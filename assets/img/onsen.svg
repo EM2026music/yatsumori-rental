@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <rect width="300" height="240" fill="#7d9a96"/>
+  <rect width="300" height="240" fill="#a9c2bd" opacity="0.4"/>
+  <text x="150" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#f4f8f6">温泉ガイド photo</text>
+</svg>

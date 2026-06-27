@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ダッシュボード | 8つ森レンタル 管理</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<div class="page">
+  <div id="admin-header"></div>
+  <div class="container">
+    <div id="error-box"></div>
+
+    <div class="field">
+      <label class="field-label" for="date-filter">日付で絞り込み</label>
+      <input type="date" id="date-filter" class="field-input">
+    </div>
+
+    <h3 style="font-size:15px;margin:18px 0 10px" id="list-heading">本日の予約</h3>
+    <div id="reservation-list"><p class="empty-note">読み込み中...</p></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="js/adminClient.js"></script>
+<script src="js/adminAuth.js"></script>
+<script src="../assets/js/booking.js"></script>
+<script>
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+
+const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "キャンセル" };
+
+async function loadReservations(dateStr) {
+  const listEl = document.getElementById("reservation-list");
+  listEl.innerHTML = `<p class="empty-note">読み込み中...</p>`;
+  showError("");
+
+  let q = supabase
+    .from("reservations")
+    .select("id, reservation_code, rental_date, customer_name, customer_phone, party_size, status, reservation_items(quantity, equipment_items(category, size_label))")
+    .order("rental_date", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  if (dateStr) q = q.eq("rental_date", dateStr);
+
+  const { data, error } = await q;
+  if (error) { showError("読み込みに失敗しました：" + error.message); listEl.innerHTML = ""; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = `<p class="empty-note">該当する予約はありません。</p>`; return; }
+
+  listEl.innerHTML = data.map(renderCard).join("");
+  attachActions();
+}
+
+function renderCard(r) {
+  const items = (r.reservation_items || []).map((ri) => {
+    const ei = ri.equipment_items || {};
+    return `${CATEGORY_LABEL[ei.category] || ei.category || "?"} ${ei.size_label || ""} ×${ri.quantity}`;
+  }).join("、") || "—";
+
+  const actions = r.status === "cancelled" ? "" : `
+    <div class="row-actions">
+      ${r.status === "pending" ? `<button class="btn-sm solid" data-act="confirm" data-id="${r.id}">確定にする</button>` : ""}
+      <button class="btn-sm danger" data-act="cancel" data-id="${r.id}">キャンセル</button>
+    </div>`;
+
+  return `
+    <div class="data-card">
+      <div class="data-card-top">
+        <div>
+          <div class="data-card-name">${r.customer_name} 様</div>
+          <div class="data-card-meta">${r.rental_date}　${r.party_size}名　${r.customer_phone}</div>
+        </div>
+        <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status]}</span>
+      </div>
+      <div class="data-card-meta">予約番号: ${r.reservation_code}</div>
+      <div class="data-card-meta">用具: ${items}</div>
+      ${actions}
+    </div>`;
+}
+
+function attachActions() {
+  document.querySelectorAll("[data-act]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const act = btn.dataset.act;
+      if (act === "cancel" && !confirm("この予約をキャンセルしますか？")) return;
+      btn.disabled = true;
+      const patch = act === "confirm"
+        ? { status: "confirmed" }
+        : { status: "cancelled", cancelled_at: new Date().toISOString() };
+      const { error } = await supabase.from("reservations").update(patch).eq("id", id);
+      if (error) { showError("更新に失敗しました：" + error.message); btn.disabled = false; return; }
+      loadReservations(document.getElementById("date-filter").value || null);
+    });
+  });
+}
+
+(async function init() {
+  if (!(await requireAdminSession())) return;
+  renderAdminChrome("index");
+
+  const df = document.getElementById("date-filter");
+  df.value = todayStr();
+  df.addEventListener("change", () => {
+    document.getElementById("list-heading").textContent = df.value ? df.value + " の予約" : "すべての予約";
+    loadReservations(df.value || null);
+  });
+  loadReservations(df.value);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bfe0f7"/>
+      <stop offset="55%" stop-color="#eaf4fb"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#sky)"/>
+  <polygon points="0,560 180,360 320,520 460,300 600,540 600,800 0,800" fill="#9db7c9" opacity="0.55"/>
+  <polygon points="0,640 220,460 400,620 600,480 600,800 0,800" fill="#7a93a8" opacity="0.6"/>
+  <text x="300" y="760" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#5b6b78">hero photo placeholder</text>
+</svg>

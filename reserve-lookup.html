@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予約の確認・変更 | 8つ森レンタル</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="subpage-header">
+    <a class="back-link" href="index.html">&#8249;</a>
+    <span class="subpage-title">予約の確認・変更</span>
+  </header>
+
+  <div class="container">
+
+    <div id="error-box"></div>
+
+    <!-- 検索フォーム -->
+    <section id="search-section">
+      <p class="help-text" style="margin-top:0;margin-bottom:18px">
+        ご予約時の予約番号と電話番号を入力してください。
+      </p>
+      <div class="field">
+        <label class="field-label" for="code">予約番号<span class="req">必須</span></label>
+        <input type="text" id="code" class="field-input" placeholder="YR-XXXXXX">
+      </div>
+      <div class="field">
+        <label class="field-label" for="phone">電話番号<span class="req">必須</span></label>
+        <input type="tel" id="phone" class="field-input" placeholder="09012345678">
+      </div>
+      <div class="wizard-actions">
+        <button class="btn-nav primary btn-block" id="search-btn">予約を確認する</button>
+      </div>
+    </section>
+
+    <!-- 結果 -->
+    <section id="result-section" style="display:none">
+      <div class="result-card" id="result-card"></div>
+      <div class="wizard-actions">
+        <button class="btn-nav ghost" id="search-again">別の予約を確認</button>
+        <button class="btn-nav primary" id="cancel-btn" style="background:#fdecec;color:#b42318">予約をキャンセル</button>
+      </div>
+      <p class="help-text" style="margin-top:14px">
+        ※ 日付や用具の変更をご希望の場合は、一度キャンセルして取り直すか、お電話（070-2472-3633）でご相談ください。
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabaseClient.js"></script>
+<script src="assets/js/booking.js"></script>
+<script>
+let current = null; // 現在表示中の予約
+
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+
+const STATUS_LABEL = { pending: "予約受付中", confirmed: "予約確定", cancelled: "キャンセル済み" };
+
+function renderResult(r) {
+  current = r;
+  const items = (r.items || []).map((it) =>
+    `${CATEGORY_LABEL[it.category] || it.category} ${it.size_label} × ${it.quantity}`
+  ).join("、") || "—";
+
+  document.getElementById("result-card").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span class="code-value" style="font-size:20px">${r.reservation_code}</span>
+      <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status] || r.status}</span>
+    </div>
+    <div class="summary-list">
+      <div class="summary-row"><span class="k">利用日</span><span class="v">${r.rental_date}</span></div>
+      <div class="summary-row"><span class="k">お名前</span><span class="v">${r.customer_name} 様</span></div>
+      <div class="summary-row"><span class="k">人数</span><span class="v">${r.party_size}名</span></div>
+      <div class="summary-row"><span class="k">用具</span><span class="v">${items}</span></div>
+    </div>`;
+
+  // キャンセル済みならキャンセルボタンを隠す
+  document.getElementById("cancel-btn").style.display =
+    r.status === "cancelled" ? "none" : "";
+
+  document.getElementById("search-section").style.display = "none";
+  document.getElementById("result-section").style.display = "block";
+  window.scrollTo(0, 0);
+}
+
+async function handleSearch() {
+  showError("");
+  const code = document.getElementById("code").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  if (!code || !phone) { showError("予約番号と電話番号を入力してください。"); return; }
+
+  const btn = document.getElementById("search-btn");
+  btn.disabled = true; btn.textContent = "確認中...";
+  try {
+    const r = await lookupReservation(code, phone);
+    if (!r) { showError("予約が見つかりませんでした。予約番号と電話番号をご確認ください。"); return; }
+    renderResult(r);
+  } catch (e) {
+    showError(translateError(e));
+  } finally {
+    btn.disabled = false; btn.textContent = "予約を確認する";
+  }
+}
+
+async function handleCancel() {
+  if (!current) return;
+  if (!confirm("この予約をキャンセルします。よろしいですか？")) return;
+  showError("");
+  const btn = document.getElementById("cancel-btn");
+  btn.disabled = true; btn.textContent = "処理中...";
+  try {
+    await cancelReservation(current.reservation_code, document.getElementById("phone").value.trim());
+    // 最新状態を取り直して表示
+    const r = await lookupReservation(current.reservation_code, document.getElementById("phone").value.trim());
+    if (r) renderResult(r);
+  } catch (e) {
+    showError(translateError(e));
+  } finally {
+    btn.disabled = false; btn.textContent = "予約をキャンセル";
+  }
+}
+
+function resetToSearch() {
+  showError("");
+  current = null;
+  document.getElementById("result-section").style.display = "none";
+  document.getElementById("search-section").style.display = "block";
+}
+
+document.getElementById("search-btn").addEventListener("click", handleSearch);
+document.getElementById("cancel-btn").addEventListener("click", handleCancel);
+document.getElementById("search-again").addEventListener("click", resetToSearch);
+</script>
+</body>
+</html>

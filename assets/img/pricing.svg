@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#3b3530"/>
+  <rect x="0" y="0" width="400" height="400" fill="#574e44" opacity="0.45"/>
+  <text x="200" y="210" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#e6ded3">レンタル料金 photo</text>
+</svg>
