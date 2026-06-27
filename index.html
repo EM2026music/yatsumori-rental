@@ -42,9 +42,21 @@
     }
 
     .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-weight: 800;
       letter-spacing: 0.04em;
       line-height: 1.2;
+    }
+
+    .logo-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: contain;
+      background: #fff;
+      flex-shrink: 0;
     }
 
     .logo span {
@@ -324,8 +336,11 @@
 
     <header>
       <div class="logo">
-        8つ森レンタル
-        <span>SKI &amp; SNOWBOARD RENTAL</span>
+        <img class="logo-img" src="assets/img/logo.png" alt="8つ森レンタル ロゴ">
+        <div>
+          8つ森レンタル
+          <span>SKI &amp; SNOWBOARD RENTAL</span>
+        </div>
       </div>
       <button class="menu" id="menu-btn" onclick="toggleNav()">☰ メニュー</button>
     </header>
