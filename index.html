@@ -1,201 +1,462 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
-<link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8つ森レンタル | SKI & SNOWBOARD RENTAL</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: #071426;
+      color: #fff;
+      line-height: 1.7;
+    }
+
+    .page {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #0b1d33;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      height: 72px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(7, 20, 38, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .logo {
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+    }
+
+    .logo span {
+      display: block;
+      font-size: 11px;
+      color: #f5c542;
+      letter-spacing: 0.12em;
+      margin-top: 4px;
+    }
+
+    .menu {
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #fff;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    /* ドロップダウンナビ */
+    .nav-drawer {
+      position: absolute;
+      top: 72px;
+      left: 0;
+      right: 0;
+      background: #0b1d33;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 16px 30px rgba(0,0,0,0.4);
+      z-index: 9;
+      display: none;
+      flex-direction: column;
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a {
+      padding: 14px 22px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-drawer a:last-child { border-bottom: none; }
+
+    .hero {
+      position: relative;
+      min-height: 560px;
+      background:
+        linear-gradient(to bottom, rgba(7,20,38,0.1), rgba(7,20,38,0.95)),
+        url("assets/img/hero-ski.jpg") center/cover no-repeat;
+      padding: 300px 22px 36px;
+    }
+
+    .label {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid rgba(245,197,66,0.55);
+      border-radius: 999px;
+      color: #f5c542;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+      background: rgba(7,20,38,0.55);
+    }
+
+    h1 {
+      font-size: 34px;
+      line-height: 1.25;
+      margin-bottom: 14px;
+      letter-spacing: 0.03em;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #e6edf7;
+    }
+
+    section {
+      padding: 34px 20px;
+    }
+
+    .section-title {
+      font-size: 23px;
+      margin-bottom: 18px;
+      letter-spacing: 0.04em;
+    }
+
+    .reserve-card {
+      margin-top: -18px;
+      background: linear-gradient(145deg, #102a49, #08182b);
+      border: 1px solid rgba(245,197,66,0.35);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.32);
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+    }
+
+    .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5c542;
+      color: #071426;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 15px 18px;
+      font-weight: 800;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      background: #f5c542;
+      color: #071426;
+      box-shadow: 0 10px 24px rgba(245,197,66,0.25);
+    }
+
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,0.45);
+      color: #fff;
+    }
+
+    .features {
+      display: grid;
+      gap: 12px;
+    }
+
+    .feature {
+      background: rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .feature h3 {
+      font-size: 17px;
+      color: #f5c542;
+      margin-bottom: 4px;
+    }
+
+    .feature p {
+      font-size: 13px;
+      color: #c9d5e5;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .image-card {
+      min-height: 170px;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      background: #000;
+      display: block;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      min-height: 170px;
+      object-fit: cover;
+      display: block;
+      opacity: 0.78;
+    }
+
+    .image-card .text {
+      position: absolute;
+      inset: auto 12px 12px;
+      font-weight: 800;
+      font-size: 15px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    }
+
+    .info-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .info-card {
+      display: flex;
+      gap: 14px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .info-card img {
+      width: 34%;
+      object-fit: cover;
+    }
+
+    .info-card div {
+      padding: 14px 14px 14px 0;
+    }
+
+    .info-card h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #f5c542;
+    }
+
+    .info-card p {
+      font-size: 13px;
+      color: #c9d5e5;
+    }
+
+    footer {
+      background: #06111f;
+      padding: 34px 20px 40px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .shop-photo {
+      width: 100%;
+      border-radius: 22px;
+      margin-bottom: 22px;
+      display: block;
+    }
+
+    .footer-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .footer-info {
+      font-size: 14px;
+      color: #dce6f2;
+      display: grid;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #f5c542;
+      border: 1px solid rgba(245,197,66,0.45);
+      border-radius: 999px;
+      padding: 8px 13px;
+      text-decoration: none;
+      font-size: 13px;
+    }
+  </style>
 </head>
 <body>
-<div class="page">
+  <div class="page">
 
-  <!-- ヘッダー -->
-  <header class="site-header">
-    <div class="brand">
-      <div class="brand-logo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 18L9 8L13 14L16 9L21 18H3Z" fill="#fff"/></svg>
+    <header>
+      <div class="logo">
+        8つ森レンタル
+        <span>SKI &amp; SNOWBOARD RENTAL</span>
       </div>
-      <div>
-        <div class="brand-name">8つ森レンタル</div>
-        <div class="brand-sub">SKI &amp; SNOWBOARD RENTAL</div>
-      </div>
-    </div>
-    <button class="menu-button" id="menu-button" onclick="toggleMenu()">
-      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-      <span class="label">メニュー</span>
-    </button>
-  </header>
+      <button class="menu" id="menu-btn" onclick="toggleNav()">☰ メニュー</button>
+    </header>
 
-  <nav class="global-nav" id="global-nav">
-    <a href="reserve.html">今すぐ予約する</a>
-    <a href="reserve-lookup.html">予約の確認・変更</a>
-    <a href="pages/catalog.html">板カタログ</a>
-    <a href="pages/beginner-guide.html">初心者ガイド</a>
-    <a href="pages/pricing.html">レンタル料金</a>
-    <a href="pages/waxing.html">ワクシングサービス</a>
-    <a href="pages/onsen-guide.html">遠刈田温泉ガイド</a>
-  </nav>
+    <nav class="nav-drawer" id="nav-drawer">
+      <a href="reserve.html">今すぐ予約する</a>
+      <a href="reserve-lookup.html">予約の確認・変更</a>
+      <a href="pages/catalog.html">板カタログ</a>
+      <a href="pages/beginner-guide.html">初心者ガイド</a>
+      <a href="pages/pricing.html">レンタル料金</a>
+      <a href="pages/waxing.html">ワクシングサービス</a>
+      <a href="pages/onsen-guide.html">遠刈田温泉ガイド</a>
+      <a href="pages/access.html">アクセス</a>
+    </nav>
 
-  <!-- ヒーロー -->
-  <section class="hero">
-    <img class="hero-photo" src="assets/img/hero-ski.jpg" alt="蔵王の雪山でスキーを持つ人">
-    <div class="hero-content">
-      <h1 class="hero-title">蔵王の雪を<br>もっと自由に。</h1>
-      <p class="hero-text">手ぶらでOK！最高の1日を。</p>
-      <p class="hero-desc">8つ森レンタルは、蔵王・遠刈田温泉の<br>スキー・スノーボードレンタル専門店です。</p>
-    </div>
-  </section>
+    <section class="hero">
+      <span class="label">MIYAGI ZAŌ RENTAL</span>
+      <h1>蔵王の雪を、<br>もっと自由に。</h1>
+      <p>宮城県・蔵王 遠刈田温泉のスキー＆スノーボードレンタル。手ぶらでOK！最高の1日を。</p>
+    </section>
 
-  <!-- 予約カード -->
-  <section class="booking-card">
-    <p class="booking-card-title">かんたんWEB予約</p>
-    <div class="booking-steps">
-      <div class="booking-step">
-        <div class="booking-step-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21"/><path d="M8 3V6"/><path d="M16 3V6"/></svg>
+    <section>
+      <div class="reserve-card">
+        <h2 class="section-title">かんたんWEB予約</h2>
+        <p>来店前に予約しておけば、当日の受け取りがスムーズです。</p>
+
+        <div class="steps">
+          <div class="step"><span class="num">1</span>日付を選ぶ</div>
+          <div class="step"><span class="num">2</span>人数・用具を選ぶ</div>
+          <div class="step"><span class="num">3</span>完了！</div>
         </div>
-        <div class="booking-step-label">日付を選ぶ</div>
+
+        <a href="reserve.html" class="btn btn-primary">今すぐ予約する</a>
+        <a href="reserve-lookup.html" class="btn btn-outline">予約の確認・変更はこちら</a>
       </div>
-      <span class="booking-step-chevron">&gt;</span>
-      <div class="booking-step">
-        <div class="booking-step-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>
+    </section>
+
+    <section>
+      <h2 class="section-title">8つ森レンタルの特徴</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>手ぶらでOK</h3>
+          <p>スキー・スノーボード用品をまとめてレンタルできます。</p>
         </div>
-        <div class="booking-step-label">人数を入力</div>
-      </div>
-      <span class="booking-step-chevron">&gt;</span>
-      <div class="booking-step">
-        <div class="booking-step-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8"><path d="M5 13L9.5 17.5L19 7"/></svg>
+        <div class="feature">
+          <h3>WEB予約でスムーズ受取</h3>
+          <p>事前予約で、当日の準備時間を短縮できます。</p>
         </div>
-        <div class="booking-step-label">完了！</div>
+        <div class="feature">
+          <h3>高品質な板</h3>
+          <p>初心者から経験者まで楽しめる板を揃えています。</p>
+        </div>
+        <div class="feature">
+          <h3>温泉街すぐそば</h3>
+          <p>遠刈田温泉エリアからアクセスしやすい立地です。</p>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <a class="btn btn-primary" href="reserve.html">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#142d49" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21"/><path d="M8 3V6"/><path d="M16 3V6"/></svg>
-      今すぐ予約する
-    </a>
-    <a class="btn btn-secondary" href="reserve-lookup.html">予約の確認・変更はこちら</a>
-  </section>
-
-  <!-- 特徴バッジ -->
-  <section class="badges">
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
+    <section>
+      <h2 class="section-title">サービス</h2>
+      <div class="grid-2">
+        <a class="image-card" href="pages/catalog.html">
+          <img src="assets/img/catalog.jpg" alt="板カタログ">
+          <div class="text">板カタログ</div>
+        </a>
+        <a class="image-card" href="pages/beginner-guide.html">
+          <img src="assets/img/beginner.jpg" alt="初心者ガイド">
+          <div class="text">初心者ガイド</div>
+        </a>
+        <a class="image-card" href="pages/pricing.html">
+          <img src="assets/img/pricing.jpg" alt="レンタル料金">
+          <div class="text">レンタル料金</div>
+        </a>
+        <a class="image-card" href="pages/waxing.html">
+          <img src="assets/img/waxing.jpg" alt="ワクシングサービス">
+          <div class="text">ワクシングサービス</div>
+        </a>
       </div>
-      <div class="badge-title">手ぶらでOK</div>
-      <div class="badge-sub">ウェアも充実</div>
-    </div>
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21"/><path d="M8 3V6"/><path d="M16 3V6"/></svg>
-      </div>
-      <div class="badge-title">WEB予約で</div>
-      <div class="badge-sub">スムーズ受取</div>
-    </div>
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
-      </div>
-      <div class="badge-title">高品質な板</div>
-      <div class="badge-sub">メンテナンス済み</div>
-    </div>
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
-      </div>
-      <div class="badge-title">温泉街すぐそば</div>
-      <div class="badge-sub">帰りに温泉も！</div>
-    </div>
-  </section>
-  <div class="dots">
-    <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-  </div>
+    </section>
 
-  <!-- コンテンツグリッド -->
-  <section class="content-grid">
-    <a class="content-card" style="background-image:url('assets/img/catalog.jpg')" href="pages/catalog.html">
-      <h3 class="content-card-title">板カタログ</h3>
-      <p class="content-card-desc">初心者〜上級者まで<br>豊富なラインナップ</p>
-      <span class="pill-btn">一覧を見る &gt;</span>
-    </a>
-    <a class="content-card" style="background-image:url('assets/img/beginner.jpg')" href="pages/beginner-guide.html">
-      <h3 class="content-card-title">初心者ガイド</h3>
-      <p class="content-card-desc">はじめての方も安心！<br>蔵王を楽しむコツを紹介</p>
-      <span class="pill-btn">詳しく見る &gt;</span>
-    </a>
-    <a class="content-card" style="background-image:url('assets/img/pricing.jpg')" href="pages/pricing.html">
-      <h3 class="content-card-title">レンタル料金</h3>
-      <p class="content-card-desc">わかりやすい料金プラン</p>
-      <span class="pill-btn">料金表を見る &gt;</span>
-    </a>
-    <a class="content-card" style="background-image:url('assets/img/waxing.jpg')" href="pages/waxing.html">
-      <h3 class="content-card-title">ワクシングサービス</h3>
-      <p class="content-card-desc">滑りが変わる！<br>板をベストコンディションに</p>
-      <span class="pill-btn">詳しく見る &gt;</span>
-    </a>
-  </section>
+    <section>
+      <h2 class="section-title">おすすめ情報</h2>
+      <div class="info-list">
+        <a class="info-card" href="pages/onsen-guide.html">
+          <img src="assets/img/onsen.jpg" alt="遠刈田温泉ガイド">
+          <div>
+            <h3>遠刈田温泉ガイド</h3>
+            <p>滑ったあとは温泉街でゆっくり休憩。</p>
+          </div>
+        </a>
+        <a class="info-card" href="pages/gourmet.html">
+          <img src="assets/img/gourmet.jpg" alt="周辺グルメ">
+          <div>
+            <h3>周辺グルメ</h3>
+            <p>蔵王・遠刈田エリアの食事スポットも楽しめます。</p>
+          </div>
+        </a>
+        <a class="info-card" href="pages/zao-ski-info.html">
+          <img src="assets/img/zao-ski.jpg" alt="蔵王のスキー場情報">
+          <div>
+            <h3>蔵王のスキー場情報</h3>
+            <p>当日の雪遊び計画に役立つ周辺情報。</p>
+          </div>
+        </a>
+      </div>
+    </section>
 
-  <!-- おすすめ情報 -->
-  <div class="section-heading">
-    <div class="section-heading-title">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8"><path d="M3 20L9 8L13 14L16 9L21 20H3Z"/></svg>
-      おすすめ情報
-    </div>
-    <span class="section-heading-more">もっと見る &gt;</span>
-  </div>
-  <div class="recommend-scroll">
-    <a class="recommend-card" href="pages/onsen-guide.html">
-      <div class="recommend-photo" style="background-image:url('assets/img/onsen.jpg')"></div>
-      <p class="recommend-title">遠刈田温泉ガイド</p>
-      <p class="recommend-sub">スキーの後は温泉でリラックス</p>
-    </a>
-    <a class="recommend-card" href="pages/gourmet.html">
-      <div class="recommend-photo" style="background-image:url('assets/img/gourmet.jpg')"></div>
-      <p class="recommend-title">周辺グルメ情報</p>
-      <p class="recommend-sub">おすすめランチ・カフェ</p>
-    </a>
-    <a class="recommend-card" href="pages/zao-ski-info.html">
-      <div class="recommend-photo" style="background-image:url('assets/img/zao-ski.jpg')"></div>
-      <p class="recommend-title">蔵王のスキー場情報</p>
-      <p class="recommend-sub">ゲレンデ・積雪・天気をチェック</p>
-    </a>
-  </div>
+    <footer>
+      <img class="shop-photo" src="assets/img/shop-thumb.jpg" alt="8つ森レンタル 店舗写真">
 
-  <!-- フッター情報バー -->
-  <footer class="footer-bar">
-    <div class="footer-top">
-      <div class="footer-photo" style="background-image:url('assets/img/shop-thumb.jpg')"></div>
+      <div class="footer-title">8つ森レンタル</div>
+
       <div class="footer-info">
-        <div class="footer-info-row">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><path d="M12 21C12 21 5 14.5 5 9.5C5 5.9 8.1 3 12 3C15.9 3 19 5.9 19 9.5C19 14.5 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-          宮城県刈田郡蔵王町遠刈田温泉中町16
-        </div>
-        <div class="footer-info-row">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 7V12L15.5 14"/></svg>
-          営業時間　8:30〜18:00（不定休）
-        </div>
-        <div class="footer-info-row">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><path d="M5 4H8L10 9L7.5 10.5C8.5 13 11 15.5 13.5 16.5L15 14L20 16V19C20 20.1 19.1 21 18 21C10.8 20.5 4.5 14.2 4 7C4 5.9 4.9 4 5 4Z"/></svg>
-          TEL　070-2472-3633
-        </div>
+        <p>住所：宮城県刈田郡蔵王町遠刈田温泉中町16</p>
+        <p>営業：8:30〜18:00（不定休）</p>
+        <p>TEL：070-2472-3633</p>
       </div>
-    </div>
-    <div class="footer-actions">
-      <a class="footer-action-btn" href="https://instagram.com" target="_blank" rel="noopener">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
-        Instagramを見る
-      </a>
-      <a class="footer-action-btn" href="pages/access.html">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1b3a5c" stroke-width="1.8"><path d="M12 21C12 21 5 14.5 5 9.5C5 5.9 8.1 3 12 3C15.9 3 19 5.9 19 9.5C19 14.5 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-        アクセス
-      </a>
-    </div>
-  </footer>
 
-</div>
-<script src="assets/js/ui-common.js"></script>
+      <div class="footer-links">
+        <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
+        <a href="pages/access.html">アクセス</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    function toggleNav() {
+      document.getElementById("nav-drawer").classList.toggle("open");
+    }
+  </script>
 </body>
 </html>
