@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理ログイン | 8つ森レンタル</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<div class="page">
+  <header class="subpage-header">
+    <span class="subpage-title">管理画面ログイン</span>
+  </header>
+
+  <div class="container">
+    <div id="error-box"></div>
+    <div class="field">
+      <label class="field-label" for="email">メールアドレス</label>
+      <input type="email" id="email" class="field-input" autocomplete="username">
+    </div>
+    <div class="field">
+      <label class="field-label" for="password">パスワード</label>
+      <input type="password" id="password" class="field-input" autocomplete="current-password">
+    </div>
+    <div class="wizard-actions">
+      <button class="btn-nav primary btn-block" id="login-btn">ログイン</button>
+    </div>
+    <p class="help-text" style="margin-top:18px">
+      スタッフ用の管理画面です。アカウントはSupabaseダッシュボードから発行します。
+    </p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="js/adminClient.js"></script>
+<script src="js/adminAuth.js"></script>
+<script>
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+
+async function handleLogin() {
+  showError("");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if (!email || !password) { showError("メールアドレスとパスワードを入力してください。"); return; }
+
+  const btn = document.getElementById("login-btn");
+  btn.disabled = true; btn.textContent = "ログイン中...";
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    showError("ログインに失敗しました。メールアドレスとパスワードをご確認ください。");
+    btn.disabled = false; btn.textContent = "ログイン";
+    return;
+  }
+  window.location.href = "index.html";
+}
+
+document.getElementById("login-btn").addEventListener("click", handleLogin);
+document.getElementById("password").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") handleLogin();
+});
+
+// すでにログイン済みならダッシュボードへ
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) window.location.href = "index.html";
+})();
+</script>
+</body>
+</html>

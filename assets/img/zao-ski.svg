@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="240" viewBox="0 0 300 240">
+  <rect width="300" height="240" fill="#a9b9c4"/>
+  <rect width="300" height="240" fill="#cfdbe3" opacity="0.5"/>
+  <text x="150" y="125" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#3c4a52">スキー場情報 photo</text>
+</svg>

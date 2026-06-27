@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>在庫管理 | 8つ森レンタル 管理</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<div class="page">
+  <div id="admin-header"></div>
+  <div class="container">
+    <div id="error-box"></div>
+
+    <h3 style="font-size:15px;margin:0 0 12px">用具を追加</h3>
+    <div class="inline-form">
+      <div class="field">
+        <label class="field-label">種類</label>
+        <select id="new-category" class="field-select">
+          <option value="ski">スキー</option>
+          <option value="snowboard">スノーボード</option>
+          <option value="boots">ブーツ</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">サイズ</label>
+        <input type="text" id="new-size" class="field-input" placeholder="160cm">
+      </div>
+      <div class="field" style="max-width:90px">
+        <label class="field-label">本数</label>
+        <input type="number" id="new-qty" class="field-input" min="0" value="1">
+      </div>
+      <button class="btn-sm solid" id="add-btn" style="padding:12px 16px">追加</button>
+    </div>
+
+    <h3 style="font-size:15px;margin:22px 0 12px">在庫一覧</h3>
+    <div id="inventory-list"><p class="empty-note">読み込み中...</p></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="js/adminClient.js"></script>
+<script src="js/adminAuth.js"></script>
+<script src="../assets/js/booking.js"></script>
+<script>
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+
+async function loadInventory() {
+  const listEl = document.getElementById("inventory-list");
+  listEl.innerHTML = `<p class="empty-note">読み込み中...</p>`;
+  const { data, error } = await supabase
+    .from("equipment_items")
+    .select("*")
+    .order("category", { ascending: true })
+    .order("size_label", { ascending: true });
+  if (error) { showError("読み込み失敗：" + error.message); listEl.innerHTML = ""; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = `<p class="empty-note">在庫が登録されていません。</p>`; return; }
+
+  listEl.innerHTML = data.map((it) => `
+    <div class="data-card">
+      <div class="data-card-top">
+        <div>
+          <div class="data-card-name">${CATEGORY_LABEL[it.category] || it.category} ${it.size_label}</div>
+          <div class="data-card-meta">${it.is_active ? "有効" : "停止中"}</div>
+        </div>
+      </div>
+      <div class="row-actions" style="align-items:center">
+        <div class="stepper" data-id="${it.id}">
+          <button type="button" class="dec">−</button>
+          <span class="qty">${it.total_quantity}</span>
+          <button type="button" class="inc">＋</button>
+        </div>
+        <button class="btn-sm" data-toggle="${it.id}" data-active="${it.is_active}">${it.is_active ? "停止する" : "有効化"}</button>
+        <button class="btn-sm danger" data-del="${it.id}">削除</button>
+      </div>
+    </div>`).join("");
+
+  attachInventoryActions(data);
+}
+
+function attachInventoryActions(items) {
+  // 本数の増減（即保存）
+  document.querySelectorAll(".stepper").forEach((stepper) => {
+    const id = stepper.dataset.id;
+    const item = items.find((x) => x.id === id);
+    let qty = item.total_quantity;
+    const qtyEl = stepper.querySelector(".qty");
+    const save = async () => {
+      const { error } = await supabase.from("equipment_items").update({ total_quantity: qty }).eq("id", id);
+      if (error) showError("更新失敗：" + error.message);
+    };
+    stepper.querySelector(".inc").addEventListener("click", () => { qty++; qtyEl.textContent = qty; save(); });
+    stepper.querySelector(".dec").addEventListener("click", () => { if (qty > 0) { qty--; qtyEl.textContent = qty; save(); } });
+  });
+
+  // 有効/停止トグル
+  document.querySelectorAll("[data-toggle]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.toggle;
+      const newActive = btn.dataset.active !== "true";
+      const { error } = await supabase.from("equipment_items").update({ is_active: newActive }).eq("id", id);
+      if (error) { showError("更新失敗：" + error.message); return; }
+      loadInventory();
+    });
+  });
+
+  // 削除
+  document.querySelectorAll("[data-del]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("この用具を削除します。よろしいですか？\n（過去の予約がある場合は停止をおすすめします）")) return;
+      const { error } = await supabase.from("equipment_items").delete().eq("id", btn.dataset.del);
+      if (error) { showError("削除失敗：予約履歴がある用具は削除できません。停止をご利用ください。"); return; }
+      loadInventory();
+    });
+  });
+}
+
+async function addItem() {
+  showError("");
+  const category = document.getElementById("new-category").value;
+  const size = document.getElementById("new-size").value.trim();
+  const qty = parseInt(document.getElementById("new-qty").value, 10);
+  if (!size) { showError("サイズを入力してください。"); return; }
+  if (isNaN(qty) || qty < 0) { showError("本数を正しく入力してください。"); return; }
+
+  const { error } = await supabase.from("equipment_items")
+    .insert({ category, size_label: size, total_quantity: qty });
+  if (error) {
+    showError(error.message.includes("duplicate") ? "その種類・サイズは既に登録されています。" : "追加失敗：" + error.message);
+    return;
+  }
+  document.getElementById("new-size").value = "";
+  document.getElementById("new-qty").value = "1";
+  loadInventory();
+}
+
+(async function init() {
+  if (!(await requireAdminSession())) return;
+  renderAdminChrome("inventory");
+  document.getElementById("add-btn").addEventListener("click", addItem);
+  loadInventory();
+})();
+</script>
+</body>
+</html>

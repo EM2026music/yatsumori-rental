@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>休業日 | 8つ森レンタル 管理</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<div class="page">
+  <div id="admin-header"></div>
+  <div class="container">
+    <div id="error-box"></div>
+
+    <h3 style="font-size:15px;margin:0 0 12px">休業日を追加</h3>
+    <div class="inline-form">
+      <div class="field">
+        <label class="field-label">日付</label>
+        <input type="date" id="new-date" class="field-input">
+      </div>
+      <div class="field">
+        <label class="field-label">理由（任意）</label>
+        <input type="text" id="new-reason" class="field-input" placeholder="私用 等">
+      </div>
+      <button class="btn-sm solid" id="add-btn" style="padding:12px 16px">追加</button>
+    </div>
+    <p class="help-text">登録した日はお客様の予約が受け付けられなくなります。</p>
+
+    <h3 style="font-size:15px;margin:22px 0 12px">休業日一覧</h3>
+    <div id="closed-list"><p class="empty-note">読み込み中...</p></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="js/adminClient.js"></script>
+<script src="js/adminAuth.js"></script>
+<script src="../assets/js/booking.js"></script>
+<script>
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+
+async function loadClosed() {
+  const listEl = document.getElementById("closed-list");
+  listEl.innerHTML = `<p class="empty-note">読み込み中...</p>`;
+  const { data, error } = await supabase
+    .from("closed_dates")
+    .select("*")
+    .gte("closed_date", todayStr())
+    .order("closed_date", { ascending: true });
+  if (error) { showError("読み込み失敗：" + error.message); listEl.innerHTML = ""; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = `<p class="empty-note">今後の休業日は登録されていません。</p>`; return; }
+
+  listEl.innerHTML = data.map((d) => `
+    <div class="data-card">
+      <div class="data-card-top">
+        <div>
+          <div class="data-card-name">${d.closed_date}</div>
+          <div class="data-card-meta">${d.reason || "（理由なし）"}</div>
+        </div>
+        <button class="btn-sm danger" data-del="${d.closed_date}">削除</button>
+      </div>
+    </div>`).join("");
+
+  document.querySelectorAll("[data-del]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const { error } = await supabase.from("closed_dates").delete().eq("closed_date", btn.dataset.del);
+      if (error) { showError("削除失敗：" + error.message); return; }
+      loadClosed();
+    });
+  });
+}
+
+async function addClosed() {
+  showError("");
+  const date = document.getElementById("new-date").value;
+  const reason = document.getElementById("new-reason").value.trim();
+  if (!date) { showError("日付を選択してください。"); return; }
+
+  const { error } = await supabase.from("closed_dates")
+    .insert({ closed_date: date, reason: reason || null });
+  if (error) {
+    showError(error.message.includes("duplicate") ? "その日は既に登録されています。" : "追加失敗：" + error.message);
+    return;
+  }
+  document.getElementById("new-date").value = "";
+  document.getElementById("new-reason").value = "";
+  loadClosed();
+}
+
+(async function init() {
+  if (!(await requireAdminSession())) return;
+  renderAdminChrome("closed");
+  document.getElementById("new-date").min = todayStr();
+  document.getElementById("add-btn").addEventListener("click", addClosed);
+  loadClosed();
+})();
+</script>
+</body>
+</html>
