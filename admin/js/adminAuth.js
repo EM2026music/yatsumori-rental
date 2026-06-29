@@ -6,7 +6,7 @@
 // 未ログインでこのページを直接開いても、データ取得クエリは空/403になる。
 
 async function requireAdminSession() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sb.auth.getSession();
   if (!session) {
     window.location.href = "login.html";
     return null;
@@ -15,7 +15,7 @@ async function requireAdminSession() {
 }
 
 async function signOut() {
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   window.location.href = "login.html";
 }
 

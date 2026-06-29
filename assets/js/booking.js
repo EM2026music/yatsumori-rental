@@ -11,7 +11,7 @@ const CATEGORY_LABEL = {
 // 指定日付で在庫の残っているサイズ一覧を取得する。
 // 戻り値: [{ equipment_item_id, category, size_label, remaining }, ...]
 async function fetchAvailability(dateStr) {
-  const { data, error } = await supabase.rpc("get_availability", { p_date: dateStr });
+  const { data, error } = await sb.rpc("get_availability", { p_date: dateStr });
   if (error) throw error;
   return data || [];
 }
@@ -19,7 +19,7 @@ async function fetchAvailability(dateStr) {
 // 予約を作成する。items は [{ equipment_item_id, quantity }, ...]。
 // 成功時: { reservation_id, reservation_code }
 async function createReservation({ rentalDate, name, phone, email, partySize, items, notes }) {
-  const { data, error } = await supabase.rpc("create_reservation", {
+  const { data, error } = await sb.rpc("create_reservation", {
     p_rental_date: rentalDate,
     p_customer_name: name,
     p_customer_phone: phone,
@@ -35,7 +35,7 @@ async function createReservation({ rentalDate, name, phone, email, partySize, it
 
 // 予約を検索する（コード＋電話番号）。一致が無ければ null。
 async function lookupReservation(code, phone) {
-  const { data, error } = await supabase.rpc("lookup_reservation", {
+  const { data, error } = await sb.rpc("lookup_reservation", {
     p_reservation_code: code,
     p_customer_phone: phone,
   });
@@ -46,7 +46,7 @@ async function lookupReservation(code, phone) {
 
 // 予約をキャンセルする（コード＋電話番号を再検証）。
 async function cancelReservation(code, phone) {
-  const { data, error } = await supabase.rpc("cancel_reservation", {
+  const { data, error } = await sb.rpc("cancel_reservation", {
     p_reservation_code: code,
     p_customer_phone: phone,
   });

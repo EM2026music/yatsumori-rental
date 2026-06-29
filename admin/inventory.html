@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>在庫管理 | 8つ森レンタル 管理</title>
-<link rel="stylesheet" href="../assets/css/style.css?v=3">
+<link rel="stylesheet" href="../assets/css/style.css?v=4">
 </head>
 <body>
 <div class="page">
@@ -39,9 +39,9 @@
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="js/adminClient.js?v=3"></script>
-<script src="js/adminAuth.js?v=3"></script>
-<script src="../assets/js/booking.js?v=3"></script>
+<script src="js/adminClient.js?v=4"></script>
+<script src="js/adminAuth.js?v=4"></script>
+<script src="../assets/js/booking.js?v=4"></script>
 <script>
 function showError(msg) {
   document.getElementById("error-box").innerHTML =
@@ -89,7 +89,7 @@ function attachInventoryActions(items) {
     let qty = item.total_quantity;
     const qtyEl = stepper.querySelector(".qty");
     const save = async () => {
-      const { error } = await supabase.from("equipment_items").update({ total_quantity: qty }).eq("id", id);
+      const { error } = await sb.from("equipment_items").update({ total_quantity: qty }).eq("id", id);
       if (error) showError("更新失敗：" + error.message);
     };
     stepper.querySelector(".inc").addEventListener("click", () => { qty++; qtyEl.textContent = qty; save(); });
@@ -101,7 +101,7 @@ function attachInventoryActions(items) {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.toggle;
       const newActive = btn.dataset.active !== "true";
-      const { error } = await supabase.from("equipment_items").update({ is_active: newActive }).eq("id", id);
+      const { error } = await sb.from("equipment_items").update({ is_active: newActive }).eq("id", id);
       if (error) { showError("更新失敗：" + error.message); return; }
       loadInventory();
     });
@@ -111,7 +111,7 @@ function attachInventoryActions(items) {
   document.querySelectorAll("[data-del]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!confirm("この用具を削除します。よろしいですか？\n（過去の予約がある場合は停止をおすすめします）")) return;
-      const { error } = await supabase.from("equipment_items").delete().eq("id", btn.dataset.del);
+      const { error } = await sb.from("equipment_items").delete().eq("id", btn.dataset.del);
       if (error) { showError("削除失敗：予約履歴がある用具は削除できません。停止をご利用ください。"); return; }
       loadInventory();
     });
@@ -126,7 +126,7 @@ async function addItem() {
   if (!size) { showError("サイズを入力してください。"); return; }
   if (isNaN(qty) || qty < 0) { showError("本数を正しく入力してください。"); return; }
 
-  const { error } = await supabase.from("equipment_items")
+  const { error } = await sb.from("equipment_items")
     .insert({ category, size_label: size, total_quantity: qty });
   if (error) {
     showError(error.message.includes("duplicate") ? "その種類・サイズは既に登録されています。" : "追加失敗：" + error.message);

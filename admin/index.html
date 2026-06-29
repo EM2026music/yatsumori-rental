@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ダッシュボード | 8つ森レンタル 管理</title>
-<link rel="stylesheet" href="../assets/css/style.css?v=3">
+<link rel="stylesheet" href="../assets/css/style.css?v=4">
 </head>
 <body>
 <div class="page">
@@ -23,9 +23,9 @@
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="js/adminClient.js?v=3"></script>
-<script src="js/adminAuth.js?v=3"></script>
-<script src="../assets/js/booking.js?v=3"></script>
+<script src="js/adminClient.js?v=4"></script>
+<script src="js/adminAuth.js?v=4"></script>
+<script src="../assets/js/booking.js?v=4"></script>
 <script>
 function showError(msg) {
   document.getElementById("error-box").innerHTML =
@@ -92,7 +92,7 @@ function attachActions() {
       const patch = act === "confirm"
         ? { status: "confirmed" }
         : { status: "cancelled", cancelled_at: new Date().toISOString() };
-      const { error } = await supabase.from("reservations").update(patch).eq("id", id);
+      const { error } = await sb.from("reservations").update(patch).eq("id", id);
       if (error) { showError("更新に失敗しました：" + error.message); btn.disabled = false; return; }
       loadReservations(document.getElementById("date-filter").value || null);
     });

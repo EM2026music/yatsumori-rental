@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理ログイン | 8つ森レンタル</title>
-<link rel="stylesheet" href="../assets/css/style.css?v=3">
+<link rel="stylesheet" href="../assets/css/style.css?v=4">
 </head>
 <body>
 <div class="page">
@@ -32,8 +32,8 @@
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="js/adminClient.js?v=3"></script>
-<script src="js/adminAuth.js?v=3"></script>
+<script src="js/adminClient.js?v=4"></script>
+<script src="js/adminAuth.js?v=4"></script>
 <script>
 function showError(msg) {
   document.getElementById("error-box").innerHTML =
@@ -53,7 +53,7 @@ async function handleLogin() {
     const timeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("TIMEOUT")), 15000));
     const { error } = await Promise.race([
-      supabase.auth.signInWithPassword({ email, password }),
+      sb.auth.signInWithPassword({ email, password }),
       timeout,
     ]);
     if (error) {
@@ -77,7 +77,7 @@ document.getElementById("password").addEventListener("keydown", (e) => {
 
 // すでにログイン済みならダッシュボードへ
 (async () => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sb.auth.getSession();
   if (session) window.location.href = "index.html";
 })();
 </script>

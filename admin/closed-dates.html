@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>休業日 | 8つ森レンタル 管理</title>
-<link rel="stylesheet" href="../assets/css/style.css?v=3">
+<link rel="stylesheet" href="../assets/css/style.css?v=4">
 </head>
 <body>
 <div class="page">
@@ -32,9 +32,9 @@
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="js/adminClient.js?v=3"></script>
-<script src="js/adminAuth.js?v=3"></script>
-<script src="../assets/js/booking.js?v=3"></script>
+<script src="js/adminClient.js?v=4"></script>
+<script src="js/adminAuth.js?v=4"></script>
+<script src="../assets/js/booking.js?v=4"></script>
 <script>
 function showError(msg) {
   document.getElementById("error-box").innerHTML =
@@ -65,7 +65,7 @@ async function loadClosed() {
 
   document.querySelectorAll("[data-del]").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const { error } = await supabase.from("closed_dates").delete().eq("closed_date", btn.dataset.del);
+      const { error } = await sb.from("closed_dates").delete().eq("closed_date", btn.dataset.del);
       if (error) { showError("削除失敗：" + error.message); return; }
       loadClosed();
     });
@@ -78,7 +78,7 @@ async function addClosed() {
   const reason = document.getElementById("new-reason").value.trim();
   if (!date) { showError("日付を選択してください。"); return; }
 
-  const { error } = await supabase.from("closed_dates")
+  const { error } = await sb.from("closed_dates")
     .insert({ closed_date: date, reason: reason || null });
   if (error) {
     showError(error.message.includes("duplicate") ? "その日は既に登録されています。" : "追加失敗：" + error.message);
