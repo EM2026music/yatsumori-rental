@@ -34,6 +34,7 @@ function renderAdminChrome(activeKey) {
   const headerEl = document.getElementById("admin-header");
   if (headerEl) {
     headerEl.innerHTML = `
+      <div class="admin-badge">🔒 管理者専用ページ（スタッフ以外は操作しないでください）</div>
       <div class="subpage-header" style="justify-content:space-between">
         <span class="subpage-title">8つ森レンタル 管理</span>
         <button class="btn-sm" onclick="signOut()">ログアウト</button>
