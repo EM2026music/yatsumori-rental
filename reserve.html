@@ -275,6 +275,8 @@ function showResult(res, input) {
   const dateInput = document.getElementById("rental-date");
   dateInput.min = todayStr();
   dateInput.max = addDaysStr(todayStr(), 90); // business_settings.max_advance_days と合わせる
+  // フィールドをタップしたらカレンダーを開く
+  dateInput.addEventListener("click", () => { try { dateInput.showPicker(); } catch (e) {} });
 
   document.getElementById("to-step2").addEventListener("click", handleToStep2);
   document.getElementById("back-step1").addEventListener("click", () => { showError(""); gotoStep(1); });

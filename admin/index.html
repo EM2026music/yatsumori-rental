@@ -105,6 +105,7 @@ function attachActions() {
 
   const df = document.getElementById("date-filter");
   df.value = todayStr();
+  df.addEventListener("click", () => { try { df.showPicker(); } catch (e) {} });
   df.addEventListener("change", () => {
     document.getElementById("list-heading").textContent = df.value ? df.value + " の予約" : "すべての予約";
     loadReservations(df.value || null);

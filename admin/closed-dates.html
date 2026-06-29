@@ -92,7 +92,9 @@ async function addClosed() {
 (async function init() {
   if (!(await requireAdminSession())) return;
   renderAdminChrome("closed");
-  document.getElementById("new-date").min = todayStr();
+  const nd = document.getElementById("new-date");
+  nd.min = todayStr();
+  nd.addEventListener("click", () => { try { nd.showPicker(); } catch (e) {} });
   document.getElementById("add-btn").addEventListener("click", addClosed);
   loadClosed();
 })();
