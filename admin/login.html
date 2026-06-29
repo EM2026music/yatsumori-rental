@@ -48,13 +48,26 @@ async function handleLogin() {
 
   const btn = document.getElementById("login-btn");
   btn.disabled = true; btn.textContent = "ログイン中...";
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    showError("ログインに失敗しました。メールアドレスとパスワードをご確認ください。");
+  try {
+    // 15秒で打ち切る（無言で固まらないように）
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("TIMEOUT")), 15000));
+    const { error } = await Promise.race([
+      supabase.auth.signInWithPassword({ email, password }),
+      timeout,
+    ]);
+    if (error) {
+      showError("ログインに失敗しました。メールアドレスとパスワードをご確認ください。");
+      return;
+    }
+    window.location.href = "index.html";
+  } catch (e) {
+    showError(e.message === "TIMEOUT"
+      ? "通信がタイムアウトしました。ページを再読み込み（更新）してからもう一度お試しください。"
+      : "エラーが発生しました：" + e.message);
+  } finally {
     btn.disabled = false; btn.textContent = "ログイン";
-    return;
   }
-  window.location.href = "index.html";
 }
 
 document.getElementById("login-btn").addEventListener("click", handleLogin);
