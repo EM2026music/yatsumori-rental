@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予約一覧 | 8つ森レンタル 管理</title>
+<link rel="stylesheet" href="../assets/css/style.css?v=4">
+</head>
+<body>
+<div class="page">
+  <div id="admin-header"></div>
+  <div class="container">
+    <div id="error-box"></div>
+
+    <div class="inline-form">
+      <div class="field">
+        <label class="field-label" for="date-filter">日付で絞り込み（空欄＝すべて）</label>
+        <input type="date" id="date-filter" class="field-input">
+      </div>
+      <div class="field">
+        <label class="field-label" for="status-filter">状態</label>
+        <select id="status-filter" class="field-select">
+          <option value="active">受付中・確定のみ</option>
+          <option value="all">すべて</option>
+          <option value="pending">受付中</option>
+          <option value="confirmed">確定</option>
+          <option value="cancelled">キャンセル</option>
+        </select>
+      </div>
+      <button class="btn-sm" id="clear-btn" style="padding:12px 16px">クリア</button>
+    </div>
+
+    <h3 style="font-size:15px;margin:18px 0 10px" id="list-heading">予約一覧</h3>
+    <div id="reservation-list"><p class="empty-note">読み込み中...</p></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="js/adminClient.js?v=4"></script>
+<script src="js/adminAuth.js?v=4"></script>
+<script src="../assets/js/booking.js?v=4"></script>
+<script>
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+
+const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "キャンセル" };
+
+async function loadReservations() {
+  const listEl = document.getElementById("reservation-list");
+  listEl.innerHTML = `<p class="empty-note">読み込み中...</p>`;
+  showError("");
+
+  const dateStr = document.getElementById("date-filter").value;
+  const statusVal = document.getElementById("status-filter").value;
+
+  let q = sb
+    .from("reservations")
+    .select("id, reservation_code, rental_date, customer_name, customer_phone, party_size, status, reservation_items(quantity, equipment_items(category, size_label))")
+    .order("rental_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (dateStr) q = q.eq("rental_date", dateStr);
+  if (statusVal === "active") q = q.in("status", ["pending", "confirmed"]);
+  else if (statusVal !== "all") q = q.eq("status", statusVal);
+
+  const { data, error } = await q;
+  if (error) { showError("読み込みに失敗しました：" + error.message); listEl.innerHTML = ""; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = `<p class="empty-note">該当する予約はありません。</p>`; return; }
+
+  document.getElementById("list-heading").textContent = `予約一覧（${data.length}件）`;
+  listEl.innerHTML = data.map(renderCard).join("");
+  attachActions();
+}
+
+function renderCard(r) {
+  const items = (r.reservation_items || []).map((ri) => {
+    const ei = ri.equipment_items || {};
+    return `${CATEGORY_LABEL[ei.category] || ei.category || "?"} ${ei.size_label || ""} ×${ri.quantity}`;
+  }).join("、") || "—";
+
+  const actions = r.status === "cancelled" ? "" : `
+    <div class="row-actions">
+      ${r.status === "pending" ? `<button class="btn-sm solid" data-act="confirm" data-id="${r.id}">確定にする</button>` : ""}
+      <button class="btn-sm danger" data-act="cancel" data-id="${r.id}">キャンセル</button>
+    </div>`;
+
+  return `
+    <div class="data-card">
+      <div class="data-card-top">
+        <div>
+          <div class="data-card-name">${r.customer_name} 様</div>
+          <div class="data-card-meta">${r.rental_date}　${r.party_size}名　${r.customer_phone}</div>
+        </div>
+        <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status]}</span>
+      </div>
+      <div class="data-card-meta">予約番号: ${r.reservation_code}</div>
+      <div class="data-card-meta">用具: ${items}</div>
+      ${actions}
+    </div>`;
+}
+
+function attachActions() {
+  document.querySelectorAll("[data-act]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const act = btn.dataset.act;
+      if (act === "cancel" && !confirm("この予約をキャンセルしますか？")) return;
+      btn.disabled = true;
+      const patch = act === "confirm"
+        ? { status: "confirmed" }
+        : { status: "cancelled", cancelled_at: new Date().toISOString() };
+      const { error } = await sb.from("reservations").update(patch).eq("id", id);
+      if (error) { showError("更新に失敗しました：" + error.message); btn.disabled = false; return; }
+      loadReservations();
+    });
+  });
+}
+
+(async function init() {
+  if (!(await requireAdminSession())) return;
+  renderAdminChrome("reservations");
+  document.getElementById("date-filter").addEventListener("change", loadReservations);
+  document.getElementById("status-filter").addEventListener("change", loadReservations);
+  document.getElementById("clear-btn").addEventListener("click", () => {
+    document.getElementById("date-filter").value = "";
+    document.getElementById("status-filter").value = "active";
+    loadReservations();
+  });
+  loadReservations();
+})();
+</script>
+</body>
+</html>
