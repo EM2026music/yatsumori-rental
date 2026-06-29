@@ -135,21 +135,32 @@ security definer
 set search_path = public
 as $$
 begin
+  -- 各サイズの「その日付・有効な予約だけ」を相関サブクエリで合算する。
+  -- （LEFT JOIN方式だと日付/状態の絞り込みがsum対象から漏れ、キャンセル済みや
+  --  別日の予約まで在庫を消費してしまうバグがあったため修正）
   return query
   select
     ei.id,
     ei.category,
     ei.size_label,
-    (ei.total_quantity - coalesce(sum(ri.quantity), 0))::integer as remaining
+    (ei.total_quantity - coalesce((
+      select sum(ri.quantity)
+      from public.reservation_items ri
+      join public.reservations r on r.id = ri.reservation_id
+      where ri.equipment_item_id = ei.id
+        and r.rental_date = p_date
+        and r.status in ('pending', 'confirmed')
+    ), 0))::integer
   from public.equipment_items ei
-  left join public.reservation_items ri on ri.equipment_item_id = ei.id
-  left join public.reservations r
-    on r.id = ri.reservation_id
-    and r.rental_date = p_date
-    and r.status in ('pending', 'confirmed')
   where ei.is_active = true
-  group by ei.id, ei.category, ei.size_label, ei.total_quantity
-  having ei.total_quantity - coalesce(sum(ri.quantity), 0) > 0
+    and (ei.total_quantity - coalesce((
+      select sum(ri.quantity)
+      from public.reservation_items ri
+      join public.reservations r on r.id = ri.reservation_id
+      where ri.equipment_item_id = ei.id
+        and r.rental_date = p_date
+        and r.status in ('pending', 'confirmed')
+    ), 0)) > 0
   order by ei.category, ei.size_label;
 end;
 $$;
