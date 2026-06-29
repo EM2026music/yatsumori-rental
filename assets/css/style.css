@@ -293,3 +293,15 @@ button { font-family: inherit; cursor: pointer; }
 
 .inline-form { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 18px; }
 .inline-form .field { margin-bottom: 0; flex: 1; min-width: 120px; }
+
+/* 管理者専用であることを明確に示す帯（お客様画面と取り違えないように） */
+.admin-badge {
+  background: #6b2233;
+  color: #ffd7df;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  padding: 7px 12px;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
