@@ -121,7 +121,9 @@ function attachActions() {
 (async function init() {
   if (!(await requireAdminSession())) return;
   renderAdminChrome("reservations");
-  document.getElementById("date-filter").addEventListener("change", loadReservations);
+  const df = document.getElementById("date-filter");
+  df.addEventListener("click", () => { try { df.showPicker(); } catch (e) {} });
+  df.addEventListener("change", loadReservations);
   document.getElementById("status-filter").addEventListener("change", loadReservations);
   document.getElementById("clear-btn").addEventListener("click", () => {
     document.getElementById("date-filter").value = "";
