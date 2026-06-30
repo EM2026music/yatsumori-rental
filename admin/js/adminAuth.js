@@ -26,6 +26,7 @@ function renderAdminChrome(activeKey) {
     { key: "reservations", label: "予約一覧", href: "reservations.html" },
     { key: "inventory", label: "在庫管理", href: "inventory.html" },
     { key: "closed", label: "休業日", href: "closed-dates.html" },
+    { key: "editor", label: "ページ編集", href: "editor.html" },
   ];
   const nav = items.map((it) =>
     `<a href="${it.href}" class="${it.key === activeKey ? "active" : ""}">${it.label}</a>`

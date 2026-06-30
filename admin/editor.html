@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>ページ編集 | 8つ森レンタル 管理</title>
+<link rel="stylesheet" href="../assets/css/style.css?v=6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/grapesjs@0.21.10/dist/css/grapes.min.css">
+<style>
+  body { max-width: none; }
+  .page { max-width: none; }
+  .gjs-cv-canvas { top: 0; height: 100%; }
+</style>
+</head>
+<body>
+<div class="page" style="background:var(--bg)">
+  <div id="admin-header"></div>
+
+  <div class="editor-toolbar">
+    <div class="device-switch">
+      <button type="button" id="dev-desktop" class="active">🖥 PC表示で編集</button>
+      <button type="button" id="dev-mobile">📱 スマホ表示で編集</button>
+    </div>
+    <span id="status-text" class="help-text" style="margin:0"></span>
+    <div class="spacer"></div>
+    <button class="btn-sm" id="tab-blocks-btn">＋ ブロック</button>
+    <button class="btn-sm" id="tab-layers-btn">レイヤー</button>
+    <button class="btn-sm" id="tab-style-btn">スタイル</button>
+    <button class="btn-sm" id="tab-history-btn">履歴</button>
+    <button class="btn-sm solid" id="publish-btn">保存して公開</button>
+  </div>
+
+  <div id="error-box" style="padding:0 14px"></div>
+
+  <div class="editor-shell">
+    <div class="editor-canvas-wrap" id="gjs-editor"></div>
+    <div class="editor-panel">
+      <div id="panel-blocks"><h4>ブロックを追加</h4><div id="blocks-container"></div></div>
+      <div id="panel-layers" style="display:none"><h4>レイヤー（構造）</h4><div id="layers-container"></div></div>
+      <div id="panel-style" style="display:none"><h4>スタイル</h4><div id="style-manager-container"></div></div>
+      <div id="panel-history" style="display:none">
+        <h4>保存履歴（復元すると編集画面に戻ります。公開はされません）</h4>
+        <div id="versions-list"><p class="empty-note">読み込み中...</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="js/adminClient.js?v=6"></script>
+<script src="js/adminAuth.js?v=6"></script>
+<script src="https://cdn.jsdelivr.net/npm/grapesjs@0.21.10/dist/grapes.min.js"></script>
+<script src="js/editorBlocks.js?v=1"></script>
+<script src="js/editorClient.js?v=1"></script>
+<script>
+function showError(msg) {
+  document.getElementById("error-box").innerHTML =
+    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+}
+function setStatus(msg) { document.getElementById("status-text").textContent = msg; }
+
+let editor;
+
+function switchPanel(which) {
+  ["blocks", "layers", "style", "history"].forEach((p) => {
+    document.getElementById("panel-" + p).style.display = p === which ? "block" : "none";
+  });
+}
+
+async function refreshVersionList() {
+  const listEl = document.getElementById("versions-list");
+  listEl.innerHTML = `<p class="empty-note">読み込み中...</p>`;
+  try {
+    const versions = await listVersions();
+    if (versions.length === 0) { listEl.innerHTML = `<p class="empty-note">まだ保存履歴がありません。</p>`; return; }
+    listEl.innerHTML = versions.map((v) => {
+      const d = new Date(v.created_at);
+      const label = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+      return `<div class="version-item"><span>${label}</span><button data-restore="${v.id}">復元</button></div>`;
+    }).join("");
+    listEl.querySelectorAll("[data-restore]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        showError("");
+        btn.disabled = true; btn.textContent = "復元中...";
+        try {
+          const v = await getVersion(btn.dataset.restore);
+          editor.loadProjectData(v.project_data);
+          setStatus("バージョンを復元しました（まだ公開されていません。内容を確認して「保存して公開」を押してください）");
+          switchPanel("blocks");
+        } catch (e) {
+          showError("復元に失敗しました：" + e.message);
+        } finally {
+          btn.disabled = false; btn.textContent = "復元";
+        }
+      });
+    });
+  } catch (e) {
+    listEl.innerHTML = "";
+    showError("履歴の読み込みに失敗しました：" + e.message);
+  }
+}
+
+async function handlePublish() {
+  showError("");
+  const btn = document.getElementById("publish-btn");
+  btn.disabled = true; btn.textContent = "公開中...";
+  try {
+    await publishPage({
+      html: editor.getHtml(),
+      css: editor.getCss(),
+      projectData: editor.getProjectData(),
+    });
+    setStatus("公開しました（" + new Date().toLocaleString("ja-JP") + "）");
+    refreshVersionList();
+  } catch (e) {
+    showError("公開に失敗しました：" + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "保存して公開";
+  }
+}
+
+async function initEditor() {
+  editor = grapesjs.init({
+    container: "#gjs-editor",
+    height: "100%",
+    fromElement: false,
+    storageManager: false,
+    panels: { defaults: [] },
+    deviceManager: {
+      devices: [
+        { name: "Desktop", width: "" },
+        { name: "Mobile", width: "420px", widthMedia: "979px" },
+      ],
+    },
+    blockManager: { appendTo: "#blocks-container" },
+    layerManager: { appendTo: "#layers-container" },
+    styleManager: { appendTo: "#style-manager-container" },
+    selectorManager: { appendTo: "#style-manager-container" },
+    assetManager: {
+      uploadFile: async (e) => {
+        const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        for (const file of files) {
+          try {
+            const url = await uploadSiteAsset(file);
+            editor.AssetManager.add({ src: url });
+          } catch (err) {
+            showError("画像アップロードに失敗しました：" + err.message);
+          }
+        }
+      },
+    },
+  });
+
+  registerYatsumoriBlocks(editor);
+
+  // 初期コンテンツ：保存済みがあればそれを、無ければ今のライブサイトを種にする
+  try {
+    const published = await loadPublishedPage();
+    if (published && published.project_data) {
+      editor.loadProjectData(published.project_data);
+      setStatus("最終公開：" + new Date(published.updated_at).toLocaleString("ja-JP"));
+    } else {
+      const seed = await loadSeedFromLiveSite();
+      editor.setComponents(seed.html);
+      editor.setStyle(seed.css);
+      setStatus("まだ公開されていません（現在のサイトの内容を表示中）");
+    }
+  } catch (e) {
+    showError("初期読み込みに失敗しました：" + e.message);
+  }
+
+  document.getElementById("dev-desktop").addEventListener("click", (ev) => {
+    editor.setDevice("Desktop");
+    document.querySelectorAll(".device-switch button").forEach((b) => b.classList.remove("active"));
+    ev.target.classList.add("active");
+  });
+  document.getElementById("dev-mobile").addEventListener("click", (ev) => {
+    editor.setDevice("Mobile");
+    document.querySelectorAll(".device-switch button").forEach((b) => b.classList.remove("active"));
+    ev.target.classList.add("active");
+  });
+
+  document.getElementById("tab-blocks-btn").addEventListener("click", () => switchPanel("blocks"));
+  document.getElementById("tab-layers-btn").addEventListener("click", () => switchPanel("layers"));
+  document.getElementById("tab-style-btn").addEventListener("click", () => switchPanel("style"));
+  document.getElementById("tab-history-btn").addEventListener("click", () => { switchPanel("history"); refreshVersionList(); });
+  document.getElementById("publish-btn").addEventListener("click", handlePublish);
+}
+
+(async function init() {
+  if (!(await requireAdminSession())) return;
+  renderAdminChrome("editor");
+  await initEditor();
+})();
+</script>
+</body>
+</html>
