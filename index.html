@@ -13,245 +13,545 @@
 -->
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
 <style>
-  :root {
-    --navy: #15314f;
-    --navy-dark: #0c2138;
-    --yellow: #f4c430;
-    --yellow-dark: #e0b21d;
-    --bg: #f6f7f9;
-    --white: #ffffff;
-    --text-gray: #6b7785;
-    --border-gray: #e6e9ed;
-    --radius-lg: 22px;
-    --radius-md: 14px;
+:root {
+  --navy: #15314f;
+  --navy-dark: #0c2138;
+  --yellow: #f0b429;
+  --yellow-dark: #d9a420;
+  --bg: #f5f6f8;
+  --white: #ffffff;
+  --text-gray: #6b7785;
+  --border: #e2e6ea;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--navy);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+.page { max-width: 1240px; margin: 0 auto; background: var(--white); overflow: hidden; }
+
+/* ============================================================
+   ヘッダー
+   ============================================================ */
+.site-header {
+  height: 72px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { width: 44px; height: 44px; border-radius: 50%; object-fit: contain; border: 1px solid var(--border); }
+.brand-name { font-weight: 800; font-size: 16px; }
+.brand-sub { font-size: 9.5px; color: var(--text-gray); letter-spacing: .1em; margin-top: 1px; }
+
+.menu-btn {
+  border: none; background: transparent; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: var(--navy); font-size: 10px; font-weight: 700; padding: 4px;
+}
+.menu-btn .bars { display: flex; flex-direction: column; gap: 4px; }
+.menu-btn .bar { width: 22px; height: 2px; background: var(--navy); border-radius: 2px; display: block; }
+
+.global-nav {
+  position: absolute; top: 72px; left: 0; right: 0;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  box-shadow: 0 12px 24px rgba(20,40,60,.1);
+  display: none; flex-direction: column; z-index: 99;
+}
+.global-nav.open { display: flex; }
+.global-nav a {
+  padding: 14px 22px; font-size: 14px; font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.global-nav a:last-child { border-bottom: none; }
+
+/* Desktop-only header elements */
+.desktop-nav { display: none; }
+.header-cta-btn { display: none; }
+
+/* ============================================================
+   ヒーロー（モバイル：写真の上にテキストオーバーレイ）
+   ============================================================ */
+.hero {
+  position: relative;
+}
+.hero-photo {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 420px;
+  background: linear-gradient(160deg,
+    rgba(8,18,46,.58) 0%,
+    rgba(8,18,46,.38) 60%,
+    rgba(8,18,46,.20) 100%);
+  z-index: 1;
+}
+.hero-content {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 420px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 22px;
+  color: #fff;
+}
+.hero-title {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.35;
+  margin-bottom: 10px;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,.18);
+}
+.hero-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255,255,255,.95);
+  margin-bottom: 6px;
+}
+.hero-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+  line-height: 1.65;
+}
+
+/* ============================================================
+   予約カード（モバイル：ヒーロー下部にオーバーラップ）
+   ============================================================ */
+.booking-card {
+  position: relative;
+  z-index: 10;
+  margin: -44px 16px 0;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px rgba(20,40,60,.14);
+  padding: 22px 20px;
+}
+.booking-card-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 16px;
+  color: var(--navy);
+}
+.booking-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.booking-step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.booking-step-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+}
+.booking-step-label { font-size: 11px; font-weight: 700; color: var(--navy); }
+.booking-step-chevron { color: var(--border); font-size: 16px; font-weight: 700; }
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  border-radius: 999px; padding: 14px 20px;
+  font-weight: 800; font-size: 14px; text-align: center;
+}
+.btn-primary {
+  background: var(--yellow);
+  color: var(--navy-dark);
+  box-shadow: 0 6px 16px rgba(240,180,41,.38);
+  margin-bottom: 10px;
+}
+.btn-primary:hover { background: var(--yellow-dark); }
+.btn-secondary {
+  border: 1.5px solid var(--border);
+  color: var(--navy);
+  background: #fff;
+}
+
+/* ============================================================
+   特徴バッジ
+   ============================================================ */
+.badges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 22px 16px 10px;
+}
+.badge {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 7px;
+}
+.badge-icon {
+  width: 54px; height: 54px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(20,40,60,.07);
+}
+.badge-title { font-size: 11px; font-weight: 800; line-height: 1.3; }
+.badge-sub { font-size: 9.5px; color: var(--text-gray); }
+
+/* ドット（モバイルのみ） */
+.badge-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 0 24px;
+}
+.badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border);
+}
+.badge-dot.active { background: var(--navy); width: 16px; border-radius: 3px; }
+
+/* ============================================================
+   サービスカード
+   ============================================================ */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px 28px;
+}
+.content-card {
+  position: relative;
+  min-height: 168px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+.content-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,18,46,.04) 20%, rgba(8,18,46,.78) 100%);
+}
+.content-card > * { position: relative; z-index: 1; }
+.content-card-title { font-weight: 800; font-size: 14px; margin-bottom: 3px; }
+.content-card-desc { font-size: 10.5px; opacity: .9; margin-bottom: 9px; line-height: 1.4; }
+.pill-btn {
+  align-self: flex-start;
+  background: rgba(255,255,255,.94);
+  color: var(--navy);
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+/* ============================================================
+   セクション見出し
+   ============================================================ */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 12px;
+}
+.section-head-title {
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-head-more {
+  font-size: 12px;
+  color: var(--text-gray);
+  font-weight: 700;
+}
+.section-kicker {
+  font-size: 11px;
+  color: var(--yellow-dark);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   おすすめ情報
+   ============================================================ */
+.info-section { padding: 28px 16px 0; }
+.recommend-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 28px;
+  scrollbar-width: none;
+}
+.recommend-scroll::-webkit-scrollbar { display: none; }
+.recommend-card { flex: 0 0 148px; }
+.recommend-photo {
+  width: 148px; height: 106px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-bottom: 7px;
+  background: var(--bg);
+}
+.recommend-title { font-size: 12.5px; font-weight: 800; }
+.recommend-sub { font-size: 10.5px; color: var(--text-gray); }
+
+/* ============================================================
+   お客様の声（モバイル非表示）
+   ============================================================ */
+.reviews-section { display: none; }
+.review-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.review-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #cdd1d9; flex-shrink: 0;
+}
+.review-text { font-size: 12px; font-weight: 600; flex: 1; }
+.review-stars { color: var(--yellow-dark); font-size: 13px; white-space: nowrap; }
+
+/* ============================================================
+   アクセスカード（モバイル非表示）
+   ============================================================ */
+.access-section { display: none; }
+.access-card-inner {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.access-photo {
+  width: 100%; height: 110px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+.access-row {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 11.5px; color: var(--navy); margin-bottom: 5px;
+}
+.access-btn {
+  display: block; text-align: center;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  padding: 10px; font-size: 12px; font-weight: 800;
+  margin-top: 10px;
+}
+
+/* ============================================================
+   フッター（モバイル：カード型）
+   ============================================================ */
+.footer-mobile {
+  background: var(--bg);
+  margin: 4px 16px 28px;
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+.footer-top { display: flex; gap: 14px; align-items: flex-start; }
+.footer-shop-photo {
+  width: 76px; height: 76px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.footer-info { font-size: 12px; color: var(--navy); }
+.footer-info-row { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 5px; }
+.footer-actions { display: flex; gap: 10px; margin-top: 16px; }
+.footer-action-btn {
+  flex: 1; text-align: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 8px;
+  font-size: 11.5px; font-weight: 800;
+  color: var(--navy); background: #fff;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+
+/* ============================================================
+   ユーティリティバー（デスクトップのみ）
+   ============================================================ */
+.utility-bar {
+  display: none;
+  background: var(--navy); color: #fff;
+  padding: 16px 36px;
+  align-items: center; justify-content: space-between;
+  font-size: 12.5px;
+}
+.utility-ig { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.utility-links { display: flex; gap: 24px; opacity: .85; }
+
+/* ============================================================
+   デスクトップ（980px以上）
+   ============================================================ */
+@media (min-width: 980px) {
+
+  /* Header */
+  .site-header { height: 82px; padding: 0 36px; }
+  .brand-logo { width: 52px; height: 52px; }
+  .brand-name { font-size: 18px; }
+  .menu-btn { display: none; }
+  .global-nav { display: none !important; }
+
+  .desktop-nav {
+    display: flex; align-items: center; gap: 28px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: var(--bg);
-    color: var(--navy);
-    line-height: 1.7;
+  .desktop-nav a {
+    text-align: center; font-size: 11px; font-weight: 700; color: var(--navy);
   }
-  a { text-decoration: none; color: inherit; }
-  img { max-width: 100%; display: block; }
-  button { font-family: inherit; cursor: pointer; }
+  .desktop-nav a .en { display: block; font-size: 13px; letter-spacing: .04em; }
+  .desktop-nav a .jp { display: block; font-size: 10px; color: var(--text-gray); font-weight: 500; margin-top: 2px; }
 
-  .page { max-width: 1240px; margin: 0 auto; background: var(--white); overflow: hidden; }
-  .show-desktop { display: none; }
-
-  /* ---------- ヘッダー ---------- */
-  header.site-header {
-    height: 74px;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--white);
-    border-bottom: 1px solid var(--border-gray);
-    position: sticky;
-    top: 0;
-    z-index: 20;
+  .header-cta-btn {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--navy); color: #fff;
+    border-radius: 12px; padding: 10px 20px;
+    font-weight: 800; font-size: 13px;
   }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-logo-img { width: 46px; height: 46px; border-radius: 50%; object-fit: contain; background: #fff; border: 1px solid var(--border-gray); flex-shrink: 0; }
-  .brand-name { font-weight: 800; font-size: 16px; letter-spacing: 0.02em; }
-  .brand-sub { font-size: 10px; color: var(--text-gray); letter-spacing: 0.1em; margin-top: 2px; }
+  .header-cta-btn .sub { display: block; font-size: 10px; font-weight: 600; opacity: .85; }
 
-  .menu-button {
-    border: none; background: transparent; display: flex; flex-direction: column;
-    align-items: center; gap: 4px; color: var(--navy); font-size: 11px; font-weight: 700;
-  }
-  .menu-button .bars { display:flex; flex-direction:column; gap:4px; }
-  .menu-button .bar { width: 22px; height: 2px; background: var(--navy); border-radius: 2px; }
-
-  .global-nav {
-    position: absolute; top: 74px; left: 0; right: 0; background: var(--white);
-    border-bottom: 1px solid var(--border-gray); box-shadow: 0 16px 28px rgba(20,40,60,0.12);
-    display: none; flex-direction: column; z-index: 19;
-  }
-  .global-nav.open { display: flex; }
-  .global-nav a { padding: 14px 22px; font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--border-gray); }
-  .global-nav a:last-child { border-bottom: none; }
-
-  .desktop-nav { display: none; align-items: center; gap: 30px; }
-  .desktop-nav a { text-align: center; font-size: 11px; font-weight: 700; color: var(--navy); }
-  .desktop-nav a .en { display:block; font-size: 13px; letter-spacing: 0.04em; }
-  .desktop-nav a .jp { display:block; font-size: 10px; color: var(--text-gray); font-weight: 500; margin-top: 2px; }
-  .header-cta {
-    background: var(--navy); color: #fff; border-radius: 12px; padding: 10px 18px;
-    font-size: 13px; font-weight: 800; display: none; align-items: center; gap: 8px;
-  }
-  .header-cta .sub { display:block; font-size: 10px; font-weight: 600; opacity: 0.85; }
-
-  /* ---------- ヒーロー ---------- */
-  .hero { position: relative; }
-  .hero-photo { width: 100%; height: 460px; object-fit: cover; }
-  .hero-overlay { display: none; }
-  .hero-content { padding: 24px 20px 0; }
-  .hero-title { font-size: 28px; font-weight: 800; line-height: 1.4; margin-bottom: 12px; }
-  .hero-text { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-  .hero-desc { font-size: 13px; color: var(--text-gray); }
-
-  /* ---------- 予約カード ---------- */
-  .booking-card {
-    margin: 18px 20px 0;
-    background: var(--white);
-    border: 1px solid var(--border-gray);
+  /* Hero: グリッドレイアウト（写真全面＋左テキスト＋右予約カード） */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 390px;
+    grid-template-rows: 1fr auto;
+    min-height: 540px;
+    margin: 0 28px;
     border-radius: var(--radius-lg);
-    box-shadow: 0 18px 36px rgba(20,40,60,0.10);
-    padding: 22px;
-  }
-  .booking-card-title { text-align: center; font-weight: 800; font-size: 15px; margin-bottom: 16px; }
-  .booking-steps { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 18px; }
-  .booking-step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .booking-step-icon {
-    width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid var(--border-gray);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .booking-step-label { font-size: 11px; font-weight: 700; color: var(--navy); }
-  .booking-step-chevron { color: var(--border-gray); font-weight: 700; }
-
-  .btn { display: block; text-align: center; border-radius: 999px; padding: 14px 18px; font-weight: 800; font-size: 14px; }
-  .btn-primary { background: var(--yellow); color: var(--navy-dark); box-shadow: 0 8px 18px rgba(244,196,48,0.35); }
-  .btn-secondary { border: 1.5px solid var(--border-gray); color: var(--navy); margin-top: 10px; background: #fff; }
-
-  /* ---------- 特徴バッジ ---------- */
-  .badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 26px 20px 8px; }
-  .badge { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
-  .badge-icon {
-    width: 56px; height: 56px; border-radius: 50%; border: 1.5px solid var(--border-gray);
-    display: flex; align-items: center; justify-content: center; background: #fff;
-  }
-  .badge-title { font-size: 11.5px; font-weight: 800; }
-  .badge-sub { font-size: 9.5px; color: var(--text-gray); }
-
-  .dots { display: flex; justify-content: center; gap: 5px; padding: 14px 0 26px; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-gray); }
-  .dot.active { background: var(--navy); width: 16px; border-radius: 4px; }
-
-  /* ---------- サービスカード ---------- */
-  .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px 30px; }
-  .content-card {
-    position: relative; min-height: 170px; border-radius: var(--radius-md); overflow: hidden;
-    display: flex; flex-direction: column; justify-content: flex-end; padding: 16px;
-    background-size: cover; background-position: center; color: #fff;
-  }
-  .content-card::before {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(12,33,56,0.05) 30%, rgba(12,33,56,0.82) 100%);
-  }
-  .content-card > * { position: relative; z-index: 1; }
-  .content-card-title { font-weight: 800; font-size: 15px; margin-bottom: 4px; }
-  .content-card-desc { font-size: 11px; opacity: 0.92; margin-bottom: 10px; }
-  .pill-btn {
-    align-self: flex-start; background: rgba(255,255,255,0.94); color: var(--navy);
-    font-size: 11px; font-weight: 800; padding: 7px 13px; border-radius: 999px;
+    overflow: hidden;
   }
 
-  /* ---------- セクション見出し ---------- */
-  .section-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 14px; }
-  .section-heading-title { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-  .section-heading-more { font-size: 12px; color: var(--text-gray); font-weight: 700; }
-  .section-kicker { font-size: 11px; color: var(--yellow-dark); font-weight: 800; padding: 0 20px 6px; }
-
-  /* ---------- おすすめ情報 ---------- */
-  .recommend-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px 34px; scrollbar-width: none; }
-  .recommend-scroll::-webkit-scrollbar { display: none; }
-  .recommend-card { flex: 0 0 150px; }
-  .recommend-photo { width: 150px; height: 110px; border-radius: var(--radius-md); object-fit: cover; margin-bottom: 8px; background: var(--border-gray); }
-  .recommend-title { font-size: 12.5px; font-weight: 800; }
-  .recommend-sub { font-size: 10.5px; color: var(--text-gray); }
-
-  /* ---------- お客様の声（デスクトップのみ） ---------- */
-  .reviews-list { display: flex; flex-direction: column; gap: 10px; padding: 0 20px; }
-  .review-card { display: flex; align-items: center; gap: 12px; background: var(--bg); border-radius: var(--radius-md); padding: 12px 14px; }
-  .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--border-gray); flex-shrink: 0; }
-  .review-text { font-size: 12px; font-weight: 600; flex: 1; }
-  .review-stars { color: var(--yellow-dark); font-size: 12px; white-space: nowrap; }
-
-  /* ---------- アクセスミニカード（デスクトップのみ） ---------- */
-  .access-card { padding: 0 20px; }
-  .access-card-inner { background: var(--bg); border-radius: var(--radius-md); padding: 14px; }
-  .access-card-photo { width: 100%; height: 110px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 12px; }
-  .access-card-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--navy); margin-bottom: 6px; }
-  .access-card-row b { font-weight: 800; }
-  .access-card-btn { margin-top: 10px; display: block; text-align: center; background: var(--white); border: 1.5px solid var(--border-gray); border-radius: 999px; padding: 10px; font-size: 12px; font-weight: 800; }
-
-  /* ---------- フッター（モバイル：簡易カード） ---------- */
-  .footer-bar { background: var(--bg); margin: 10px 20px 24px; border-radius: var(--radius-lg); padding: 18px; }
-  .footer-top { display: flex; gap: 14px; align-items: flex-start; }
-  .footer-photo { width: 76px; height: 76px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0; }
-  .footer-info { font-size: 12px; color: var(--navy); }
-  .footer-info-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
-  .footer-actions { display: flex; gap: 10px; margin-top: 16px; }
-  .footer-action-btn {
-    flex: 1; text-align: center; border: 1.5px solid var(--border-gray); border-radius: var(--radius-md);
-    padding: 12px; font-size: 12px; font-weight: 800; color: var(--navy); background: #fff;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    border-radius: 0;
+    object-position: center 25%;
   }
 
-  /* ---------- ユーティリティバー（デスクトップのみ） ---------- */
-  .utility-bar {
-    background: var(--navy); color: #fff; padding: 16px 30px; display: flex;
-    align-items: center; justify-content: space-between; font-size: 12.5px; flex-wrap: wrap; gap: 10px;
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg,
+      rgba(255,255,255,.92) 0%,
+      rgba(255,255,255,.70) 28%,
+      rgba(255,255,255,.20) 50%,
+      rgba(255,255,255,.00) 65%);
+    height: auto;
+    z-index: 1;
   }
-  .utility-bar .ig { display: flex; align-items: center; gap: 8px; font-weight: 700; }
-  .utility-links { display: flex; gap: 22px; opacity: 0.92; }
 
-  /* ============================================================
-     デスクトップ（980px以上）
-     ============================================================ */
-  @media (min-width: 980px) {
-    .show-desktop { display: block; }
-    .hide-desktop { display: none !important; }
-
-    header.site-header { padding: 0 36px; height: 86px; }
-    .brand-logo-img { width: 54px; height: 54px; }
-    .brand-name { font-size: 18px; }
-    .menu-button { display: none; }
-    .desktop-nav { display: flex; }
-    .header-cta { display: flex; padding: 12px 22px; }
-
-    .hero { display: grid; grid-template-columns: 1fr 380px; align-items: center; gap: 36px; padding: 36px; }
-    .hero-photo { height: 480px; border-radius: var(--radius-lg); grid-row: 1; grid-column: 1 / -1; }
-    .hero-overlay {
-      display: block; grid-row: 1; grid-column: 1 / -1; align-self: stretch; justify-self: stretch;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(100deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.62) 32%, rgba(255,255,255,0.0) 62%);
-    }
-    .hero-content {
-      grid-row: 1; grid-column: 1 / 1; padding: 0; position: relative; margin-top: 0;
-      align-self: center; justify-self: start; max-width: 560px; margin-left: 40px; margin-top: -40px;
-    }
-    .hero-title { font-size: 38px; }
-    .hero-text { font-size: 16px; }
-    .hero-desc { font-size: 14px; }
-    .hero .badges {
-      grid-row: 1; grid-column: 1 / 1; align-self: end; justify-self: start;
-      display: grid; grid-template-columns: repeat(4, 84px); gap: 18px; padding: 0; margin: 0 0 36px 40px; background: transparent;
-    }
-    .hero .badge-icon { background: rgba(255,255,255,0.92); }
-    .booking-card {
-      grid-row: 1; grid-column: 2 / 3; align-self: center; justify-self: end;
-      margin: 0; width: 100%;
-    }
-
-    .content-grid { grid-template-columns: repeat(4, 1fr); padding: 0 36px 40px; gap: 16px; }
-    .content-card { min-height: 200px; }
-
-    .info-row { display: grid; grid-template-columns: 1.4fr 1fr 0.9fr; gap: 28px; padding: 0 36px 40px; align-items: start; }
-    .info-row .section-heading, .info-row .section-kicker { padding: 0 0 12px; }
-    .info-row .recommend-scroll { overflow: visible; flex-wrap: wrap; padding: 0; }
-    .info-row .recommend-card { flex: 1 1 30%; }
-    .info-row .recommend-photo { width: 100%; height: 90px; }
-
-    .footer-bar { display: none; }
-
-    .utility-bar { display: flex; }
+  .hero-content {
+    grid-column: 1; grid-row: 1;
+    position: relative; z-index: 2;
+    padding: 52px 40px 0;
+    display: flex; flex-direction: column; justify-content: center;
+    color: var(--navy);
+    height: auto;
   }
-  @media (max-width: 979px) {
-    .utility-bar { display: none; }
+
+  .hero-title {
+    font-size: 40px;
+    color: var(--navy);
+    text-shadow: none;
   }
+  .hero-text { font-size: 16px; color: var(--navy); }
+  .hero-desc { font-size: 14px; color: var(--text-gray); }
+
+  /* 予約カード：右カラム */
+  .booking-card {
+    grid-column: 2; grid-row: 1 / 3;
+    position: relative; z-index: 2;
+    align-self: center;
+    margin: 28px 28px 28px 0;
+    box-shadow: 0 20px 48px rgba(20,40,60,.18);
+  }
+
+  /* バッジ：ヒーロー左下 */
+  .badges {
+    grid-column: 1; grid-row: 2;
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    padding: 0 40px 36px;
+    background: transparent;
+  }
+  .badge-icon { background: rgba(255,255,255,.92); }
+  .badge-title { font-size: 12px; }
+  .badge-sub { font-size: 10px; }
+  .badge-dots { display: none; }
+
+  /* サービスカード：4列 */
+  .content-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    padding: 36px 28px 40px;
+  }
+  .content-card { min-height: 210px; }
+  .content-card-title { font-size: 15px; }
+  .content-card-desc { font-size: 11px; }
+
+  /* 情報3列 */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 0.85fr;
+    gap: 28px;
+    padding: 0 28px 44px;
+    align-items: start;
+  }
+  .info-section {
+    padding: 0;
+  }
+  .info-section .section-head { padding: 0 0 12px; }
+  .info-section .section-kicker { padding: 0; }
+  .recommend-scroll {
+    overflow: visible;
+    flex-wrap: wrap;
+    padding: 0;
+  }
+  .recommend-card { flex: 1 1 30%; min-width: 0; }
+  .recommend-photo { width: 100%; height: 92px; }
+
+  /* お客様の声 */
+  .reviews-section { display: block; }
+  .reviews-head { padding: 0 0 12px; }
+
+  /* アクセス */
+  .access-section { display: block; }
+  .access-head { padding: 0 0 12px; }
+
+  /* フッター：モバイル非表示 */
+  .footer-mobile { display: none; }
+
+  /* ユーティリティバー */
+  .utility-bar { display: flex; }
+}
 </style>
 </head>
 <body>
@@ -260,7 +560,7 @@
   <!-- ヘッダー -->
   <header class="site-header">
     <a class="brand" href="index.html">
-      <img class="brand-logo-img" src="assets/img/logo.png" alt="8つ森レンタル ロゴ">
+      <img class="brand-logo" src="assets/img/logo.png" alt="8つ森レンタル ロゴ">
       <div>
         <div class="brand-name">8つ森レンタル</div>
         <div class="brand-sub">SKI &amp; SNOWBOARD RENTAL</div>
@@ -276,17 +576,18 @@
       <a href="pages/access.html"><span class="en">ACCESS</span><span class="jp">アクセス</span></a>
     </nav>
 
-    <a class="header-cta hide-mobile show-desktop" href="reserve.html">
-      📅 <span><span style="display:block">予約する</span><span class="sub">WEB予約はこちら ›</span></span>
+    <a class="header-cta-btn" href="reserve.html">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
+      <span><span style="display:block">予約する</span><span class="sub">WEB予約はこちら ›</span></span>
     </a>
 
-    <button class="menu-button hide-desktop" id="menu-btn" onclick="toggleNav()">
+    <button class="menu-btn" id="menu-btn" onclick="toggleNav()">
       <span class="bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
       メニュー
     </button>
   </header>
 
-  <nav class="global-nav hide-desktop" id="global-nav">
+  <nav class="global-nav" id="global-nav">
     <a href="reserve.html">今すぐ予約する</a>
     <a href="reserve-lookup.html">予約の確認・変更</a>
     <a href="pages/catalog.html">板カタログ</a>
@@ -307,24 +608,24 @@
       <p class="hero-desc">8つ森レンタルは、蔵王・遠刈田温泉の<br>スキー・スノーボードレンタル専門店です。</p>
     </div>
 
-    <!-- 予約カード -->
+    <!-- 予約カード（PC：右カラム　モバイル：ヒーロー下にオーバーラップ） -->
     <div class="booking-card">
       <p class="booking-card-title">かんたんWEB予約</p>
       <div class="booking-steps">
         <div class="booking-step">
           <div class="booking-step-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21"/><path d="M8 3V6"/><path d="M16 3V6"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
           </div>
           <div class="booking-step-label">日付を選ぶ</div>
         </div>
-        <span class="booking-step-chevron">&gt;</span>
+        <span class="booking-step-chevron">›</span>
         <div class="booking-step">
           <div class="booking-step-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>
           </div>
           <div class="booking-step-label">人数を入力</div>
         </div>
-        <span class="booking-step-chevron">&gt;</span>
+        <span class="booking-step-chevron">›</span>
         <div class="booking-step">
           <div class="booking-step-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><path d="M5 13L9.5 17.5L19 7"/></svg>
@@ -332,37 +633,53 @@
           <div class="booking-step-label">完了！</div>
         </div>
       </div>
-      <a class="btn btn-primary" href="reserve.html">📅 今すぐ予約する</a>
+      <a class="btn btn-primary" href="reserve.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
+        今すぐ予約する
+      </a>
       <a class="btn btn-secondary" href="reserve-lookup.html">予約の確認・変更はこちら</a>
     </div>
 
     <!-- 特徴バッジ -->
     <div class="badges">
       <div class="badge">
-        <div class="badge-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg></div>
+        <div class="badge-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
+        </div>
         <div class="badge-title">手ぶらでOK</div>
         <div class="badge-sub">ウェアも充実</div>
       </div>
       <div class="badge">
-        <div class="badge-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21"/><path d="M8 3V6"/><path d="M16 3V6"/></svg></div>
+        <div class="badge-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
+        </div>
         <div class="badge-title">WEB予約で</div>
         <div class="badge-sub">スムーズ受取</div>
       </div>
       <div class="badge">
-        <div class="badge-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg></div>
+        <div class="badge-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
+        </div>
         <div class="badge-title">高品質な板</div>
         <div class="badge-sub">メンテナンス済み</div>
       </div>
       <div class="badge">
-        <div class="badge-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg></div>
+        <div class="badge-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
+        </div>
         <div class="badge-title">温泉街すぐそば</div>
         <div class="badge-sub">帰りに温泉も！</div>
       </div>
     </div>
   </section>
 
-  <div class="dots hide-desktop">
-    <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  <!-- バッジドット（モバイルのみ） -->
+  <div class="badge-dots">
+    <span class="badge-dot active"></span>
+    <span class="badge-dot"></span>
+    <span class="badge-dot"></span>
+    <span class="badge-dot"></span>
+    <span class="badge-dot"></span>
   </div>
 
   <!-- サービスカード -->
@@ -389,16 +706,18 @@
     </a>
   </section>
 
-  <!-- おすすめ情報／お客様の声／アクセス -->
+  <!-- 情報3列（おすすめ／声／アクセス） -->
   <div class="info-row">
-    <div>
-      <p class="section-kicker hide-desktop">＼ 蔵王をもっと楽しもう！ ／</p>
-      <div class="section-heading">
-        <div class="section-heading-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><path d="M3 20L9 8L13 14L16 9L21 20H3Z"/></svg>
+
+    <!-- おすすめ情報 -->
+    <div class="info-section">
+      <p class="section-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
+      <div class="section-head">
+        <div class="section-head-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="2"><path d="M3 20L9 8L13 14L16 9L21 20H3Z"/></svg>
           おすすめ情報
         </div>
-        <span class="section-heading-more">もっと見る &gt;</span>
+        <a class="section-head-more" href="#">もっと見る &gt;</a>
       </div>
       <div class="recommend-scroll">
         <a class="recommend-card" href="pages/onsen-guide.html">
@@ -419,45 +738,48 @@
       </div>
     </div>
 
-    <!-- お客様の声（デスクトップのみ表示） -->
-    <div class="show-desktop hide-mobile">
-      <div class="section-heading"><div class="section-heading-title">お客様の声</div></div>
-      <div class="reviews-list">
-        <div class="review-card">
-          <div class="review-avatar"></div>
-          <p class="review-text">初心者でしたが丁寧に教えてもらえて安心でした！</p>
-          <span class="review-stars">★★★★★</span>
-        </div>
-        <div class="review-card">
-          <div class="review-avatar"></div>
-          <p class="review-text">板の種類が多くて、ぴったりの板を選んでもらえました！</p>
-          <span class="review-stars">★★★★★</span>
-        </div>
-        <div class="review-card">
-          <div class="review-avatar"></div>
-          <p class="review-text">温泉街のすぐそばで便利！また利用したいです。</p>
-          <span class="review-stars">★★★★★</span>
-        </div>
+    <!-- お客様の声 -->
+    <div class="reviews-section">
+      <div class="section-head reviews-head">
+        <div class="section-head-title">お客様の声</div>
+      </div>
+      <div class="review-card">
+        <div class="review-avatar"></div>
+        <p class="review-text">初心者でしたが丁寧に教えてもらえて安心でした！</p>
+        <span class="review-stars">★★★★★</span>
+      </div>
+      <div class="review-card">
+        <div class="review-avatar"></div>
+        <p class="review-text">板の種類が多くて、ぴったりの板を選んでもらえました！</p>
+        <span class="review-stars">★★★★★</span>
+      </div>
+      <div class="review-card">
+        <div class="review-avatar"></div>
+        <p class="review-text">温泉街のすぐそばで便利！また利用したいです。</p>
+        <span class="review-stars">★★★★★</span>
       </div>
     </div>
 
-    <!-- アクセス（デスクトップのみ表示） -->
-    <div class="show-desktop hide-mobile access-card">
-      <div class="section-heading"><div class="section-heading-title">アクセス</div></div>
+    <!-- アクセス -->
+    <div class="access-section">
+      <div class="section-head access-head">
+        <div class="section-head-title">アクセス</div>
+      </div>
       <div class="access-card-inner">
-        <img class="access-card-photo" src="assets/img/shop-thumb.jpg" alt="8つ森レンタル 店舗写真">
-        <div class="access-card-row">📍 <span>宮城県刈田郡蔵王町遠刈田温泉中町16</span></div>
-        <div class="access-card-row">🕒 <span>営業時間 8:30〜18:00（不定休）</span></div>
-        <div class="access-card-row">📞 <b>070-2472-3633</b></div>
-        <a class="access-card-btn" href="pages/access.html">詳しいアクセスを見る &gt;</a>
+        <img class="access-photo" src="assets/img/shop-thumb.jpg" alt="8つ森レンタル 店舗写真">
+        <div class="access-row">📍 <span>宮城県刈田郡蔵王町遠刈田温泉中町16</span></div>
+        <div class="access-row">🕒 <span>営業時間 8:30〜18:00（不定休）</span></div>
+        <div class="access-row">📞 <strong>070-2472-3633</strong></div>
+        <a class="access-btn" href="pages/access.html">詳しいアクセスを見る &gt;</a>
       </div>
     </div>
+
   </div>
 
-  <!-- フッター（モバイル：簡易カード） -->
-  <footer class="footer-bar hide-desktop">
+  <!-- フッター（モバイルのみ） -->
+  <footer class="footer-mobile">
     <div class="footer-top">
-      <img class="footer-photo" src="assets/img/shop-thumb.jpg" alt="8つ森レンタル 店舗写真">
+      <img class="footer-shop-photo" src="assets/img/shop-thumb.jpg" alt="8つ森レンタル 店舗写真">
       <div class="footer-info">
         <div class="footer-info-row">📍 宮城県刈田郡蔵王町遠刈田温泉中町16</div>
         <div class="footer-info-row">🕒 営業時間　8:30〜18:00（不定休）</div>
@@ -465,29 +787,37 @@
       </div>
     </div>
     <div class="footer-actions">
-      <a class="footer-action-btn" href="https://instagram.com" target="_blank" rel="noopener">📷 Instagramを見る</a>
-      <a class="footer-action-btn" href="pages/access.html">📍 アクセス</a>
+      <a class="footer-action-btn" href="https://instagram.com" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="#15314f"/></svg>
+        Instagramを見る
+      </a>
+      <a class="footer-action-btn" href="pages/access.html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        アクセス
+      </a>
     </div>
   </footer>
 
-  <!-- ユーティリティバー（デスクトップのみ） -->
+  <!-- ユーティリティバー（PCのみ） -->
   <div class="utility-bar">
-    <span class="ig">📷 最新情報はInstagramでチェック！　@8mori_rental</span>
+    <span class="utility-ig">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white"/></svg>
+      最新情報はInstagramでチェック！　@8mori_rental
+    </span>
     <div class="utility-links">
-      <span>❓ よくある質問</span>
-      <span>✉️ お問い合わせ</span>
-      <span>🔒 プライバシーポリシー</span>
+      <a href="#">❓ よくある質問</a>
+      <a href="#">✉️ お問い合わせ</a>
+      <a href="#">🔒 プライバシーポリシー</a>
     </div>
   </div>
 
 </div>
 
 <script>
-  function toggleNav() {
-    document.getElementById("global-nav").classList.toggle("open");
-  }
+function toggleNav() {
+  document.getElementById("global-nav").classList.toggle("open");
+}
 </script>
-
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY = "home";</script>
