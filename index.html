@@ -438,11 +438,11 @@ img { max-width: 100%; display: block; }
   /* Hero: グリッドレイアウト（写真全面＋左テキスト＋右予約カード） */
   .hero {
     display: grid;
-    grid-template-columns: 1fr 390px;
+    grid-template-columns: 1fr 420px;
     grid-template-rows: 1fr auto;
-    min-height: 540px;
-    margin: 0 28px;
-    border-radius: var(--radius-lg);
+    min-height: 560px;
+    margin: 0;
+    border-radius: 0;
     overflow: hidden;
   }
 
@@ -469,18 +469,19 @@ img { max-width: 100%; display: block; }
   .hero-content {
     grid-column: 1; grid-row: 1;
     position: relative; z-index: 2;
-    padding: 52px 40px 0;
+    padding: 60px 48px 0 52px;
     display: flex; flex-direction: column; justify-content: center;
     color: var(--navy);
     height: auto;
   }
 
   .hero-title {
-    font-size: 40px;
+    font-size: 42px;
     color: var(--navy);
     text-shadow: none;
+    margin-bottom: 12px;
   }
-  .hero-text { font-size: 16px; color: var(--navy); }
+  .hero-text { font-size: 17px; color: var(--navy); margin-bottom: 8px; }
   .hero-desc { font-size: 14px; color: var(--text-gray); }
 
   /* 予約カード：右カラム */
@@ -488,8 +489,10 @@ img { max-width: 100%; display: block; }
     grid-column: 2; grid-row: 1 / 3;
     position: relative; z-index: 2;
     align-self: center;
-    margin: 28px 28px 28px 0;
+    margin: 32px 36px 32px 0;
     box-shadow: 0 20px 48px rgba(20,40,60,.18);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
   }
 
   /* バッジ：ヒーロー左下 */
@@ -497,32 +500,36 @@ img { max-width: 100%; display: block; }
     grid-column: 1; grid-row: 2;
     position: relative; z-index: 2;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    padding: 0 40px 36px;
+    grid-template-columns: repeat(4, max-content);
+    gap: 24px;
+    padding: 0 0 40px 52px;
     background: transparent;
   }
-  .badge-icon { background: rgba(255,255,255,.92); }
-  .badge-title { font-size: 12px; }
-  .badge-sub { font-size: 10px; }
+  .badge-icon {
+    width: 62px; height: 62px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 2px 10px rgba(20,40,60,.1);
+  }
+  .badge-title { font-size: 12.5px; }
+  .badge-sub { font-size: 10.5px; }
   .badge-dots { display: none; }
 
   /* サービスカード：4列 */
   .content-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    padding: 36px 28px 40px;
+    gap: 16px;
+    padding: 40px 36px 48px;
   }
-  .content-card { min-height: 210px; }
-  .content-card-title { font-size: 15px; }
-  .content-card-desc { font-size: 11px; }
+  .content-card { min-height: 220px; border-radius: var(--radius-lg); }
+  .content-card-title { font-size: 16px; margin-bottom: 5px; }
+  .content-card-desc { font-size: 12px; margin-bottom: 12px; }
 
   /* 情報3列 */
   .info-row {
     display: grid;
     grid-template-columns: 1.4fr 1fr 0.85fr;
     gap: 28px;
-    padding: 0 28px 44px;
+    padding: 0 36px 52px;
     align-items: start;
   }
   .info-section {
