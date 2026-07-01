@@ -6,92 +6,402 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>ページ編集 | 8つ森レンタル 管理</title>
-<link rel="stylesheet" href="../assets/css/style.css?v=6">
+<title>ページ編集 | 8つ森レンタル</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/grapesjs@0.21.10/dist/css/grapes.min.css">
 <style>
-  body { max-width: none; }
-  .page { max-width: none; }
-  .gjs-cv-canvas { top: 0; height: 100%; }
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  background: #111827;
+  color: #e5e7eb;
+  font-size: 13px;
+}
+
+/* ── Top Bar ── */
+#ed-top {
+  height: 48px;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+}
+#ed-top .back-link {
+  color: rgba(255,255,255,.45);
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+}
+#ed-top .back-link:hover { color: #fff; background: rgba(255,255,255,.08); }
+#ed-top .site-name {
+  font-size: 13px; font-weight: 700; color: #fff;
+  padding-left: 10px; border-left: 1px solid rgba(255,255,255,.12);
+}
+#ed-top .divider { width: 1px; height: 20px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+#ed-top .spacer { flex: 1; }
+
+/* undo/redo */
+.top-icon-btn {
+  border: none; background: transparent; cursor: pointer;
+  color: rgba(255,255,255,.5); padding: 5px 8px;
+  border-radius: 6px; font-size: 15px; line-height: 1;
+  transition: all .15s;
+}
+.top-icon-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
+.top-icon-btn:disabled { opacity: .25; cursor: not-allowed; }
+
+/* device toggle */
+.dev-toggle {
+  display: flex; background: rgba(255,255,255,.07);
+  border-radius: 20px; padding: 2px; gap: 0;
+}
+.dev-toggle button {
+  border: none; background: transparent; cursor: pointer;
+  color: rgba(255,255,255,.45); padding: 4px 14px;
+  border-radius: 18px; font-size: 12px; font-weight: 500;
+  transition: all .18s; white-space: nowrap;
+}
+.dev-toggle button.active { background: #fff; color: #0f172a; font-weight: 700; }
+
+/* status */
+#ed-status {
+  font-size: 11px; color: rgba(255,255,255,.35);
+  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* publish btn */
+#publish-btn {
+  background: #2563eb; color: #fff; border: none; cursor: pointer;
+  padding: 7px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; letter-spacing: .01em;
+  transition: background .18s, transform .1s;
+  white-space: nowrap;
+}
+#publish-btn:hover:not(:disabled) { background: #1d4ed8; }
+#publish-btn:active:not(:disabled) { transform: scale(.97); }
+#publish-btn:disabled { background: #374151; color: #9ca3af; cursor: default; }
+#publish-btn.saving { background: #374151; }
+#publish-btn.done { background: #059669; }
+
+/* ── Layout body ── */
+#ed-body {
+  display: flex;
+  height: calc(100vh - 48px);
+  margin-top: 48px;
+}
+
+/* ── Left sidebar ── */
+#ed-left {
+  width: 248px; flex-shrink: 0;
+  background: #1e293b;
+  border-right: 1px solid rgba(255,255,255,.07);
+  display: flex; flex-direction: column;
+}
+#ed-left-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+#ed-left-tabs button {
+  flex: 1; border: none; background: transparent;
+  color: rgba(255,255,255,.4); padding: 10px 4px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+}
+#ed-left-tabs button.active { color: #93c5fd; border-bottom-color: #3b82f6; }
+#ed-left-tabs button:hover:not(.active) { color: rgba(255,255,255,.7); }
+
+#ed-left-content { flex: 1; overflow-y: auto; }
+#ed-left-content > div { display: none; }
+#ed-left-content > div.visible { display: block; }
+
+/* ── Canvas ── */
+#ed-canvas {
+  flex: 1; min-width: 0;
+  background: #1f2937;
+  position: relative;
+  overflow: hidden;
+}
+#gjs-editor { width: 100%; height: 100%; }
+
+/* ── Right sidebar ── */
+#ed-right {
+  width: 268px; flex-shrink: 0;
+  background: #1e293b;
+  border-left: 1px solid rgba(255,255,255,.07);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+#ed-right-head {
+  padding: 10px 14px;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: rgba(255,255,255,.3); text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+#ed-right-body { flex: 1; overflow-y: auto; }
+#trait-container { padding: 8px 10px; }
+#selector-container { padding: 4px 10px 0; }
+#style-container { padding: 4px 4px 12px; }
+
+#no-selection-hint {
+  padding: 32px 16px; text-align: center;
+  color: rgba(255,255,255,.2); font-size: 12px; line-height: 1.7;
+}
+#no-selection-hint .hint-icon { font-size: 32px; margin-bottom: 10px; }
+
+/* ── History panel ── */
+#panel-history { padding: 10px; }
+.history-note {
+  font-size: 11px; color: rgba(255,255,255,.3);
+  background: rgba(255,255,255,.04);
+  border-radius: 6px; padding: 8px 10px;
+  margin-bottom: 10px; line-height: 1.6;
+}
+.version-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 10px; border-radius: 6px;
+  background: rgba(255,255,255,.04); margin-bottom: 4px;
+}
+.version-item .ver-label { font-size: 12px; color: rgba(255,255,255,.65); }
+.version-item .ver-restore {
+  background: rgba(255,255,255,.1); border: none; color: #93c5fd;
+  padding: 3px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;
+  font-weight: 600; transition: background .15s;
+}
+.version-item .ver-restore:hover { background: rgba(59,130,246,.3); }
+.ver-empty { font-size: 12px; color: rgba(255,255,255,.25); padding: 12px 4px; text-align: center; }
+
+/* ── Toast ── */
+#ed-toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: #1e293b; color: #e5e7eb;
+  padding: 10px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  opacity: 0; pointer-events: none;
+  transition: all .22s cubic-bezier(.4,0,.2,1);
+  border-left: 3px solid #3b82f6;
+  white-space: nowrap; z-index: 10000;
+}
+#ed-toast.show {
+  opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+}
+#ed-toast.success { border-left-color: #10b981; }
+#ed-toast.error { border-left-color: #ef4444; background: #1f0a0a; color: #fca5a5; }
+
+/* ── GrapesJS overrides ── */
+.gjs-cv-canvas { background: #1f2937 !important; }
+.gjs-frame-wrapper { box-shadow: 0 8px 48px rgba(0,0,0,.5) !important; border-radius: 6px !important; overflow: hidden !important; }
+
+/* Block manager */
+.gjs-block-categories { padding: 8px !important; }
+.gjs-block-category .gjs-title {
+  background: transparent !important; color: rgba(255,255,255,.3) !important;
+  font-size: 9px !important; letter-spacing: .1em !important; font-weight: 700 !important;
+  padding: 10px 4px 4px !important; border: none !important;
+}
+.gjs-blocks-c { gap: 6px !important; padding: 0 !important; }
+.gjs-block {
+  border: 1px solid rgba(255,255,255,.1) !important;
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(255,255,255,.7) !important;
+  border-radius: 8px !important; padding: 10px 6px !important;
+  font-size: 10px !important; transition: all .15s !important;
+  min-height: 68px !important;
+}
+.gjs-block:hover {
+  background: rgba(59,130,246,.15) !important;
+  border-color: rgba(59,130,246,.5) !important;
+  color: #fff !important;
+}
+.gjs-block-svg-path { fill: rgba(255,255,255,.5) !important; }
+.gjs-block__media { margin-bottom: 6px !important; }
+
+/* Layer manager */
+.gjs-layer-item { border-color: rgba(255,255,255,.06) !important; }
+.gjs-layer-title-c { color: rgba(255,255,255,.7) !important; }
+.gjs-layer-title { font-size: 12px !important; }
+.gjs-layer-count { color: rgba(255,255,255,.3) !important; font-size: 10px !important; }
+.gjs-layer:hover > .gjs-layer-item > .gjs-layer-title-c { color: #fff !important; }
+.gjs-layer.gjs-selected > .gjs-layer-item { background: rgba(59,130,246,.15) !important; }
+
+/* Style manager */
+.gjs-sm-sector { border-color: rgba(255,255,255,.07) !important; }
+.gjs-sm-sector .gjs-sm-title {
+  background: rgba(255,255,255,.04) !important; color: rgba(255,255,255,.6) !important;
+  border-color: rgba(255,255,255,.07) !important; font-size: 11px !important;
+  padding: 7px 12px !important;
+}
+.gjs-sm-property .gjs-sm-label { color: rgba(255,255,255,.4) !important; font-size: 11px !important; }
+.gjs-sm-field input, .gjs-sm-field select, .gjs-sm-field textarea {
+  background: rgba(255,255,255,.07) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #e5e7eb !important; border-radius: 5px !important;
+}
+.gjs-sm-field input:focus, .gjs-sm-field select:focus {
+  border-color: #3b82f6 !important; outline: none !important;
+}
+.gjs-clm-tag { background: rgba(59,130,246,.2) !important; color: #93c5fd !important; border-radius: 4px !important; }
+.gjs-clm-tags-field { background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.1) !important; border-radius: 5px !important; }
+
+/* Trait manager */
+.gjs-trt-header { display: none; }
+.gjs-trait-label { color: rgba(255,255,255,.4) !important; font-size: 11px !important; }
+.gjs-trait input, .gjs-trait select {
+  background: rgba(255,255,255,.07) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  color: #e5e7eb !important; border-radius: 5px !important;
+}
+
+/* Selected component highlight */
+.gjs-comp-selected { outline: 2px solid #3b82f6 !important; }
+.gjs-hovered { outline: 1px dashed rgba(59,130,246,.5) !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
 </style>
 </head>
 <body>
-<div class="page" style="background:var(--bg)">
-  <div id="admin-header"></div>
 
-  <div class="editor-toolbar">
-    <div class="device-switch">
-      <button type="button" id="dev-desktop" class="active">🖥 PC表示で編集</button>
-      <button type="button" id="dev-mobile">📱 スマホ表示で編集</button>
-    </div>
-    <span id="status-text" class="help-text" style="margin:0"></span>
-    <div class="spacer"></div>
-    <button class="btn-sm" id="tab-blocks-btn">＋ ブロック</button>
-    <button class="btn-sm" id="tab-layers-btn">レイヤー</button>
-    <button class="btn-sm" id="tab-style-btn">スタイル</button>
-    <button class="btn-sm" id="tab-history-btn">履歴</button>
-    <button class="btn-sm solid" id="publish-btn">保存して公開</button>
+<!-- Top bar -->
+<div id="ed-top">
+  <a class="back-link" href="index.html" title="ダッシュボードに戻る">‹</a>
+  <span class="site-name">8つ森レンタル — ページ編集</span>
+  <div class="divider"></div>
+  <button class="top-icon-btn" id="undo-btn" title="元に戻す (Ctrl+Z)">↩</button>
+  <button class="top-icon-btn" id="redo-btn" title="やり直す (Ctrl+Y)">↪</button>
+  <div class="spacer"></div>
+  <div class="dev-toggle">
+    <button id="dev-desktop" class="active">🖥 PC</button>
+    <button id="dev-mobile">📱 スマホ</button>
   </div>
+  <div class="spacer"></div>
+  <span id="ed-status"></span>
+  <button id="publish-btn">✓ 保存して公開</button>
+</div>
 
-  <div id="error-box" style="padding:0 14px"></div>
+<!-- Toast notification -->
+<div id="ed-toast"></div>
 
-  <div class="editor-shell">
-    <div class="editor-canvas-wrap" id="gjs-editor"></div>
-    <div class="editor-panel">
-      <div id="panel-blocks"><h4>ブロックを追加</h4><div id="blocks-container"></div></div>
-      <div id="panel-layers" style="display:none"><h4>レイヤー（構造）</h4><div id="layers-container"></div></div>
-      <div id="panel-style" style="display:none"><h4>スタイル</h4><div id="style-manager-container"></div></div>
-      <div id="panel-history" style="display:none">
-        <h4>保存履歴（復元すると編集画面に戻ります。公開はされません）</h4>
-        <div id="versions-list"><p class="empty-note">読み込み中...</p></div>
+<!-- Editor body -->
+<div id="ed-body">
+
+  <!-- Left sidebar -->
+  <div id="ed-left">
+    <div id="ed-left-tabs">
+      <button class="active" data-panel="blocks">＋ ブロック</button>
+      <button data-panel="layers">レイヤー</button>
+      <button data-panel="history">履歴</button>
+    </div>
+    <div id="ed-left-content">
+      <div id="panel-blocks" class="visible">
+        <div id="blocks-container"></div>
+      </div>
+      <div id="panel-layers">
+        <div id="layers-container"></div>
+      </div>
+      <div id="panel-history">
+        <div class="history-note">復元後は確認してから「保存して公開」を押すまで本番には反映されません</div>
+        <div id="versions-list"><p class="ver-empty">読み込み中...</p></div>
       </div>
     </div>
   </div>
+
+  <!-- Canvas -->
+  <div id="ed-canvas">
+    <div id="gjs-editor"></div>
+  </div>
+
+  <!-- Right sidebar: Properties -->
+  <div id="ed-right">
+    <div id="ed-right-head">プロパティ</div>
+    <div id="ed-right-body">
+      <div id="no-selection-hint">
+        <div class="hint-icon">🖱</div>
+        要素をクリックすると<br>ここにプロパティが表示されます
+      </div>
+      <div id="props-area" style="display:none">
+        <div id="trait-container"></div>
+        <div id="selector-container"></div>
+        <div id="style-container"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="js/adminClient.js?v=6"></script>
 <script src="js/adminAuth.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/grapesjs@0.21.10/dist/grapes.min.js"></script>
-<script src="js/editorBlocks.js?v=1"></script>
+<script src="js/editorBlocks.js?v=2"></script>
 <script src="js/editorClient.js?v=1"></script>
 <script>
-function showError(msg) {
-  document.getElementById("error-box").innerHTML =
-    msg ? `<div class="alert alert-error">${msg}</div>` : "";
+// ── Toast ──
+let toastTimer;
+function toast(msg, type = "info") {
+  const el = document.getElementById("ed-toast");
+  el.textContent = msg;
+  el.className = "show " + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ""; }, 3200);
 }
-function setStatus(msg) { document.getElementById("status-text").textContent = msg; }
 
-let editor;
+// ── Status ──
+function setStatus(msg) { document.getElementById("ed-status").textContent = msg; }
 
-function switchPanel(which) {
-  ["blocks", "layers", "style", "history"].forEach((p) => {
-    document.getElementById("panel-" + p).style.display = p === which ? "block" : "none";
+// ── Left panel tabs ──
+let currentPanel = "blocks";
+document.querySelectorAll("#ed-left-tabs button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const panel = btn.dataset.panel;
+    document.querySelectorAll("#ed-left-tabs button").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll("#ed-left-content > div").forEach((d) => d.classList.remove("visible"));
+    document.getElementById("panel-" + panel).classList.add("visible");
+    currentPanel = panel;
+    if (panel === "history") loadHistory();
   });
-}
+});
 
-async function refreshVersionList() {
+// ── Versions ──
+async function loadHistory() {
   const listEl = document.getElementById("versions-list");
-  listEl.innerHTML = `<p class="empty-note">読み込み中...</p>`;
+  listEl.innerHTML = `<p class="ver-empty">読み込み中...</p>`;
   try {
     const versions = await listVersions();
-    if (versions.length === 0) { listEl.innerHTML = `<p class="empty-note">まだ保存履歴がありません。</p>`; return; }
+    if (!versions.length) { listEl.innerHTML = `<p class="ver-empty">まだ保存履歴がありません</p>`; return; }
     listEl.innerHTML = versions.map((v) => {
       const d = new Date(v.created_at);
-      const label = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
-      return `<div class="version-item"><span>${label}</span><button data-restore="${v.id}">復元</button></div>`;
+      const label = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+      return `<div class="version-item"><span class="ver-label">${label}</span><button class="ver-restore" data-id="${v.id}">復元</button></div>`;
     }).join("");
-    listEl.querySelectorAll("[data-restore]").forEach((btn) => {
+    listEl.querySelectorAll(".ver-restore").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        showError("");
         btn.disabled = true; btn.textContent = "復元中...";
         try {
-          const v = await getVersion(btn.dataset.restore);
+          const v = await getVersion(btn.dataset.id);
           editor.loadProjectData(v.project_data);
-          setStatus("バージョンを復元しました（まだ公開されていません。内容を確認して「保存して公開」を押してください）");
-          switchPanel("blocks");
+          toast("バージョンを復元しました。内容を確認して「保存して公開」を押してください", "info");
+          // switch to blocks panel
+          document.querySelector('#ed-left-tabs button[data-panel="blocks"]').click();
         } catch (e) {
-          showError("復元に失敗しました：" + e.message);
+          toast("復元に失敗しました: " + e.message, "error");
         } finally {
           btn.disabled = false; btn.textContent = "復元";
         }
@@ -99,28 +409,40 @@ async function refreshVersionList() {
     });
   } catch (e) {
     listEl.innerHTML = "";
-    showError("履歴の読み込みに失敗しました：" + e.message);
+    toast("履歴の読み込みに失敗しました: " + e.message, "error");
   }
 }
 
+// ── Right panel: show/hide on selection ──
+function showProps(show) {
+  document.getElementById("no-selection-hint").style.display = show ? "none" : "block";
+  document.getElementById("props-area").style.display = show ? "block" : "none";
+}
+
+// ── Publish ──
 async function handlePublish() {
-  showError("");
   const btn = document.getElementById("publish-btn");
-  btn.disabled = true; btn.textContent = "公開中...";
+  btn.disabled = true; btn.textContent = "公開中..."; btn.className = "saving";
   try {
     await publishPage({
       html: editor.getHtml(),
       css: editor.getCss(),
       projectData: editor.getProjectData(),
     });
-    setStatus("公開しました（" + new Date().toLocaleString("ja-JP") + "）");
-    refreshVersionList();
+    const now = new Date().toLocaleString("ja-JP", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" });
+    setStatus("公開済み " + now);
+    btn.className = "done"; btn.textContent = "✓ 公開しました";
+    toast("公開しました！ライブサイトに反映されました", "success");
+    setTimeout(() => { btn.textContent = "✓ 保存して公開"; btn.className = ""; btn.disabled = false; }, 2000);
+    if (currentPanel === "history") loadHistory();
   } catch (e) {
-    showError("公開に失敗しました：" + e.message);
-  } finally {
-    btn.disabled = false; btn.textContent = "保存して公開";
+    toast("公開に失敗しました: " + e.message, "error");
+    btn.textContent = "✓ 保存して公開"; btn.className = ""; btn.disabled = false;
   }
 }
+
+// ── Init GrapesJS ──
+let editor;
 
 async function initEditor() {
   editor = grapesjs.init({
@@ -137,8 +459,9 @@ async function initEditor() {
     },
     blockManager: { appendTo: "#blocks-container" },
     layerManager: { appendTo: "#layers-container" },
-    styleManager: { appendTo: "#style-manager-container" },
-    selectorManager: { appendTo: "#style-manager-container" },
+    styleManager: { appendTo: "#style-container" },
+    selectorManager: { appendTo: "#selector-container" },
+    traitManager: { appendTo: "#trait-container" },
     assetManager: {
       uploadFile: async (e) => {
         const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
@@ -146,8 +469,9 @@ async function initEditor() {
           try {
             const url = await uploadSiteAsset(file);
             editor.AssetManager.add({ src: url });
+            toast("画像をアップロードしました", "success");
           } catch (err) {
-            showError("画像アップロードに失敗しました：" + err.message);
+            toast("画像アップロード失敗: " + err.message, "error");
           }
         }
       },
@@ -156,43 +480,77 @@ async function initEditor() {
 
   registerYatsumoriBlocks(editor);
 
-  // 初期コンテンツ：保存済みがあればそれを、無ければ今のライブサイトを種にする
+  // Selection events → right panel
+  editor.on("component:selected", () => showProps(true));
+  editor.on("component:deselected", () => showProps(false));
+  showProps(false);
+
+  // Load content
+  setStatus("読み込み中...");
   try {
     const published = await loadPublishedPage();
     if (published && published.project_data) {
       editor.loadProjectData(published.project_data);
-      setStatus("最終公開：" + new Date(published.updated_at).toLocaleString("ja-JP"));
+      const d = new Date(published.updated_at);
+      setStatus("最終公開 " + d.toLocaleString("ja-JP", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" }));
     } else {
       const seed = await loadSeedFromLiveSite();
       editor.setComponents(seed.html);
       editor.setStyle(seed.css);
-      setStatus("まだ公開されていません（現在のサイトの内容を表示中）");
+      setStatus("未公開（現在のサイトを表示中）");
     }
   } catch (e) {
-    showError("初期読み込みに失敗しました：" + e.message);
+    toast("初期読み込みに失敗しました: " + e.message, "error");
+    setStatus("読み込み失敗");
   }
 
+  // Device toggle
   document.getElementById("dev-desktop").addEventListener("click", (ev) => {
     editor.setDevice("Desktop");
-    document.querySelectorAll(".device-switch button").forEach((b) => b.classList.remove("active"));
-    ev.target.classList.add("active");
+    document.querySelectorAll(".dev-toggle button").forEach((b) => b.classList.remove("active"));
+    ev.currentTarget.classList.add("active");
   });
   document.getElementById("dev-mobile").addEventListener("click", (ev) => {
     editor.setDevice("Mobile");
-    document.querySelectorAll(".device-switch button").forEach((b) => b.classList.remove("active"));
-    ev.target.classList.add("active");
+    document.querySelectorAll(".dev-toggle button").forEach((b) => b.classList.remove("active"));
+    ev.currentTarget.classList.add("active");
   });
 
-  document.getElementById("tab-blocks-btn").addEventListener("click", () => switchPanel("blocks"));
-  document.getElementById("tab-layers-btn").addEventListener("click", () => switchPanel("layers"));
-  document.getElementById("tab-style-btn").addEventListener("click", () => switchPanel("style"));
-  document.getElementById("tab-history-btn").addEventListener("click", () => { switchPanel("history"); refreshVersionList(); });
+  // Undo / Redo
+  document.getElementById("undo-btn").addEventListener("click", () => editor.UndoManager.undo());
+  document.getElementById("redo-btn").addEventListener("click", () => editor.UndoManager.redo());
+
+  // Publish
   document.getElementById("publish-btn").addEventListener("click", handlePublish);
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+      e.preventDefault();
+      handlePublish();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+      e.preventDefault();
+      editor.UndoManager.undo();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+      e.preventDefault();
+      editor.UndoManager.redo();
+    }
+  });
+
+  // Warn before leaving with unsaved changes
+  let hasUnsaved = false;
+  editor.on("update", () => { hasUnsaved = true; });
+  document.getElementById("publish-btn").addEventListener("click", () => { hasUnsaved = false; });
+  window.addEventListener("beforeunload", (e) => {
+    if (hasUnsaved) { e.preventDefault(); e.returnValue = ""; }
+  });
 }
 
+// ── Boot ──
 (async function init() {
   if (!(await requireAdminSession())) return;
-  renderAdminChrome("editor");
   await initEditor();
 })();
 </script>
