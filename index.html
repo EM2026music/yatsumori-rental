@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -74,22 +74,22 @@ img{display:block}
   position:absolute;inset:0;
   background:linear-gradient(90deg,
     rgba(255,255,255,0)   0%,
-    rgba(255,255,255,0)   22%,
-    rgba(255,255,255,.50) 38%,
-    rgba(255,255,255,.90) 52%,
-    rgba(255,255,255,1)   66%);
+    rgba(255,255,255,0)   24%,
+    rgba(255,255,255,.45) 40%,
+    rgba(255,255,255,.60) 60%,
+    rgba(255,255,255,.45) 100%);
 }
 
-/* heroテキスト：left 456px / top 132px（absolute） */
-.hero-content{position:absolute;left:456px;top:132px;width:620px;z-index:2;color:var(--navy)}
-.hero-title{font-size:36px;font-weight:800;line-height:1.32;margin-bottom:10px;text-shadow:0 0 18px rgba(255,255,255,.85)}
-.hero-desc{font-size:14px;color:var(--text-gray);line-height:1.6;text-shadow:0 0 12px rgba(255,255,255,.9)}
+/* heroテキスト：left 456px / ページ上端から132px（hero内では44px） */
+.hero-content{position:absolute;left:456px;top:44px;width:640px;z-index:2;color:var(--navy)}
+.hero-title{font-size:40px;font-weight:800;line-height:1.4;margin-bottom:14px;text-shadow:0 0 18px rgba(255,255,255,.9),0 0 36px rgba(255,255,255,.7)}
+.hero-desc{font-size:14px;color:#415062;line-height:1.7;text-shadow:0 0 12px rgba(255,255,255,.95)}
 
-/* バッジ（heroテキスト直下・left 456px） */
-.badges{position:absolute;left:456px;top:280px;z-index:2;display:flex;gap:28px}
-.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px}
-.badge-icon{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.94);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(20,40,60,.08)}
-.badge-label{font-size:12px;font-weight:800}
+/* バッジ（heroテキスト直下・left 456px・画像の大きな白丸に合わせる） */
+.badges{position:absolute;left:456px;top:232px;z-index:2;display:flex;gap:38px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+.badge-icon{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(20,40,60,.12)}
+.badge-label{font-size:13px;font-weight:800}
 .badge-sub{font-size:10px;color:var(--text-gray)}
 
 /* 予約カード：right 64px / top 76px / 336x276（absolute） */
@@ -143,22 +143,21 @@ img{display:block}
 /* おすすめ情報 */
 .rec-scroll{display:flex;gap:12px}
 .rec-card{flex:1;min-width:0;color:var(--navy)}
-.rec-photo{width:100%;height:62px;border-radius:8px;object-fit:cover;margin-bottom:6px;background:var(--bg)}
+.rec-photo{width:100%;height:96px;border-radius:8px;object-fit:cover;margin-bottom:6px;background:var(--bg)}
 .rec-title{font-size:13px;font-weight:800}
 .rec-sub{font-size:10px;color:var(--text-gray);line-height:1.4}
 
-/* お客様の声 */
-.review-card{display:flex;align-items:flex-start;gap:12px;background:var(--bg);border-radius:8px;padding:11px 16px;margin-bottom:7px}
+/* お客様の声（画像どおり：アバター｜本文｜星を横一列） */
+.review-card{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:7px}
 .review-avatar{width:34px;height:34px;border-radius:50%;background:#c8cdd5;flex-shrink:0}
-.review-body{flex:1}
-.review-text{font-size:13px;font-weight:600;margin-bottom:4px}
-.review-stars{color:var(--yellow);font-size:13px}
+.review-text{flex:1;font-size:12.5px;font-weight:600;line-height:1.5}
+.review-stars{color:var(--yellow);font-size:13px;flex-shrink:0;letter-spacing:1px}
 
 /* アクセス */
-.access-inner{background:var(--bg);border-radius:8px;padding:12px}
-.access-photo{width:100%;height:44px;object-fit:cover;border-radius:8px;margin-bottom:7px}
-.access-row{display:flex;align-items:flex-start;gap:7px;font-size:12px;margin-bottom:4px}
-.access-btn{display:block;text-align:center;border:1.5px solid var(--border);border-radius:999px;padding:9px;font-size:12px;font-weight:800;margin-top:9px;background:#fff}
+.access-inner{background:var(--bg);border-radius:8px;padding:10px}
+.access-photo{width:100%;height:42px;object-fit:cover;border-radius:8px;margin-bottom:6px}
+.access-row{display:flex;align-items:flex-start;gap:7px;font-size:12px;margin-bottom:2px}
+.access-btn{display:block;text-align:center;border:1.5px solid var(--border);border-radius:999px;padding:7px;font-size:12px;font-weight:800;margin-top:7px;background:#fff}
 
 /* ==============================
    FOOTER (UTILITY BAR)  高さ56px
@@ -243,28 +242,28 @@ img{display:block}
   <div class="badges">
     <div class="badge">
       <div class="badge-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
       </div>
       <div class="badge-label">手ぶらでOK</div>
       <div class="badge-sub">ウェアも充実</div>
     </div>
     <div class="badge">
       <div class="badge-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
       </div>
       <div class="badge-label">WEB予約で</div>
       <div class="badge-sub">スムーズ受取</div>
     </div>
     <div class="badge">
       <div class="badge-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
       </div>
       <div class="badge-label">高品質な板</div>
       <div class="badge-sub">メンテナンス済み</div>
     </div>
     <div class="badge">
       <div class="badge-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
       </div>
       <div class="badge-label">温泉街すぐそば</div>
       <div class="badge-sub">帰りに温泉も！</div>
@@ -335,17 +334,18 @@ img{display:block}
     </div>
     <div class="review-card">
       <div class="review-avatar"></div>
-      <div class="review-body">
-        <p class="review-text">初心者でしたが丁寧に教えてもらえて安心でした！</p>
-        <div class="review-stars">★★★★★</div>
-      </div>
+      <p class="review-text">初心者でしたが丁寧に教えてもらえて安心でした！</p>
+      <span class="review-stars">★★★★★</span>
     </div>
     <div class="review-card">
       <div class="review-avatar"></div>
-      <div class="review-body">
-        <p class="review-text">板の種類が多くて、ぴったりの板を選んでもらえました！</p>
-        <div class="review-stars">★★★★★</div>
-      </div>
+      <p class="review-text">板の種類が多くて、ぴったりの板を選んでもらえました！</p>
+      <span class="review-stars">★★★★★</span>
+    </div>
+    <div class="review-card">
+      <div class="review-avatar"></div>
+      <p class="review-text">温泉街のすぐそばで便利！また利用したいです。</p>
+      <span class="review-stars">★★★★★</span>
     </div>
   </div>
 
