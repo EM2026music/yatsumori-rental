@@ -67,17 +67,19 @@ img{display:block}
 
 .hero-photo{
   width:1536px;height:386px;
-  object-fit:cover;object-position:center 14%;
-  transform:scaleX(-1);           /* 人物を左側（0〜360px範囲）に配置 */
+  object-fit:cover;object-position:center 30%;
 }
 .hero-overlay{
   position:absolute;inset:0;
-  background:linear-gradient(90deg,
-    rgba(255,255,255,0)   0%,
-    rgba(255,255,255,0)   24%,
-    rgba(255,255,255,.45) 40%,
-    rgba(255,255,255,.60) 60%,
-    rgba(255,255,255,.45) 100%);
+  background:
+    radial-gradient(ellipse 620px 200px at 700px 330px,
+      rgba(255,255,255,.72), rgba(255,255,255,0) 72%),
+    linear-gradient(90deg,
+      rgba(255,255,255,0)   0%,
+      rgba(255,255,255,0)   24%,
+      rgba(255,255,255,.55) 42%,
+      rgba(255,255,255,.72) 62%,
+      rgba(255,255,255,.55) 100%);
 }
 
 /* heroテキスト：left 456px / ページ上端から132px（hero内では44px） */
@@ -89,8 +91,8 @@ img{display:block}
 .badges{position:absolute;left:456px;top:232px;z-index:2;display:flex;gap:38px}
 .badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
 .badge-icon{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(20,40,60,.12)}
-.badge-label{font-size:13px;font-weight:800}
-.badge-sub{font-size:10px;color:var(--text-gray)}
+.badge-label{font-size:13px;font-weight:800;text-shadow:0 0 10px rgba(255,255,255,.95),0 0 20px rgba(255,255,255,.8)}
+.badge-sub{font-size:10px;color:#4a5867;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 16px rgba(255,255,255,.85)}
 
 /* 予約カード：right 64px / top 76px / 336x276（absolute） */
 .booking-card{
