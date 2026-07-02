@@ -2,312 +2,171 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=1536">
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
+<!--
+  ============================================================
+  PC版 1536px 固定カンプ（レスポンシブ無し・@media 未使用）
+  スマホ版は別途作成する。指定の固定値で実装：
+  header 88 / hero 386 / heroテキスト left456 top132 /
+  予約カード right64 top76 336x276 / カード height172 gap12 radius6 /
+  下段 584/484/352 gap16 / footer 56
+  ============================================================
+-->
 <style>
-:root {
-  --navy: #15314f;
-  --navy-dark: #0c2138;
-  --yellow: #f0b429;
-  --yellow-dark: #d9960f;
-  --bg: #f5f6f8;
-  --white: #ffffff;
-  --text-gray: #6b7785;
-  --border: #dde2e8;
-  --r-lg: 14px;
-  --r-md: 10px;
+:root{
+  --navy:#15314f;
+  --navy-dark:#0c2138;
+  --yellow:#f0b429;
+  --yellow-dark:#d9960f;
+  --bg:#f5f6f8;
+  --white:#ffffff;
+  --text-gray:#6b7785;
+  --border:#dde2e8;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:#e8eaed;color:var(--navy);-webkit-font-smoothing:antialiased}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  background:#ffffff;color:var(--navy);-webkit-font-smoothing:antialiased;
+}
 a{text-decoration:none;color:inherit}
-img{max-width:100%;display:block}
-.page{max-width:1280px;margin:0 auto;background:var(--white);overflow:hidden}
+img{display:block}
+
+/* ページ全体：1536px 固定・中央寄せしない */
+.page{width:1536px;background:#ffffff;position:relative;overflow:hidden}
 
 /* ==============================
-   HEADER
+   HEADER  高さ88px
 ============================== */
 .site-header{
-  height:68px;padding:0 18px;
+  width:1536px;height:88px;padding:0 40px;
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--white);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;
+  background:#fff;border-bottom:1px solid var(--border);
 }
-.brand{display:flex;align-items:center;gap:9px}
-.brand-logo{width:42px;height:42px;border-radius:50%;object-fit:contain;border:1px solid var(--border)}
-.brand-name{font-weight:800;font-size:15px;line-height:1.2}
-.brand-sub{font-size:9px;color:var(--text-gray);letter-spacing:.08em;margin-top:2px}
-.menu-btn{border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--navy);font-size:10px;font-weight:700;padding:4px}
-.menu-btn .bars{display:flex;flex-direction:column;gap:4px}
-.menu-btn .bar{width:22px;height:2px;background:var(--navy);border-radius:2px;display:block}
-.desktop-nav{display:none}
-.header-cta-btn{display:none}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-logo{width:54px;height:54px;border-radius:50%;object-fit:contain;border:1px solid var(--border)}
+.brand-name{font-weight:800;font-size:20px;line-height:1.2}
+.brand-sub{font-size:10px;color:var(--text-gray);letter-spacing:.08em;margin-top:3px}
 
-.global-nav{position:absolute;top:68px;left:0;right:0;background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 12px 24px rgba(20,40,60,.1);display:none;flex-direction:column;z-index:99}
-.global-nav.open{display:flex}
-.global-nav a{padding:14px 20px;font-size:14px;font-weight:600;border-bottom:1px solid var(--border)}
-.global-nav a:last-child{border-bottom:none}
+.desktop-nav{display:flex;align-items:center;gap:30px}
+.desktop-nav a{text-align:center;color:var(--navy)}
+.desktop-nav a .en{display:block;font-size:14px;font-weight:700;letter-spacing:.04em}
+.desktop-nav a .jp{display:block;font-size:10px;color:var(--text-gray);font-weight:500;margin-top:3px}
+
+.header-cta-btn{
+  display:flex;align-items:center;gap:10px;
+  background:var(--navy);color:#fff;border-radius:10px;
+  padding:13px 24px;font-weight:800;font-size:15px;
+}
+.header-cta-btn .cta-sub{display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px}
 
 /* ==============================
-   HERO — mobile
+   HERO  高さ386px
 ============================== */
-.hero{position:relative}
+.hero{position:relative;width:1536px;height:386px;overflow:hidden}
 
 .hero-photo{
-  width:100%;height:340px;
-  object-fit:cover;object-position:center 8%;
-  display:block;
+  width:1536px;height:386px;
+  object-fit:cover;object-position:center 14%;
+  transform:scaleX(-1);           /* 人物を左側（0〜360px範囲）に配置 */
 }
 .hero-overlay{
-  position:absolute;top:0;left:0;right:0;height:340px;
-  background:linear-gradient(160deg,rgba(8,18,46,.58) 0%,rgba(8,18,46,.35) 65%,rgba(8,18,46,.15) 100%);
-  z-index:1;
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0)   0%,
+    rgba(255,255,255,0)   22%,
+    rgba(255,255,255,.50) 38%,
+    rgba(255,255,255,.90) 52%,
+    rgba(255,255,255,1)   66%);
 }
-.hero-content{
-  position:absolute;top:0;left:0;right:0;height:340px;
-  z-index:2;display:flex;flex-direction:column;justify-content:center;
-  padding:20px 18px;color:#fff;
-}
-.hero-title{font-size:26px;font-weight:800;line-height:1.3;margin-bottom:6px;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.2)}
-.hero-sub{font-size:13.5px;font-weight:700;color:rgba(255,255,255,.95);margin-bottom:5px}
-.hero-desc{font-size:11.5px;color:rgba(255,255,255,.8);line-height:1.55}
 
-/* ==============================
-   BOOKING CARD — mobile
-============================== */
+/* heroテキスト：left 456px / top 132px（absolute） */
+.hero-content{position:absolute;left:456px;top:132px;width:620px;z-index:2;color:var(--navy)}
+.hero-title{font-size:36px;font-weight:800;line-height:1.32;margin-bottom:10px;text-shadow:0 0 18px rgba(255,255,255,.85)}
+.hero-desc{font-size:14px;color:var(--text-gray);line-height:1.6;text-shadow:0 0 12px rgba(255,255,255,.9)}
+
+/* バッジ（heroテキスト直下・left 456px） */
+.badges{position:absolute;left:456px;top:280px;z-index:2;display:flex;gap:28px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px}
+.badge-icon{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.94);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(20,40,60,.08)}
+.badge-label{font-size:12px;font-weight:800}
+.badge-sub{font-size:10px;color:var(--text-gray)}
+
+/* 予約カード：right 64px / top 76px / 336x276（absolute） */
 .booking-card{
-  position:relative;z-index:10;
-  margin:-70px 14px 0;
-  background:var(--white);border-radius:var(--r-lg);
-  box-shadow:0 12px 32px rgba(20,40,60,.16);
-  padding:16px 16px;
+  position:absolute;right:64px;top:76px;width:336px;height:276px;
+  background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(20,40,60,.18);
+  padding:22px;z-index:3;display:flex;flex-direction:column;
 }
-.booking-card-title{text-align:center;font-weight:800;font-size:13.5px;margin-bottom:12px;color:var(--navy)}
-.booking-steps{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:12px}
-.booking-step{display:flex;flex-direction:column;align-items:center;gap:4px}
-.booking-step-icon{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;background:#fff}
+.booking-card-title{text-align:center;font-weight:800;font-size:15px;margin-bottom:16px;color:var(--navy)}
+.booking-steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
+.booking-step{display:flex;flex-direction:column;align-items:center;gap:5px}
+.booking-step-icon{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;background:#fff}
 .booking-step-label{font-size:10px;font-weight:700;color:var(--navy)}
-.booking-step-chevron{color:#bbb;font-size:14px;font-weight:700;line-height:1}
-
-.btn{display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;padding:13px 18px;font-weight:800;font-size:13.5px;cursor:pointer}
-.btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:8px}
-.btn-primary:hover{background:var(--yellow-dark)}
+.booking-step-chevron{color:#bbb;font-size:15px;font-weight:700;line-height:1}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 18px;font-weight:800;font-size:14px;cursor:pointer}
+.btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:9px}
 .btn-secondary{border:1.5px solid var(--border);color:var(--navy);background:#fff}
 
 /* ==============================
-   BADGES — mobile
-============================== */
-.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:16px 14px 4px}
-.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}
-.badge-icon{width:50px;height:50px;border-radius:50%;border:1.5px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(20,40,60,.07)}
-.badge-label{font-size:10px;font-weight:800;line-height:1.3}
-.badge-sub{font-size:9px;color:var(--text-gray)}
-
-.badge-dots{display:flex;justify-content:center;gap:5px;padding:8px 0 18px}
-.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
-.badge-dot.active{background:var(--navy);width:16px;border-radius:3px}
-
-/* ==============================
    SERVICE CARDS
+   container padding40 / repeat(4,1fr) / gap12 / height172 / radius6
 ============================== */
-.content-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:8px;padding:0 14px 22px;
-}
+.content-grid{width:1536px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:40px}
 .content-card{
-  position:relative;min-height:150px;
-  border-radius:var(--r-md);overflow:hidden;
+  position:relative;height:172px;border-radius:6px;overflow:hidden;
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding:12px;background-size:cover;background-position:center;color:#fff;
-  text-decoration:none;
+  padding:16px;background-size:cover;background-position:center;color:#fff;
 }
 .content-card::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,46,.05) 25%,rgba(8,18,46,.80) 100%)}
 .content-card>*{position:relative;z-index:1}
-.content-card-title{font-weight:800;font-size:14px;margin-bottom:3px}
-.content-card-desc{font-size:10.5px;opacity:.9;margin-bottom:8px;line-height:1.4}
-.pill-btn{align-self:flex-start;background:rgba(255,255,255,.94);color:var(--navy);font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:999px}
+.content-card-title{font-weight:800;font-size:17px;margin-bottom:4px}
+.content-card-desc{font-size:12px;opacity:.9;margin-bottom:10px;line-height:1.4}
+.pill-btn{align-self:flex-start;background:rgba(255,255,255,.94);color:var(--navy);font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px}
 
 /* ==============================
    SECTION HEAD
 ============================== */
-.sec-kicker{font-size:11px;color:var(--yellow-dark);font-weight:800;margin-bottom:4px}
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.sec-head-title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.sec-kicker{font-size:12px;color:var(--yellow-dark);font-weight:800;margin-bottom:5px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sec-head-title{font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px}
 .sec-head-more{font-size:12px;color:var(--text-gray);font-weight:700}
 
 /* ==============================
-   おすすめ情報
+   INFO ROW  左584 / 中484 / 右352 / gap16
 ============================== */
-.info-sec{padding:22px 14px 0}
-.rec-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:22px;scrollbar-width:none}
-.rec-scroll::-webkit-scrollbar{display:none}
-.rec-card{flex:0 0 140px;text-decoration:none;color:var(--navy)}
-.rec-photo{width:140px;height:98px;border-radius:var(--r-md);object-fit:cover;margin-bottom:6px;background:var(--bg)}
-.rec-title{font-size:12px;font-weight:800}
-.rec-sub{font-size:10px;color:var(--text-gray)}
+.info-row{width:1536px;display:flex;gap:16px;padding:0 40px 24px}
+.info-sec{width:584px}
+.reviews-sec{width:484px}
+.access-sec{width:352px}
 
-/* ==============================
-   お客様の声 (PC only)
-============================== */
-.reviews-sec{display:none}
-.review-card{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border-radius:var(--r-md);padding:10px 12px;margin-bottom:6px}
-.review-avatar{width:32px;height:32px;border-radius:50%;background:#c8cdd5;flex-shrink:0}
+/* おすすめ情報 */
+.rec-scroll{display:flex;gap:12px}
+.rec-card{flex:1;min-width:0;color:var(--navy)}
+.rec-photo{width:100%;height:62px;border-radius:8px;object-fit:cover;margin-bottom:6px;background:var(--bg)}
+.rec-title{font-size:13px;font-weight:800}
+.rec-sub{font-size:10px;color:var(--text-gray);line-height:1.4}
+
+/* お客様の声 */
+.review-card{display:flex;align-items:flex-start;gap:12px;background:var(--bg);border-radius:8px;padding:11px 16px;margin-bottom:7px}
+.review-avatar{width:34px;height:34px;border-radius:50%;background:#c8cdd5;flex-shrink:0}
 .review-body{flex:1}
-.review-text{font-size:11.5px;font-weight:600;margin-bottom:3px}
-.review-stars{color:var(--yellow);font-size:12px}
+.review-text{font-size:13px;font-weight:600;margin-bottom:4px}
+.review-stars{color:var(--yellow);font-size:13px}
+
+/* アクセス */
+.access-inner{background:var(--bg);border-radius:8px;padding:12px}
+.access-photo{width:100%;height:44px;object-fit:cover;border-radius:8px;margin-bottom:7px}
+.access-row{display:flex;align-items:flex-start;gap:7px;font-size:12px;margin-bottom:4px}
+.access-btn{display:block;text-align:center;border:1.5px solid var(--border);border-radius:999px;padding:9px;font-size:12px;font-weight:800;margin-top:9px;background:#fff}
 
 /* ==============================
-   アクセス (PC only)
+   FOOTER (UTILITY BAR)  高さ56px
 ============================== */
-.access-sec{display:none}
-.access-inner{background:var(--bg);border-radius:var(--r-md);padding:12px}
-.access-photo{width:100%;height:80px;object-fit:cover;border-radius:var(--r-md);margin-bottom:10px}
-.access-row{display:flex;align-items:flex-start;gap:6px;font-size:11px;margin-bottom:4px}
-.access-btn{display:block;text-align:center;border:1.5px solid var(--border);border-radius:999px;padding:9px;font-size:11.5px;font-weight:800;margin-top:10px;background:#fff}
-
-/* ==============================
-   MOBILE FOOTER CARD
-============================== */
-.footer-mobile{background:var(--bg);margin:4px 14px 24px;border-radius:var(--r-lg);padding:16px}
-.footer-top{display:flex;gap:12px;align-items:flex-start}
-.footer-shop-photo{width:70px;height:70px;border-radius:var(--r-md);object-fit:cover;flex-shrink:0}
-.footer-info{font-size:11px;color:var(--navy)}
-.footer-info-row{display:flex;align-items:flex-start;gap:5px;margin-bottom:4px}
-.footer-actions{display:flex;gap:8px;margin-top:12px}
-.footer-action-btn{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:var(--r-md);padding:11px 6px;font-size:11px;font-weight:800;color:var(--navy);background:#fff;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
-
-/* ==============================
-   UTILITY BAR (PC only)
-============================== */
-.utility-bar{display:none;background:var(--navy);color:#fff;padding:14px 32px;align-items:center;justify-content:space-between;font-size:12.5px}
-.utility-ig{display:flex;align-items:center;gap:8px;font-weight:700}
-.utility-links{display:flex;gap:22px;opacity:.85}
-
-/* ==============================
-   DESKTOP 980px+
-============================== */
-@media(min-width:980px){
-
-  /* HEADER */
-  .site-header{height:62px;padding:0 32px}
-  .brand-logo{width:44px;height:44px}
-  .brand-name{font-size:17px}
-  .menu-btn{display:none}
-  .global-nav{display:none!important}
-
-  .desktop-nav{display:flex;align-items:center;gap:22px}
-  .desktop-nav a{text-align:center;font-size:11px;font-weight:700;color:var(--navy)}
-  .desktop-nav a .en{display:block;font-size:13px;letter-spacing:.04em}
-  .desktop-nav a .jp{display:block;font-size:10px;color:var(--text-gray);font-weight:500;margin-top:1px}
-
-  .header-cta-btn{
-    display:flex;align-items:center;gap:9px;
-    background:var(--navy);color:#fff;
-    border-radius:10px;padding:9px 18px;
-    font-weight:800;font-size:13px;
-  }
-  .header-cta-btn .cta-sub{display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:1px}
-
-  /* HERO — PC grid */
-  .hero{
-    display:grid;
-    grid-template-columns:1fr 300px;
-    grid-template-rows:1fr auto;
-    min-height:316px;
-    position:relative;overflow:hidden;
-    margin:0;border-radius:0;
-  }
-
-  .hero-photo{
-    position:absolute;inset:0;
-    width:100%;height:100%;
-    object-fit:cover;object-position:center 8%;
-    transform:scaleX(-1);
-    border-radius:0;
-  }
-
-  /* gradient: LEFT=transparent (photo shows clearly), CENTER=fades, RIGHT=white (booking card) */
-  .hero-overlay{
-    position:absolute;inset:0;height:auto;
-    background:linear-gradient(90deg,
-      rgba(255,255,255,0)   0%,
-      rgba(255,255,255,0)   36%,
-      rgba(255,255,255,.55) 55%,
-      rgba(255,255,255,.90) 68%,
-      rgba(255,255,255,.98) 75%,
-      rgba(255,255,255,1)   80%);
-    z-index:1;
-  }
-
-  .hero-content{
-    grid-column:1;grid-row:1;
-    position:relative;z-index:2;
-    padding:0 24px 0 36%;
-    display:flex;flex-direction:column;justify-content:center;
-    color:var(--navy);height:auto;
-  }
-
-  .hero-title{font-size:34px;color:var(--navy);text-shadow:0 0 20px rgba(255,255,255,.9),0 0 40px rgba(255,255,255,.7);margin-bottom:10px;line-height:1.35}
-  .hero-sub{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px}
-  .hero-desc{font-size:13px;color:var(--text-gray);text-shadow:0 0 14px rgba(255,255,255,.9)}
-
-  /* BOOKING CARD — PC right column */
-  .booking-card{
-    grid-column:2;grid-row:1/3;
-    position:relative;z-index:2;
-    align-self:center;
-    margin:22px 24px 22px 0;
-    border-radius:var(--r-lg);
-    padding:20px 18px;
-    box-shadow:0 14px 40px rgba(20,40,60,.2);
-  }
-  .booking-card-title{font-size:14px;margin-bottom:14px}
-  .booking-step-icon{width:38px;height:38px}
-
-  /* BADGES — PC row 2, left */
-  .badges{
-    grid-column:1;grid-row:2;
-    position:relative;z-index:2;
-    display:grid;grid-template-columns:repeat(4,max-content);
-    gap:22px;padding:0 0 24px 36%;
-    background:transparent;
-  }
-  .badge-icon{width:56px;height:56px;background:rgba(255,255,255,.92)}
-  .badge-label{font-size:11.5px}
-  .badge-sub{font-size:10px}
-  .badge-dots{display:none}
-
-  /* SERVICE CARDS — 4 columns */
-  .content-grid{
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;padding:10px 28px 10px;
-  }
-  .content-card{min-height:140px;border-radius:var(--r-lg);padding:14px}
-  .content-card-title{font-size:16px;margin-bottom:4px}
-  .content-card-desc{font-size:11.5px;margin-bottom:10px}
-  .pill-btn{font-size:11px;padding:5px 12px}
-
-  /* INFO ROW — 3 columns */
-  .info-row{
-    display:grid;
-    grid-template-columns:1.35fr 1fr 0.82fr;
-    gap:22px;
-    padding:0 28px 12px;
-    align-items:start;
-  }
-  .info-sec{padding:0}
-  .info-sec .sec-head{margin-bottom:10px}
-  .rec-scroll{overflow:visible;flex-wrap:wrap;padding:0;gap:8px}
-  .rec-card{flex:1 1 30%;min-width:0}
-  .rec-photo{width:100%;height:88px}
-  .rec-title{font-size:11.5px}
-  .rec-sub{font-size:10px}
-
-  .reviews-sec{display:block}
-  .access-sec{display:block}
-
-  .footer-mobile{display:none}
-  .utility-bar{display:flex}
-}
+.utility-bar{width:1536px;height:56px;background:var(--navy);color:#fff;padding:0 40px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.utility-ig{display:flex;align-items:center;gap:9px;font-weight:700}
+.utility-links{display:flex;gap:24px;opacity:.85}
+.utility-links a{display:flex;align-items:center}
 </style>
 </head>
 <body>
@@ -336,22 +195,7 @@ img{max-width:100%;display:block}
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
     <span>予約する<span class="cta-sub">WEB予約はこちら &rsaquo;</span></span>
   </a>
-
-  <button class="menu-btn" onclick="toggleNav()">
-    <span class="bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
-    メニュー
-  </button>
 </header>
-
-<nav class="global-nav" id="global-nav">
-  <a href="reserve.html">今すぐ予約する</a>
-  <a href="reserve-lookup.html">予約の確認・変更</a>
-  <a href="pages/catalog.html">板カタログ</a>
-  <a href="pages/beginner-guide.html">初心者ガイド</a>
-  <a href="pages/pricing.html">レンタル料金</a>
-  <a href="pages/waxing.html">ワクシングサービス</a>
-  <a href="pages/access.html">アクセス</a>
-</nav>
 
 <!-- ▼ HERO -->
 <section class="hero">
@@ -399,41 +243,34 @@ img{max-width:100%;display:block}
   <div class="badges">
     <div class="badge">
       <div class="badge-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
       </div>
       <div class="badge-label">手ぶらでOK</div>
       <div class="badge-sub">ウェアも充実</div>
     </div>
     <div class="badge">
       <div class="badge-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6"/></svg>
       </div>
       <div class="badge-label">WEB予約で</div>
       <div class="badge-sub">スムーズ受取</div>
     </div>
     <div class="badge">
       <div class="badge-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
       </div>
       <div class="badge-label">高品質な板</div>
       <div class="badge-sub">メンテナンス済み</div>
     </div>
     <div class="badge">
       <div class="badge-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
       </div>
       <div class="badge-label">温泉街すぐそば</div>
       <div class="badge-sub">帰りに温泉も！</div>
     </div>
   </div>
 </section>
-
-<!-- バッジドット（モバイルのみ） -->
-<div class="badge-dots">
-  <span class="badge-dot active"></span>
-  <span class="badge-dot"></span>
-  <span class="badge-dot"></span>
-</div>
 
 <!-- ▼ SERVICE CARDS -->
 <section class="content-grid">
@@ -467,7 +304,7 @@ img{max-width:100%;display:block}
     <p class="sec-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
     <div class="sec-head">
       <div class="sec-head-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="2"><path d="M3 20L9 8L13 14L16 9L21 20H3Z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="2"><path d="M3 20L9 8L13 14L16 9L21 20H3Z"/></svg>
         おすすめ情報
       </div>
       <a class="sec-head-more" href="#">もっと見る &rsaquo;</a>
@@ -510,13 +347,6 @@ img{max-width:100%;display:block}
         <div class="review-stars">★★★★★</div>
       </div>
     </div>
-    <div class="review-card">
-      <div class="review-avatar"></div>
-      <div class="review-body">
-        <p class="review-text">温泉街のすぐそばで便利！また利用したいです。</p>
-        <div class="review-stars">★★★★★</div>
-      </div>
-    </div>
   </div>
 
   <!-- アクセス -->
@@ -534,29 +364,7 @@ img{max-width:100%;display:block}
   </div>
 </div>
 
-<!-- ▼ MOBILE FOOTER CARD -->
-<footer class="footer-mobile">
-  <div class="footer-top">
-    <img class="footer-shop-photo" src="assets/img/shop-thumb.jpg" alt="店舗写真">
-    <div class="footer-info">
-      <div class="footer-info-row">📍 宮城県刈田郡蔵王町遠刈田温泉中町16</div>
-      <div class="footer-info-row">🕒 営業時間　8:30〜18:00（不定休）</div>
-      <div class="footer-info-row">📞 TEL　070-2472-3633</div>
-    </div>
-  </div>
-  <div class="footer-actions">
-    <a class="footer-action-btn" href="https://instagram.com" target="_blank" rel="noopener">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="#15314f"/></svg>
-      Instagramを見る
-    </a>
-    <a class="footer-action-btn" href="pages/access.html">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-      アクセス
-    </a>
-  </div>
-</footer>
-
-<!-- ▼ UTILITY BAR (PC) -->
+<!-- ▼ FOOTER (UTILITY BAR) -->
 <div class="utility-bar">
   <span class="utility-ig">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white"/></svg>
@@ -571,9 +379,6 @@ img{max-width:100%;display:block}
 
 </div><!-- .page -->
 
-<script>
-function toggleNav(){document.getElementById("global-nav").classList.toggle("open")}
-</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="home";</script>
