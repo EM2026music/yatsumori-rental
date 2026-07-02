@@ -48,6 +48,9 @@
       rebindNavToggle();
     } catch (e) {
       // タイムアウト・通信エラー等：何もしない＝静的HTMLのまま表示され続ける
+    } finally {
+      // エディタ側が「差し替えチェック完了」を検知するためのフラグ
+      window.__yatsumoriPageReady = true;
     }
   }
 

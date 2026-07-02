@@ -52,9 +52,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 
 /* ── Canvas ── */
 #ed-canvas { flex: 1; min-width: 0; background: #1e293b; display: flex; flex-direction: column; align-items: center; overflow: hidden; position: relative; }
-#canvas-scroller { flex: 1; width: 100%; overflow: auto; display: flex; justify-content: center; padding: 24px; }
-#canvas-wrapper { width: 100%; max-width: 1280px; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.5); background: #fff; transition: max-width .3s ease; position: relative; }
-#page-iframe { width: 100%; border: none; display: block; min-height: 600px; }
+#canvas-scroller { flex: 1; width: 100%; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 24px; }
+/* ページ本体は1536px固定 → transform:scaleで縮小表示（レイアウトは崩さない） */
+#canvas-wrapper { flex-shrink: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.5); background: #fff; position: relative; }
+#page-iframe { width: 1536px; border: none; display: block; min-height: 600px; transform-origin: top left; }
 
 /* Loading overlay */
 #canvas-loading { position: absolute; inset: 0; background: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: rgba(255,255,255,.4); font-size: 13px; z-index: 10; border-radius: 8px; }
@@ -107,8 +108,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <button class="icon-btn" id="redo-btn" title="やり直す (Ctrl+Y)" disabled>↪</button>
   <div class="top-space"></div>
   <div class="dev-toggle">
-    <button id="dev-desktop" class="active">🖥 PC</button>
-    <button id="dev-mobile">📱 スマホ</button>
+    <button id="zoom-fit" class="active">🔍 全体表示</button>
+    <button id="zoom-100">100%</button>
   </div>
   <div class="top-space"></div>
   <span id="ed-status"></span>
@@ -187,6 +188,40 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
         </div>
       </div>
 
+      <!-- Block props (パワポ風・自由配置ブロック) -->
+      <div id="block-props" style="display:none">
+        <div class="sel-tag" id="block-tag">ブロック</div>
+        <div class="prop-group">
+          <div class="prop-label">位置</div>
+          <div class="prop-row" style="margin-bottom:6px">
+            <span class="prop-unit" style="width:14px">X</span>
+            <input type="number" id="block-x-inp" class="prop-input" step="1">
+            <span class="prop-unit">px</span>
+          </div>
+          <div class="prop-row">
+            <span class="prop-unit" style="width:14px">Y</span>
+            <input type="number" id="block-y-inp" class="prop-input" step="1">
+            <span class="prop-unit">px</span>
+          </div>
+        </div>
+        <div class="prop-group">
+          <div class="prop-label">サイズ</div>
+          <div class="prop-row" style="margin-bottom:6px">
+            <span class="prop-unit" style="width:14px">W</span>
+            <input type="number" id="block-w-inp" class="prop-input" min="60" step="1">
+            <span class="prop-unit">px</span>
+          </div>
+          <div class="prop-row" id="block-h-row">
+            <span class="prop-unit" style="width:14px">H</span>
+            <input type="number" id="block-h-inp" class="prop-input" min="60" step="1">
+            <span class="prop-unit">px</span>
+          </div>
+        </div>
+        <div class="prop-group" style="font-size:11px;color:rgba(255,255,255,.35);line-height:1.7">
+          ドラッグで移動<br>矢印キーで1px微調整（Shift=10px）<br>文字はダブルクリックで編集
+        </div>
+      </div>
+
       <!-- Image props -->
       <div id="image-props" style="display:none">
         <div class="sel-tag">画像</div>
@@ -244,11 +279,26 @@ function toast(msg, type = "info") {
 }
 function setStatus(msg) { document.getElementById("ed-status").textContent = msg; }
 
+// ── クリーンHTML取得（エディタ用の目印・ハンドル類を除いた状態） ──
+function getCleanHTML() {
+  const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
+  const clone = root.cloneNode(true);
+  clone.querySelectorAll("._ed_handle,._ed_rs,._ed_guide").forEach(n => n.remove());
+  clone.querySelectorAll("[data-ed],[data-ed-img],[contenteditable]").forEach(el => {
+    el.removeAttribute("data-ed");
+    el.removeAttribute("data-ed-img");
+    el.removeAttribute("contenteditable");
+    el.classList.remove("ed-sel", "_ed_sec");
+    if (el.getAttribute("class") === "") el.removeAttribute("class");
+  });
+  clone.querySelectorAll("._ed_sec").forEach(el => el.classList.remove("_ed_sec"));
+  return clone.innerHTML;
+}
+
 // ── Undo / Redo ──
 function snapshotForUndo() {
   if (!iframeDoc) return;
-  const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
-  const snap = { html: root.innerHTML };
+  const snap = { html: getCleanHTML() };
   undoStack.push(snap);
   if (undoStack.length > 60) undoStack.shift();
   redoStack = [];
@@ -262,6 +312,7 @@ function refreshUndoButtons() {
 }
 
 function applySnapshot(snap) {
+  deselect();
   const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
   root.innerHTML = snap.html;
   reattach();
@@ -289,25 +340,43 @@ document.getElementById("redo-btn").addEventListener("click", doRedo);
 // ── Load iframe ──
 const iframe = document.getElementById("page-iframe");
 
+// ── ズーム表示（ページは1536px固定 → scaleで縮小して全体を見せる） ──
+const PAGE_W = 1536;
+let zoomMode = "fit"; // "fit" | "100"
+let zoomScale = 1;
+
+function applyZoom() {
+  const scroller = document.getElementById("canvas-scroller");
+  const wrapper = document.getElementById("canvas-wrapper");
+  const avail = scroller.clientWidth - 48;
+  zoomScale = zoomMode === "fit" ? Math.min(1, avail / PAGE_W) : 1;
+  iframe.style.transform = `scale(${zoomScale})`;
+  wrapper.style.width = Math.round(PAGE_W * zoomScale) + "px";
+  let h = 600;
+  try { h = Math.max(iframeDoc.documentElement.scrollHeight, 600); } catch (e) {}
+  iframe.style.height = h + "px";
+  wrapper.style.height = Math.round(h * zoomScale) + "px";
+}
+
 // Auto-resize iframe height to content
 function resizeIframe() {
   if (!iframeDoc) return;
-  try {
-    const h = iframeDoc.documentElement.scrollHeight;
-    iframe.style.height = Math.max(h, 600) + "px";
-  } catch(e) {}
+  applyZoom();
 }
+
+window.addEventListener("resize", () => { if (iframeDoc) applyZoom(); });
 
 iframe.addEventListener("load", () => {
   iframeDoc = iframe.contentDocument;
   iframeWin = iframe.contentWindow;
 
-  // Disable pageRenderer to avoid overwriting while editing
-  if (iframeWin.YATSUMORI_EDITOR_MODE !== undefined) return;
-  Object.defineProperty(iframeWin, "YATSUMORI_EDITOR_MODE", { value: true });
-
-  // Wait for any dynamic content to settle
-  setTimeout(() => {
+  // pageRenderer（公開済み内容の差し替え）が終わるのを待ってから編集を開始する。
+  // 途中で innerHTML が置き換わるとハンドラが消えるため。最大5.5秒でタイムアウト。
+  const t0 = Date.now();
+  (function waitPageReady() {
+    if (!iframeWin.__yatsumoriPageReady && Date.now() - t0 < 5500) {
+      return setTimeout(waitPageReady, 120);
+    }
     document.getElementById("canvas-loading").style.display = "none";
     resizeIframe();
     injectEditingCSS();
@@ -316,8 +385,7 @@ iframe.addEventListener("load", () => {
     injectSortable();
 
     // Initial undo snapshot
-    const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
-    undoStack = [{ html: root.innerHTML }];
+    undoStack = [{ html: getCleanHTML() }];
     refreshUndoButtons();
 
     // Load last published time
@@ -330,7 +398,7 @@ iframe.addEventListener("load", () => {
       }
     }).catch(() => {});
 
-  }, 800);
+  })();
 });
 
 iframe.src = "../index.html";
@@ -365,6 +433,19 @@ function injectEditingCSS() {
       padding: 6px 14px !important; border-radius: 6px !important;
       font-size: 12px !important; white-space: nowrap !important; z-index: 9999 !important;
     }
+    /* 自由配置ブロック（パワポ風） */
+    [data-ed-block] { cursor: move !important; }
+    [data-ed-block]:hover { outline: 1.5px dashed rgba(59,130,246,.55) !important; outline-offset: 3px !important; }
+    [data-ed-block].ed-sel { outline: 2px solid #3b82f6 !important; outline-offset: 3px !important; }
+    ._ed_rs { position: absolute !important; right: -7px !important; bottom: -7px !important;
+      width: 14px !important; height: 14px !important; background: #fff !important;
+      border: 2px solid #3b82f6 !important; border-radius: 3px !important;
+      cursor: nwse-resize !important; z-index: 9999 !important; }
+    ._ed_guide_v { position: absolute !important; top: 0 !important; bottom: 0 !important;
+      width: 1px !important; background: #f43f5e !important; z-index: 9998 !important; pointer-events: none !important; }
+    ._ed_guide_h { position: absolute !important; left: 0 !important; right: 0 !important;
+      height: 1px !important; background: #f43f5e !important; z-index: 9998 !important; pointer-events: none !important; }
+
     /* Section drag handle */
     ._ed_sec { position: relative !important; }
     ._ed_handle { position: absolute !important; left: 8px !important; top: 8px !important;
@@ -383,29 +464,41 @@ function injectEditingCSS() {
 }
 
 // ── Attach edit handlers ──
+// 新1536px固定デザインのテキスト要素
 const TEXT_SEL = [
   "h1","h2","h3","h4","h5","p",
-  ".hero-title",".hero-text",".hero-desc",
-  ".badge-title",".badge-sub",
+  ".brand-name",".brand-sub",
+  ".desktop-nav a",".header-cta-btn > span",
+  ".hero-title",".hero-desc",
+  ".badge-label",".badge-sub",
   ".booking-card-title",".booking-step-label",
-  ".content-card-title",".content-card-desc",
+  ".content-card-title",".content-card-desc",".pill-btn",
+  ".sec-kicker",".sec-head-title",".sec-head-more",
+  ".rec-title",".rec-sub",
   ".review-text",".review-stars",
-  ".footer-info-row",
-  ".recommend-title",".recommend-sub",
-  ".pill-btn",".footer-action-btn",
+  ".access-row",".access-btn",
+  ".utility-ig",".utility-links a",
   "a.btn",
 ].join(",");
+
+// パワポ風に自由移動できるブロック（hero内のabsolute配置要素）
+const DRAG_SEL = ".hero-content,.booking-card,.badges";
+const DRAG_LABEL = { "hero-content": "キャッチコピー", "booking-card": "予約カード", "badges": "特徴バッジ" };
 
 function attachEditHandlers() {
   if (!iframeDoc) return;
 
-  // Text
+  // Text: 自由配置ブロック内はダブルクリックで編集（シングルクリックはブロック選択）
   iframeDoc.querySelectorAll(TEXT_SEL).forEach(el => {
     if (el.closest("[data-ed-img]")) return;
     el.setAttribute("data-ed", "text");
-    el._ed_handler = el._ed_handler || ((e) => { e.stopPropagation(); handleTextClick(el); });
-    el.removeEventListener("click", el._ed_handler);
-    el.addEventListener("click", el._ed_handler);
+    const inDragBlock = !!el.closest(DRAG_SEL);
+    if (el._ed_handler) {
+      el.removeEventListener("click", el._ed_handler);
+      el.removeEventListener("dblclick", el._ed_handler);
+    }
+    el._ed_handler = (e) => { e.stopPropagation(); handleTextClick(el); };
+    el.addEventListener(inDragBlock ? "dblclick" : "click", el._ed_handler);
   });
 
   // Images
@@ -416,15 +509,29 @@ function attachEditHandlers() {
     el.addEventListener("click", el._ed_img_handler);
   });
 
+  // 自由配置ブロック
+  iframeDoc.querySelectorAll(DRAG_SEL).forEach(el => el.setAttribute("data-ed-block", ""));
+  attachBlockDrag();
+
+  if (iframeDoc._ed_global_attached) return;
+  iframeDoc._ed_global_attached = true;
+
+  // エディタ内ではリンク遷移を全て無効化（クリック編集を優先）
+  iframeDoc.addEventListener("click", (e) => {
+    const a = e.target.closest("a");
+    if (a) e.preventDefault();
+  }, true);
+
   // Click elsewhere to deselect
   iframeDoc.addEventListener("click", (e) => {
-    if (!e.target.hasAttribute("data-ed") && !e.target.hasAttribute("data-ed-img")) deselect();
+    if (!e.target.closest("[data-ed]") && !e.target.closest("[data-ed-img]") && !e.target.closest("[data-ed-block]")) deselect();
   }, { capture: false });
 
-  // Escape to deselect
+  // Escape to deselect / 矢印キーでブロック微調整
   iframeDoc.addEventListener("keydown", (e) => {
     if (e.key === "Escape") deselect();
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); handlePublish(); }
+    handleArrowNudge(e);
   });
 }
 
@@ -505,30 +612,228 @@ document.getElementById("img-width-inp").addEventListener("change", (e) => {
   activeImgEl.style.width = e.target.value + "px";
 });
 
+// ================================================================
+// パワポ風 自由配置ブロック（ドラッグ移動・スナップ・リサイズ）
+// ================================================================
+let activeBlockEl = null;
+let dragState = null;
+let resizeState = null;
+let nudgeTimer = null;
+
+function heroEl() { return iframeDoc.querySelector(".hero"); }
+
+// ブロックの現在位置（.hero基準のleft/top）を取得
+function blockRect(el) {
+  const hb = heroEl().getBoundingClientRect();
+  const bb = el.getBoundingClientRect();
+  return { left: bb.left - hb.left, top: bb.top - hb.top, width: bb.width, height: bb.height };
+}
+
+function setBlockPos(el, left, top) {
+  el.style.left = Math.round(left) + "px";
+  el.style.top = Math.round(top) + "px";
+  el.style.right = "auto"; // booking-cardはright基準なのでleft基準に切替
+}
+
+// ── スナップ（他ブロックの端/中央、heroの端/中央に吸着） ──
+const SNAP_TH = 6;
+function computeSnapTargets(exceptEl) {
+  const hero = heroEl();
+  const hw = hero.offsetWidth, hh = hero.offsetHeight;
+  const v = [0, hw / 2, hw, 456];       // 456=デザイン基準の左端
+  const h = [0, hh / 2, hh];
+  iframeDoc.querySelectorAll(DRAG_SEL).forEach(b => {
+    if (b === exceptEl) return;
+    const r = blockRect(b);
+    v.push(r.left, r.left + r.width / 2, r.left + r.width);
+    h.push(r.top, r.top + r.height / 2, r.top + r.height);
+  });
+  return { v, h };
+}
+
+function clearGuides() {
+  iframeDoc.querySelectorAll("._ed_guide_v,._ed_guide_h").forEach(g => g.remove());
+}
+
+function drawGuide(axis, pos) {
+  const g = iframeDoc.createElement("div");
+  g.className = axis === "v" ? "_ed_guide_v" : "_ed_guide_h";
+  g.style[axis === "v" ? "left" : "top"] = Math.round(pos) + "px";
+  heroEl().appendChild(g);
+}
+
+function applySnap(left, top, w, h, targets) {
+  clearGuides();
+  let L = left, T = top;
+  const edgesV = [ [left, 0], [left + w / 2, w / 2], [left + w, w] ];
+  for (const [edge, off] of edgesV) {
+    const hit = targets.v.find(t => Math.abs(t - edge) <= SNAP_TH);
+    if (hit !== undefined) { L = hit - off; drawGuide("v", hit); break; }
+  }
+  const edgesH = [ [top, 0], [top + h / 2, h / 2], [top + h, h] ];
+  for (const [edge, off] of edgesH) {
+    const hit = targets.h.find(t => Math.abs(t - edge) <= SNAP_TH);
+    if (hit !== undefined) { T = hit - off; drawGuide("h", hit); break; }
+  }
+  return { L, T };
+}
+
+// ── ドラッグ＆リサイズのマウスイベント ──
+function attachBlockDrag() {
+  if (iframeDoc._ed_drag_attached) return;
+  iframeDoc._ed_drag_attached = true;
+
+  iframeDoc.addEventListener("mousedown", (e) => {
+    // リサイズハンドル
+    if (e.target.classList && e.target.classList.contains("_ed_rs")) {
+      const block = e.target.parentElement;
+      const r = blockRect(block);
+      resizeState = { block, startX: e.clientX, startY: e.clientY, origW: r.width, origH: r.height };
+      e.preventDefault(); e.stopPropagation();
+      return;
+    }
+    const block = e.target.closest(DRAG_SEL);
+    if (!block || e.target.isContentEditable) return;
+    const r = blockRect(block);
+    dragState = { block, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
+    e.preventDefault();
+  });
+
+  iframeDoc.addEventListener("mousemove", (e) => {
+    if (resizeState) {
+      const dw = e.clientX - resizeState.startX;
+      const dh = e.clientY - resizeState.startY;
+      const w = Math.max(80, Math.round(resizeState.origW + dw));
+      resizeState.block.style.width = w + "px";
+      if (resizeState.block.classList.contains("booking-card")) {
+        const h = Math.max(80, Math.round(resizeState.origH + dh));
+        resizeState.block.style.height = h + "px";
+      }
+      syncBlockProps(resizeState.block);
+      return;
+    }
+    if (!dragState) return;
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+    if (!dragState.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+    dragState.moved = true;
+    const { L, T } = applySnap(dragState.origL + dx, dragState.origT + dy, dragState.w, dragState.h, dragState.targets);
+    setBlockPos(dragState.block, L, T);
+    syncBlockProps(dragState.block);
+  });
+
+  iframeDoc.addEventListener("mouseup", () => {
+    if (resizeState) { snapshotForUndo(); resizeState = null; return; }
+    if (!dragState) return;
+    const { block, moved } = dragState;
+    dragState = null;
+    clearGuides();
+    if (moved) { snapshotForUndo(); selectBlock(block); }
+    else selectBlock(block);
+  });
+}
+
+// ── ブロック選択 ──
+function selectBlock(el) {
+  if (activeTextEl) commitText();
+  selectEl(el, "block");
+  activeBlockEl = el;
+  const key = Object.keys(DRAG_LABEL).find(k => el.classList.contains(k));
+  document.getElementById("block-tag").textContent = DRAG_LABEL[key] || "ブロック";
+  // 高さ入力は予約カードのみ（他はコンテンツで自動）
+  document.getElementById("block-h-row").style.display = el.classList.contains("booking-card") ? "flex" : "none";
+  syncBlockProps(el);
+  // リサイズハンドル
+  if (!el.querySelector("._ed_rs")) {
+    const rs = iframeDoc.createElement("div");
+    rs.className = "_ed_rs";
+    el.appendChild(rs);
+  }
+}
+
+function syncBlockProps(el) {
+  const r = blockRect(el);
+  document.getElementById("block-x-inp").value = Math.round(r.left);
+  document.getElementById("block-y-inp").value = Math.round(r.top);
+  document.getElementById("block-w-inp").value = Math.round(r.width);
+  document.getElementById("block-h-inp").value = Math.round(r.height);
+}
+
+// 位置/サイズ入力
+document.getElementById("block-x-inp").addEventListener("change", (e) => {
+  if (!activeBlockEl) return;
+  const r = blockRect(activeBlockEl);
+  setBlockPos(activeBlockEl, +e.target.value || 0, r.top);
+  snapshotForUndo();
+});
+document.getElementById("block-y-inp").addEventListener("change", (e) => {
+  if (!activeBlockEl) return;
+  const r = blockRect(activeBlockEl);
+  setBlockPos(activeBlockEl, r.left, +e.target.value || 0);
+  snapshotForUndo();
+});
+document.getElementById("block-w-inp").addEventListener("change", (e) => {
+  if (!activeBlockEl) return;
+  activeBlockEl.style.width = (+e.target.value || 100) + "px";
+  snapshotForUndo();
+});
+document.getElementById("block-h-inp").addEventListener("change", (e) => {
+  if (!activeBlockEl) return;
+  activeBlockEl.style.height = (+e.target.value || 100) + "px";
+  snapshotForUndo();
+});
+
+// ── 矢印キーで微調整（1px、Shift=10px） ──
+function handleArrowNudge(e) {
+  if (!activeBlockEl || activeTextEl) return;
+  const step = e.shiftKey ? 10 : 1;
+  const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  const mv = moves[e.key];
+  if (!mv) return;
+  e.preventDefault();
+  const r = blockRect(activeBlockEl);
+  setBlockPos(activeBlockEl, r.left + mv[0], r.top + mv[1]);
+  syncBlockProps(activeBlockEl);
+  clearTimeout(nudgeTimer);
+  nudgeTimer = setTimeout(snapshotForUndo, 700); // 連打が終わってから1回だけ記録
+}
+
 // ── Select / Deselect ──
 function selectEl(el, type) {
   if (selectedEl && selectedEl !== el) {
     selectedEl.classList.remove("ed-sel");
+    const rs = selectedEl.querySelector && selectedEl.querySelector("._ed_rs");
+    if (rs) rs.remove();
   }
   selectedEl = el;
   el.classList.add("ed-sel");
+  if (type !== "block") activeBlockEl = null;
 
   // Right panel
   document.getElementById("no-sel").style.display = "none";
   document.getElementById("text-props").style.display = type === "text" ? "block" : "none";
   document.getElementById("image-props").style.display = type === "image" ? "block" : "none";
+  document.getElementById("block-props").style.display = type === "block" ? "block" : "none";
 
   if (type === "text") syncTextProps(el);
 }
 
 function deselect() {
   if (activeTextEl) commitText(); // commitText calls deselect again, guard:
-  if (!selectedEl && !activeTextEl && !activeImgEl) return;
-  if (selectedEl) { selectedEl.classList.remove("ed-sel"); selectedEl = null; }
+  if (!selectedEl && !activeTextEl && !activeImgEl && !activeBlockEl) return;
+  if (selectedEl) {
+    selectedEl.classList.remove("ed-sel");
+    const rs = selectedEl.querySelector && selectedEl.querySelector("._ed_rs");
+    if (rs) rs.remove();
+    selectedEl = null;
+  }
   activeImgEl = null;
+  activeBlockEl = null;
+  clearGuides();
   document.getElementById("no-sel").style.display = "block";
   document.getElementById("text-props").style.display = "none";
   document.getElementById("image-props").style.display = "none";
+  document.getElementById("block-props").style.display = "none";
 }
 
 // ── Text props (right panel) ──
@@ -587,14 +892,16 @@ document.getElementById("text-color-inp").addEventListener("change", () => {
 
 // ── Section list (left panel) ──
 const SEC_MAP = [
-  { sel: "header, nav, .site-header",     icon: "🔗", label: "ヘッダー・ナビ" },
-  { sel: ".hero, section.hero",            icon: "🏔", label: "ヒーロー" },
-  { sel: ".booking-card",                  icon: "📅", label: "予約カード" },
-  { sel: ".badges",                        icon: "✓",  label: "特徴バッジ" },
-  { sel: ".content-cards, .services",      icon: "🎿", label: "サービスカード" },
-  { sel: ".reviews",                       icon: "⭐", label: "お客様の声" },
-  { sel: ".recommends, .info-section",     icon: "📍", label: "おすすめ情報" },
-  { sel: "footer, .footer-bar",            icon: "📞", label: "フッター" },
+  { sel: ".site-header",   icon: "🔗", label: "ヘッダー・ナビ" },
+  { sel: ".hero",          icon: "🏔", label: "メイン写真の帯" },
+  { sel: ".hero-content",  icon: "✏️", label: "キャッチコピー" },
+  { sel: ".booking-card",  icon: "📅", label: "予約カード" },
+  { sel: ".badges",        icon: "✓",  label: "特徴バッジ" },
+  { sel: ".content-grid",  icon: "🎿", label: "サービスカード" },
+  { sel: ".info-sec",      icon: "📍", label: "おすすめ情報" },
+  { sel: ".reviews-sec",   icon: "⭐", label: "お客様の声" },
+  { sel: ".access-sec",    icon: "🚗", label: "アクセス" },
+  { sel: ".utility-bar",   icon: "📞", label: "フッター" },
 ];
 
 function buildSectionList() {
@@ -609,7 +916,11 @@ function buildSectionList() {
     item.className = "sec-item";
     item.innerHTML = `<span class="sec-icon">${icon}</span><span>${label}</span>`;
     item.addEventListener("click", () => {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      // 縮小表示中でも正しい位置へ（外側スクローラをズーム換算でスクロール）
+      const scroller = document.getElementById("canvas-scroller");
+      const rootTop = iframeDoc.documentElement.getBoundingClientRect().top;
+      const y = (el.getBoundingClientRect().top - rootTop) * zoomScale;
+      scroller.scrollTo({ top: Math.max(0, y - 16), behavior: "smooth" });
       document.querySelectorAll(".sec-item").forEach(i => i.classList.remove("active"));
       item.classList.add("active");
     });
@@ -661,14 +972,14 @@ function injectSortable() {
   iframeDoc.head.appendChild(s);
 }
 
-// ── Device toggle ──
-document.getElementById("dev-desktop").addEventListener("click", (e) => {
-  document.getElementById("canvas-wrapper").style.maxWidth = "1280px";
+// ── ズーム切替（全体表示 / 原寸100%） ──
+document.getElementById("zoom-fit").addEventListener("click", (e) => {
+  zoomMode = "fit"; applyZoom();
   document.querySelectorAll(".dev-toggle button").forEach(b => b.classList.remove("active"));
   e.currentTarget.classList.add("active");
 });
-document.getElementById("dev-mobile").addEventListener("click", (e) => {
-  document.getElementById("canvas-wrapper").style.maxWidth = "430px";
+document.getElementById("zoom-100").addEventListener("click", (e) => {
+  zoomMode = "100"; applyZoom();
   document.querySelectorAll(".dev-toggle button").forEach(b => b.classList.remove("active"));
   e.currentTarget.classList.add("active");
 });
@@ -686,22 +997,9 @@ async function handlePublish() {
   btn.disabled = true; btn.textContent = "公開中...";
 
   try {
-    const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
-
-    // Clean editor artifacts before saving
-    iframeDoc.querySelectorAll("._ed_handle").forEach(h => h.remove());
-    iframeDoc.querySelectorAll("[data-ed]").forEach(el => {
-      el.removeAttribute("data-ed");
-      el.removeAttribute("contenteditable");
-      el.classList.remove("ed-sel");
-    });
-    iframeDoc.querySelectorAll("[data-ed-img]").forEach(el => {
-      el.removeAttribute("data-ed-img");
-      el.classList.remove("ed-sel");
-    });
-    iframeDoc.querySelectorAll("._ed_sec").forEach(el => el.classList.remove("_ed_sec"));
-
-    const html = root.innerHTML;
+    deselect();
+    // クローンから編集用の目印を除去した完成HTMLを保存（ライブDOMは触らない）
+    const html = getCleanHTML();
 
     // Get page CSS (inline style tags)
     const css = Array.from(iframeDoc.querySelectorAll("style:not(#_ed_style)"))
@@ -716,10 +1014,7 @@ async function handlePublish() {
     btn.classList.add("done");
     toast("公開しました！ライブサイトに反映されました", "success");
 
-    // Re-inject editing after cleanup
     setTimeout(() => {
-      reattach();
-      injectSortable();
       btn.textContent = "✓ 保存して公開";
       btn.classList.remove("done");
       btn.disabled = false;
