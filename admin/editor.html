@@ -91,6 +91,54 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 #ed-toast.success { border-left-color: #10b981; }
 #ed-toast.error { border-left-color: #ef4444; color: #fca5a5; background: #1a0a0a; }
 
+/* ── フローティング・クイックツールバー（Canva方式：選択要素のそばに出る） ── */
+#float-bar {
+  position: fixed; z-index: 10001; display: none;
+  align-items: center; gap: 2px;
+  background: #0f172a; border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px; padding: 4px 6px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.45);
+  user-select: none;
+}
+#float-bar.show { display: flex; }
+.fb-label { font-size: 11px; font-weight: 700; color: #93c5fd; padding: 0 8px 0 4px; white-space: nowrap; }
+.fb-sep { width: 1px; height: 18px; background: rgba(255,255,255,.14); margin: 0 3px; }
+.fb-btn { border: none; background: transparent; color: rgba(255,255,255,.75); cursor: pointer;
+  padding: 5px 9px; border-radius: 6px; font-size: 13px; font-weight: 700; line-height: 1; transition: all .12s; white-space: nowrap; }
+.fb-btn:hover { background: rgba(255,255,255,.14); color: #fff; }
+.fb-color { width: 26px; height: 26px; padding: 2px; border: none; background: transparent; cursor: pointer; border-radius: 6px; }
+.fb-hint { font-size: 11px; color: rgba(255,255,255,.45); padding: 0 8px; white-space: nowrap; }
+
+/* ── バージョン履歴パネル ── */
+#history-panel {
+  position: fixed; top: 54px; right: 12px; z-index: 10002; display: none;
+  width: 250px; max-height: 420px; overflow-y: auto;
+  background: #1e293b; border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.5); padding: 8px;
+}
+#history-panel.show { display: block; }
+.hist-head { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.4); padding: 6px 8px; }
+.hist-item { padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: rgba(255,255,255,.75); transition: background .12s; }
+.hist-item:hover { background: rgba(59,130,246,.18); color: #fff; }
+.hist-empty { padding: 16px 10px; font-size: 12px; color: rgba(255,255,255,.3); text-align: center; }
+
+/* ── 下書き復元バナー ── */
+#draft-banner {
+  position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 10002; display: none;
+  align-items: center; gap: 12px;
+  background: #172554; border: 1px solid rgba(147,197,253,.3); color: #dbeafe;
+  border-radius: 12px; padding: 10px 16px; font-size: 13px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.45);
+}
+#draft-banner.show { display: flex; }
+#draft-banner button { border: none; border-radius: 7px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+#draft-restore-btn { background: #3b82f6; color: #fff; }
+#draft-discard-btn { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
+
+/* ── 未公開バッジ ── */
+#dirty-badge { display: none; font-size: 11px; font-weight: 700; color: #fbbf24; white-space: nowrap; }
+#dirty-badge.show { display: inline; }
+
 /* ── Scrollbars ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -112,12 +160,47 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
     <button id="zoom-100">100%</button>
   </div>
   <div class="top-space"></div>
+  <span id="dirty-badge">● 未公開の変更あり</span>
   <span id="ed-status"></span>
+  <button class="icon-btn" id="history-btn" title="バージョン履歴">🕘</button>
   <button id="preview-btn">👁 プレビュー</button>
   <button id="publish-btn">✓ 保存して公開</button>
 </div>
 
 <div id="ed-toast"></div>
+
+<!-- フローティング・クイックツールバー -->
+<div id="float-bar">
+  <span class="fb-label" id="fb-label">テキスト</span>
+  <span class="fb-sep"></span>
+  <span id="fb-text-tools" style="display:none">
+    <button class="fb-btn" id="fb-bold" title="太字切替"><b>B</b></button>
+    <button class="fb-btn" id="fb-bigger" title="文字を大きく">A＋</button>
+    <button class="fb-btn" id="fb-smaller" title="文字を小さく">A－</button>
+    <input type="color" class="fb-color" id="fb-color" title="文字色">
+  </span>
+  <span id="fb-img-tools" style="display:none">
+    <button class="fb-btn" id="fb-replace">🖼 差し替え</button>
+  </span>
+  <span id="fb-block-tools" style="display:none">
+    <span class="fb-hint">ドラッグで移動 ／ 文字はダブルクリック</span>
+  </span>
+  <span class="fb-sep"></span>
+  <button class="fb-btn" id="fb-done" title="選択解除">✓ 完了</button>
+</div>
+
+<!-- バージョン履歴 -->
+<div id="history-panel">
+  <div class="hist-head">保存の履歴（クリックで読み込み・公開はされません）</div>
+  <div id="history-list"><div class="hist-empty">読み込み中...</div></div>
+</div>
+
+<!-- 下書き復元バナー -->
+<div id="draft-banner">
+  <span>💾 前回の未公開の下書きがあります</span>
+  <button id="draft-restore-btn">復元する</button>
+  <button id="draft-discard-btn">破棄</button>
+</div>
 
 <div id="ed-body">
 
@@ -304,6 +387,8 @@ function snapshotForUndo() {
   redoStack = [];
   isDirty = true;
   refreshUndoButtons();
+  scheduleDraftSave();
+  refreshDirtyBadge();
 }
 
 function refreshUndoButtons() {
@@ -356,6 +441,9 @@ function applyZoom() {
   try { h = Math.max(iframeDoc.documentElement.scrollHeight, 600); } catch (e) {}
   iframe.style.height = h + "px";
   wrapper.style.height = Math.round(h * zoomScale) + "px";
+  const fitPct = Math.round(Math.min(1, avail / PAGE_W) * 100);
+  document.getElementById("zoom-fit").textContent = "🔍 全体表示 " + fitPct + "%";
+  if (typeof positionFloatBar === "function") positionFloatBar();
 }
 
 // Auto-resize iframe height to content
@@ -387,6 +475,9 @@ iframe.addEventListener("load", () => {
     // Initial undo snapshot
     undoStack = [{ html: getCleanHTML() }];
     refreshUndoButtons();
+
+    // 前回の未公開下書きがあれば復元を提案
+    checkDraftOnBoot();
 
     // Load last published time
     loadPublishedPage().then(p => {
@@ -757,6 +848,7 @@ function syncBlockProps(el) {
   document.getElementById("block-y-inp").value = Math.round(r.top);
   document.getElementById("block-w-inp").value = Math.round(r.width);
   document.getElementById("block-h-inp").value = Math.round(r.height);
+  positionFloatBar();
 }
 
 // 位置/サイズ入力
@@ -798,6 +890,188 @@ function handleArrowNudge(e) {
   nudgeTimer = setTimeout(snapshotForUndo, 700); // 連打が終わってから1回だけ記録
 }
 
+// ================================================================
+// フローティング・クイックツールバー（選択した要素のすぐ上に出る）
+// ================================================================
+const floatBar = document.getElementById("float-bar");
+
+// 要素 → 日本語名（ツールバーに表示）
+const NAME_MAP = [
+  [".hero-title", "キャッチコピー"], [".hero-desc", "説明文"],
+  [".badge-label", "バッジ名"], [".badge-sub", "バッジ説明"],
+  [".booking-card-title", "予約カード見出し"], [".booking-step-label", "ステップ名"],
+  [".content-card-title", "カード見出し"], [".content-card-desc", "カード説明"],
+  [".pill-btn", "カードボタン"], [".btn", "ボタン"],
+  [".sec-kicker", "見出し上の一言"], [".sec-head-title", "セクション見出し"],
+  [".rec-title", "おすすめ見出し"], [".rec-sub", "おすすめ説明"],
+  [".review-text", "口コミ本文"], [".review-stars", "星評価"],
+  [".access-row", "アクセス情報"], [".access-btn", "アクセスボタン"],
+  [".brand-name", "店名"], [".utility-ig", "フッター文言"],
+];
+function elName(el, type) {
+  if (type === "image") return "画像";
+  if (type === "block") {
+    const key = Object.keys(DRAG_LABEL).find(k => el.classList.contains(k));
+    return DRAG_LABEL[key] || "ブロック";
+  }
+  for (const [sel, name] of NAME_MAP) if (el.matches(sel)) return name;
+  return "テキスト";
+}
+
+function showFloatBar(el, type) {
+  document.getElementById("fb-label").textContent = elName(el, type);
+  document.getElementById("fb-text-tools").style.display = type === "text" ? "inline" : "none";
+  document.getElementById("fb-img-tools").style.display = type === "image" ? "inline" : "none";
+  document.getElementById("fb-block-tools").style.display = type === "block" ? "inline" : "none";
+  if (type === "text") {
+    try { document.getElementById("fb-color").value = rgbToHex(iframeWin.getComputedStyle(el).color); } catch (e) {}
+  }
+  floatBar.classList.add("show");
+  positionFloatBar();
+}
+
+function hideFloatBar() { floatBar.classList.remove("show"); }
+
+function positionFloatBar() {
+  if (!selectedEl || !floatBar.classList.contains("show")) return;
+  const ifr = iframe.getBoundingClientRect();
+  const r = selectedEl.getBoundingClientRect();
+  const cx = ifr.left + (r.left + r.width / 2) * zoomScale;
+  const topY = ifr.top + r.top * zoomScale;
+  const bw = floatBar.offsetWidth || 260;
+  const x = Math.min(Math.max(cx - bw / 2, 232), window.innerWidth - bw - 272);
+  const y = Math.max(58, topY - 44);
+  floatBar.style.left = Math.round(x) + "px";
+  floatBar.style.top = Math.round(y) + "px";
+}
+
+// ツールバーのボタン動作（編集中でなければ選択要素に直接適用）
+function fbTextTarget() { return activeTextEl || (selectedEl && selectedEl.hasAttribute("data-ed") ? selectedEl : null); }
+
+document.getElementById("fb-bold").addEventListener("mousedown", (e) => {
+  e.preventDefault();
+  const t = fbTextTarget(); if (!t) return;
+  const cs = iframeWin.getComputedStyle(t);
+  t.style.fontWeight = (parseInt(cs.fontWeight, 10) >= 700) ? "400" : "800";
+  snapshotForUndo();
+});
+document.getElementById("fb-bigger").addEventListener("mousedown", (e) => {
+  e.preventDefault();
+  const t = fbTextTarget(); if (!t) return;
+  t.style.fontSize = (parseFloat(iframeWin.getComputedStyle(t).fontSize) + 1) + "px";
+  syncTextProps(t); snapshotForUndo();
+});
+document.getElementById("fb-smaller").addEventListener("mousedown", (e) => {
+  e.preventDefault();
+  const t = fbTextTarget(); if (!t) return;
+  t.style.fontSize = Math.max(8, parseFloat(iframeWin.getComputedStyle(t).fontSize) - 1) + "px";
+  syncTextProps(t); snapshotForUndo();
+});
+document.getElementById("fb-color").addEventListener("input", (e) => {
+  const t = fbTextTarget(); if (!t) return;
+  t.style.color = e.target.value; isDirty = true; refreshDirtyBadge();
+});
+document.getElementById("fb-color").addEventListener("change", () => snapshotForUndo());
+document.getElementById("fb-replace").addEventListener("click", () => {
+  document.getElementById("img-file-inp").click();
+});
+document.getElementById("fb-done").addEventListener("click", () => deselect());
+
+// 位置更新のトリガー
+document.getElementById("canvas-scroller").addEventListener("scroll", positionFloatBar);
+window.addEventListener("resize", positionFloatBar);
+
+// ================================================================
+// 自動下書き保存（ブラウザを閉じても作業が消えない）
+// ================================================================
+const DRAFT_KEY = "yatsumori_draft_home";
+let draftTimer = null;
+
+function scheduleDraftSave() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ html: getCleanHTML(), savedAt: Date.now() }));
+      const t = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+      setStatus("下書き自動保存 " + t);
+    } catch (e) {}
+  }, 1500);
+}
+
+function checkDraftOnBoot() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    if (!draft.html || draft.html === getCleanHTML()) { localStorage.removeItem(DRAFT_KEY); return; }
+    const banner = document.getElementById("draft-banner");
+    banner.classList.add("show");
+    document.getElementById("draft-restore-btn").onclick = () => {
+      const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
+      root.innerHTML = draft.html;
+      reattach();
+      snapshotForUndo();
+      banner.classList.remove("show");
+      toast("下書きを復元しました", "success");
+    };
+    document.getElementById("draft-discard-btn").onclick = () => {
+      localStorage.removeItem(DRAFT_KEY);
+      banner.classList.remove("show");
+    };
+  } catch (e) {}
+}
+
+// ================================================================
+// バージョン履歴（読み込むだけ・公開はされない安全設計）
+// ================================================================
+const histPanel = document.getElementById("history-panel");
+
+document.getElementById("history-btn").addEventListener("click", async () => {
+  if (histPanel.classList.contains("show")) { histPanel.classList.remove("show"); return; }
+  histPanel.classList.add("show");
+  const list = document.getElementById("history-list");
+  list.innerHTML = `<div class="hist-empty">読み込み中...</div>`;
+  try {
+    const versions = await listVersions();
+    if (!versions.length) { list.innerHTML = `<div class="hist-empty">まだ履歴がありません</div>`; return; }
+    list.innerHTML = "";
+    versions.forEach(v => {
+      const d = new Date(v.created_at);
+      const item = document.createElement("div");
+      item.className = "hist-item";
+      item.textContent = "🕘 " + d.toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+      item.addEventListener("click", async () => {
+        if (!confirm("このバージョンを編集画面に読み込みますか？\n（サイトにはまだ公開されません。確認して「保存して公開」を押すまで反映されません）")) return;
+        try {
+          const full = await getVersion(v.id);
+          const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
+          root.innerHTML = full.html;
+          reattach();
+          snapshotForUndo();
+          histPanel.classList.remove("show");
+          toast("読み込みました。よければ「保存して公開」を押してください", "success");
+        } catch (e) { toast("読み込みに失敗: " + e.message, "error"); }
+      });
+      list.appendChild(item);
+    });
+  } catch (e) {
+    list.innerHTML = `<div class="hist-empty">取得に失敗しました</div>`;
+  }
+});
+
+// パネルの外をクリックしたら閉じる
+document.addEventListener("click", (e) => {
+  if (histPanel.classList.contains("show") &&
+      !e.target.closest("#history-panel") && !e.target.closest("#history-btn")) {
+    histPanel.classList.remove("show");
+  }
+});
+
+// ── 未公開バッジ ──
+function refreshDirtyBadge() {
+  document.getElementById("dirty-badge").classList.toggle("show", isDirty);
+}
+
 // ── Select / Deselect ──
 function selectEl(el, type) {
   if (selectedEl && selectedEl !== el) {
@@ -816,6 +1090,7 @@ function selectEl(el, type) {
   document.getElementById("block-props").style.display = type === "block" ? "block" : "none";
 
   if (type === "text") syncTextProps(el);
+  showFloatBar(el, type);
 }
 
 function deselect() {
@@ -830,6 +1105,7 @@ function deselect() {
   activeImgEl = null;
   activeBlockEl = null;
   clearGuides();
+  hideFloatBar();
   document.getElementById("no-sel").style.display = "block";
   document.getElementById("text-props").style.display = "none";
   document.getElementById("image-props").style.display = "none";
@@ -1008,6 +1284,8 @@ async function handlePublish() {
     await publishPage({ html, css, projectData: { savedAt: new Date().toISOString() } });
 
     isDirty = false;
+    refreshDirtyBadge();
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
     const now = new Date().toLocaleString("ja-JP", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" });
     setStatus("公開済み " + now);
     btn.textContent = "✓ 公開しました";
