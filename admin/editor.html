@@ -109,6 +109,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 .fb-color { width: 26px; height: 26px; padding: 2px; border: none; background: transparent; cursor: pointer; border-radius: 6px; }
 .fb-hint { font-size: 11px; color: rgba(255,255,255,.45); padding: 0 8px; white-space: nowrap; }
 
+/* 端っこをつかんで大きさ調整するハンドル（選択中の項目/画像の右下） */
+#rs-handle {
+  position: fixed; z-index: 10001; width: 16px; height: 16px; display: none;
+  background: #fff; border: 2.5px solid #3b82f6; border-radius: 4px;
+  cursor: nwse-resize; box-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+#rs-handle.show { display: block; }
+/* リサイズ中はiframeがマウスを奪わないよう透明シールドを被せる */
+#drag-shield { position: fixed; inset: 0; z-index: 10004; display: none; cursor: nwse-resize; }
+#drag-shield.show { display: block; }
+
 /* ── バージョン履歴パネル ── */
 #history-panel {
   position: fixed; top: 54px; right: 12px; z-index: 10002; display: none;
@@ -189,6 +200,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <button class="fb-btn" id="fb-done" title="選択解除">✓ 完了</button>
 </div>
 
+<!-- 大きさ調整ハンドル（選択中の項目の右下角） -->
+<div id="rs-handle" title="ドラッグで大きさ調整"></div>
+<div id="drag-shield"></div>
+
 <!-- バージョン履歴 -->
 <div id="history-panel">
   <div class="hist-head">保存の履歴（クリックで読み込み・公開はされません）</div>
@@ -208,7 +223,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <div id="ed-left">
     <div class="left-head">ページ構成</div>
     <div id="section-list"></div>
-    <div class="left-hint">クリックで編集<br>テキスト → 直接入力<br>画像 → クリックで差し替え</div>
+    <div class="left-hint">項目クリック → 選択・ドラッグで移動<br>文字ダブルクリック → 編集<br>右下の□ → 大きさ変更<br>画像クリック → 差し替え</div>
   </div>
 
   <!-- Canvas -->
@@ -468,6 +483,7 @@ iframe.addEventListener("load", () => {
     document.getElementById("canvas-loading").style.display = "none";
     resizeIframe();
     injectEditingCSS();
+    canvasizeItems();   // 並んでいる項目を1個ずつ動かせる状態に固定
     attachEditHandlers();
     buildSectionList();
     injectSortable();
@@ -515,9 +531,10 @@ function injectEditingCSS() {
       outline-offset: 2px !important;
       cursor: text !important;
     }
-    [data-ed-img] { position: relative !important; cursor: pointer !important; }
+    [data-ed-img] { position: relative !important; cursor: move !important; }
+    [data-ed-pan] { cursor: move !important; }
     [data-ed-img]:hover::after {
-      content: "🖼 クリックして変更" !important;
+      content: "🖼 クリックで差し替え ／ ドラッグで位置調整" !important;
       position: absolute !important; top: 50% !important; left: 50% !important;
       transform: translate(-50%,-50%) !important;
       background: rgba(0,0,0,.72) !important; color: #fff !important;
@@ -572,9 +589,63 @@ const TEXT_SEL = [
   "a.btn",
 ].join(",");
 
-// パワポ風に自由移動できるブロック（hero内のabsolute配置要素）
-const DRAG_SEL = ".hero-content,.booking-card,.badges";
-const DRAG_LABEL = { "hero-content": "キャッチコピー", "booking-card": "予約カード", "badges": "特徴バッジ" };
+// パワポ風に自由移動できる「項目」たち（1個ずつ独立して動かせる）
+const DRAG_SEL = [
+  ".hero-content", ".booking-card", ".badges", ".badge",
+  ".content-card", ".info-sec", ".reviews-sec", ".access-sec",
+  ".rec-card", ".review-card",
+].join(",");
+const DRAG_LABEL = {
+  "hero-content": "キャッチコピー", "booking-card": "予約カード",
+  "badges": "特徴バッジ（全体）", "badge": "バッジ",
+  "content-card": "サービスカード", "info-sec": "おすすめ情報（全体）",
+  "reviews-sec": "お客様の声（全体）", "access-sec": "アクセス",
+  "rec-card": "おすすめカード", "review-card": "口コミ",
+};
+
+// ── ページを「キャンバス化」：並んでいる項目を1個ずつ絶対配置に固定 ──
+// 見た目は1pxも変えずに、全項目を自由に動かせる状態にする。
+// 一度実行済みのHTML（復元・履歴読込含む）ではスキップされる（冪等）。
+function canvasizeSection(container, childSel) {
+  if (!container) return;
+  const kids = Array.from(container.querySelectorAll(childSel)).filter(k => k.parentElement === container || k.closest(childSel) === k);
+  const direct = kids.filter(k => k.parentElement === container);
+  if (!direct.length) return;
+  if (direct.every(k => k.style.position === "absolute")) return; // 既にキャンバス化済み
+  const crect = container.getBoundingClientRect();
+  // 先に全項目を測ってから一括適用（順に適用すると位置がずれるため）
+  const meas = direct.map(k => {
+    const r = k.getBoundingClientRect();
+    const cs = iframeWin.getComputedStyle(k);
+    return {
+      k,
+      left: r.left - crect.left - (parseFloat(cs.marginLeft) || 0),
+      top:  r.top  - crect.top  - (parseFloat(cs.marginTop)  || 0),
+      w: r.width,
+    };
+  });
+  // 既にabsolute等で配置済みの容器はそのまま（relativeで上書きすると位置が壊れる）
+  if (iframeWin.getComputedStyle(container).position === "static") {
+    container.style.position = "relative";
+  }
+  container.style.width  = Math.round(crect.width) + "px";
+  container.style.height = Math.round(crect.height) + "px";
+  meas.forEach(m => {
+    m.k.style.position = "absolute";
+    m.k.style.left = Math.round(m.left) + "px";
+    m.k.style.top  = Math.round(m.top) + "px";
+    m.k.style.width = Math.round(m.w) + "px";
+    m.k.style.margin = "0";
+  });
+}
+
+function canvasizeItems() {
+  canvasizeSection(iframeDoc.querySelector(".info-row"), ".info-sec,.reviews-sec,.access-sec");
+  canvasizeSection(iframeDoc.querySelector(".content-grid"), ".content-card");
+  canvasizeSection(iframeDoc.querySelector(".reviews-sec"), ".review-card");
+  canvasizeSection(iframeDoc.querySelector(".rec-scroll"), ".rec-card");
+  canvasizeSection(iframeDoc.querySelector(".badges"), ".badge");
+}
 
 function attachEditHandlers() {
   if (!iframeDoc) return;
@@ -628,6 +699,7 @@ function attachEditHandlers() {
 
 function reattach() {
   injectEditingCSS();
+  canvasizeItems(); // 履歴読込・Undo後も項目を動かせる状態を維持（適用済みならスキップ）
   attachEditHandlers();
   buildSectionList();
   resizeIframe();
@@ -656,6 +728,7 @@ function commitText() {
 
 // ── Image editing ──
 function handleImgClick(el) {
+  if (Date.now() < suppressClickUntil) return; // ドラッグ直後の誤クリックを無視
   if (activeTextEl) commitText();
   selectEl(el, "image");
   activeImgEl = el;
@@ -709,13 +782,20 @@ document.getElementById("img-width-inp").addEventListener("change", (e) => {
 let activeBlockEl = null;
 let dragState = null;
 let resizeState = null;
+let panState = null;
 let nudgeTimer = null;
+let suppressClickUntil = 0; // ドラッグ直後の誤クリック（差し替えパネル等）を防ぐ
 
 function heroEl() { return iframeDoc.querySelector(".hero"); }
 
-// ブロックの現在位置（.hero基準のleft/top）を取得
+// 項目が属する「キャンバス」（＝positionを持つ親）。この中で自由に動く
+function containerOf(el) {
+  return el.offsetParent || heroEl() || iframeDoc.body;
+}
+
+// 項目の現在位置（自分のコンテナ基準のleft/top）を取得
 function blockRect(el) {
-  const hb = heroEl().getBoundingClientRect();
+  const hb = containerOf(el).getBoundingClientRect();
   const bb = el.getBoundingClientRect();
   return { left: bb.left - hb.left, top: bb.top - hb.top, width: bb.width, height: bb.height };
 }
@@ -723,34 +803,35 @@ function blockRect(el) {
 function setBlockPos(el, left, top) {
   el.style.left = Math.round(left) + "px";
   el.style.top = Math.round(top) + "px";
-  el.style.right = "auto"; // booking-cardはright基準なのでleft基準に切替
+  el.style.right = "auto"; // right基準の要素もleft基準に切替
 }
 
-// ── スナップ（他ブロックの端/中央、heroの端/中央に吸着） ──
+// ── スナップ（同じコンテナ内の他項目の端/中央、コンテナの端/中央に吸着） ──
 const SNAP_TH = 6;
 function computeSnapTargets(exceptEl) {
-  const hero = heroEl();
-  const hw = hero.offsetWidth, hh = hero.offsetHeight;
-  const v = [0, hw / 2, hw, 456];       // 456=デザイン基準の左端
-  const h = [0, hh / 2, hh];
+  const c = containerOf(exceptEl);
+  const cw = c.clientWidth, ch = c.clientHeight;
+  const v = [0, cw / 2, cw];
+  const h = [0, ch / 2, ch];
+  if (c.classList.contains("hero")) v.push(456); // デザイン基準の左端
   iframeDoc.querySelectorAll(DRAG_SEL).forEach(b => {
-    if (b === exceptEl) return;
+    if (b === exceptEl || containerOf(b) !== c) return;
     const r = blockRect(b);
     v.push(r.left, r.left + r.width / 2, r.left + r.width);
     h.push(r.top, r.top + r.height / 2, r.top + r.height);
   });
-  return { v, h };
+  return { v, h, container: c };
 }
 
 function clearGuides() {
   iframeDoc.querySelectorAll("._ed_guide_v,._ed_guide_h").forEach(g => g.remove());
 }
 
-function drawGuide(axis, pos) {
+function drawGuide(axis, pos, container) {
   const g = iframeDoc.createElement("div");
   g.className = axis === "v" ? "_ed_guide_v" : "_ed_guide_h";
   g.style[axis === "v" ? "left" : "top"] = Math.round(pos) + "px";
-  heroEl().appendChild(g);
+  (container || heroEl()).appendChild(g);
 }
 
 function applySnap(left, top, w, h, targets) {
@@ -759,48 +840,73 @@ function applySnap(left, top, w, h, targets) {
   const edgesV = [ [left, 0], [left + w / 2, w / 2], [left + w, w] ];
   for (const [edge, off] of edgesV) {
     const hit = targets.v.find(t => Math.abs(t - edge) <= SNAP_TH);
-    if (hit !== undefined) { L = hit - off; drawGuide("v", hit); break; }
+    if (hit !== undefined) { L = hit - off; drawGuide("v", hit, targets.container); break; }
   }
   const edgesH = [ [top, 0], [top + h / 2, h / 2], [top + h, h] ];
   for (const [edge, off] of edgesH) {
     const hit = targets.h.find(t => Math.abs(t - edge) <= SNAP_TH);
-    if (hit !== undefined) { T = hit - off; drawGuide("h", hit); break; }
+    if (hit !== undefined) { T = hit - off; drawGuide("h", hit, targets.container); break; }
   }
   return { L, T };
 }
 
-// ── ドラッグ＆リサイズのマウスイベント ──
+// 写真の「見える位置」調整（object-fit:coverのはみ出し量）
+function coverOverflow(img) {
+  const fw = img.clientWidth, fh = img.clientHeight;
+  const nw = img.naturalWidth, nh = img.naturalHeight;
+  if (!nw || !nh || !fw || !fh) return null;
+  const s = Math.max(fw / nw, fh / nh);
+  return { ox: Math.max(0, nw * s - fw), oy: Math.max(0, nh * s - fh) };
+}
+function objPosPct(img, ov) {
+  const parts = (iframeWin.getComputedStyle(img).objectPosition || "50% 50%").split(" ");
+  const one = (v, o) => {
+    const f = parseFloat(v);
+    if (isNaN(f)) return 50;
+    if ((v || "").includes("%")) return Math.min(100, Math.max(0, f));
+    return o > 0 ? Math.min(100, Math.max(0, (-f / o) * 100)) : 50;
+  };
+  return { x: one(parts[0], ov.ox), y: one(parts[1] || parts[0], ov.oy) };
+}
+
+// ── ドラッグ移動＆写真パンのマウスイベント（iframe内） ──
 function attachBlockDrag() {
   if (iframeDoc._ed_drag_attached) return;
   iframeDoc._ed_drag_attached = true;
 
   iframeDoc.addEventListener("mousedown", (e) => {
-    // リサイズハンドル
-    if (e.target.classList && e.target.classList.contains("_ed_rs")) {
-      const block = e.target.parentElement;
+    if (e.target.isContentEditable) return;
+
+    // 項目ドラッグ（画像が項目の中にある場合は項目ごと動く）
+    const block = e.target.closest(DRAG_SEL);
+    if (block) {
       const r = blockRect(block);
-      resizeState = { block, startX: e.clientX, startY: e.clientY, origW: r.width, origH: r.height };
-      e.preventDefault(); e.stopPropagation();
+      dragState = { block, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
+      e.preventDefault();
       return;
     }
-    const block = e.target.closest(DRAG_SEL);
-    if (!block || e.target.isContentEditable) return;
-    const r = blockRect(block);
-    dragState = { block, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
-    e.preventDefault();
+
+    // 項目の外にある写真（ヒーロー写真など）→ ドラッグで見える位置を調整
+    const img = e.target.tagName === "IMG" ? e.target : null;
+    if (img && img.hasAttribute("data-ed-img")) {
+      const ov = coverOverflow(img);
+      if (ov && (ov.ox > 1 || ov.oy > 1)) {
+        panState = { img, startX: e.clientX, startY: e.clientY, ov, pct: objPosPct(img, ov), moved: false };
+        e.preventDefault();
+      }
+    }
   });
 
   iframeDoc.addEventListener("mousemove", (e) => {
-    if (resizeState) {
-      const dw = e.clientX - resizeState.startX;
-      const dh = e.clientY - resizeState.startY;
-      const w = Math.max(80, Math.round(resizeState.origW + dw));
-      resizeState.block.style.width = w + "px";
-      if (resizeState.block.classList.contains("booking-card")) {
-        const h = Math.max(80, Math.round(resizeState.origH + dh));
-        resizeState.block.style.height = h + "px";
-      }
-      syncBlockProps(resizeState.block);
+    if (panState) {
+      const dx = e.clientX - panState.startX;
+      const dy = e.clientY - panState.startY;
+      if (!panState.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+      panState.moved = true;
+      const { ov, pct } = panState;
+      const nx = ov.ox > 1 ? Math.min(100, Math.max(0, (pct.x / 100 * ov.ox - dx) / ov.ox * 100)) : pct.x;
+      const ny = ov.oy > 1 ? Math.min(100, Math.max(0, (pct.y / 100 * ov.oy - dy) / ov.oy * 100)) : pct.y;
+      panState.img.style.objectPosition = nx.toFixed(1) + "% " + ny.toFixed(1) + "%";
       return;
     }
     if (!dragState) return;
@@ -814,13 +920,17 @@ function attachBlockDrag() {
   });
 
   iframeDoc.addEventListener("mouseup", () => {
-    if (resizeState) { snapshotForUndo(); resizeState = null; return; }
+    if (panState) {
+      if (panState.moved) { suppressClickUntil = Date.now() + 400; snapshotForUndo(); }
+      panState = null;
+      return;
+    }
     if (!dragState) return;
     const { block, moved } = dragState;
     dragState = null;
     clearGuides();
-    if (moved) { snapshotForUndo(); selectBlock(block); }
-    else selectBlock(block);
+    if (moved) { suppressClickUntil = Date.now() + 400; snapshotForUndo(); }
+    selectBlock(block);
   });
 }
 
@@ -831,15 +941,10 @@ function selectBlock(el) {
   activeBlockEl = el;
   const key = Object.keys(DRAG_LABEL).find(k => el.classList.contains(k));
   document.getElementById("block-tag").textContent = DRAG_LABEL[key] || "ブロック";
-  // 高さ入力は予約カードのみ（他はコンテンツで自動）
-  document.getElementById("block-h-row").style.display = el.classList.contains("booking-card") ? "flex" : "none";
+  // 高さ入力は固定高さの項目のみ（他はコンテンツで自動）
+  const hasH = el.classList.contains("booking-card") || el.classList.contains("content-card");
+  document.getElementById("block-h-row").style.display = hasH ? "flex" : "none";
   syncBlockProps(el);
-  // リサイズハンドル
-  if (!el.querySelector("._ed_rs")) {
-    const rs = iframeDoc.createElement("div");
-    rs.className = "_ed_rs";
-    el.appendChild(rs);
-  }
 }
 
 function syncBlockProps(el) {
@@ -930,7 +1035,10 @@ function showFloatBar(el, type) {
   positionFloatBar();
 }
 
-function hideFloatBar() { floatBar.classList.remove("show"); }
+function hideFloatBar() {
+  floatBar.classList.remove("show");
+  document.getElementById("rs-handle").classList.remove("show");
+}
 
 function positionFloatBar() {
   if (!selectedEl || !floatBar.classList.contains("show")) return;
@@ -943,7 +1051,66 @@ function positionFloatBar() {
   const y = Math.max(58, topY - 44);
   floatBar.style.left = Math.round(x) + "px";
   floatBar.style.top = Math.round(y) + "px";
+  positionRsHandle();
 }
+
+// ── 大きさ調整ハンドル（選択中の項目・画像の右下角に表示） ──
+const rsHandle = document.getElementById("rs-handle");
+
+function rsEligible(el) {
+  if (!el) return false;
+  if (el.classList.contains("hero-photo")) return false; // 帯の写真は枠固定
+  return el.tagName === "IMG" || el.matches(DRAG_SEL);
+}
+
+function positionRsHandle() {
+  if (!rsEligible(selectedEl)) { rsHandle.classList.remove("show"); return; }
+  const ifr = iframe.getBoundingClientRect();
+  const r = selectedEl.getBoundingClientRect();
+  rsHandle.style.left = Math.round(ifr.left + r.right * zoomScale - 8) + "px";
+  rsHandle.style.top  = Math.round(ifr.top  + r.bottom * zoomScale - 8) + "px";
+  rsHandle.classList.add("show");
+}
+
+rsHandle.addEventListener("mousedown", (e) => {
+  if (!selectedEl) return;
+  e.preventDefault(); e.stopPropagation();
+  const r = selectedEl.getBoundingClientRect();
+  const isImg = selectedEl.tagName === "IMG";
+  resizeState = {
+    el: selectedEl, startX: e.clientX, startY: e.clientY,
+    origW: r.width, origH: r.height, isImg,
+    aspect: isImg && selectedEl.naturalWidth ? selectedEl.naturalWidth / selectedEl.naturalHeight : null,
+    hFree: selectedEl.classList.contains("booking-card") || selectedEl.classList.contains("content-card"),
+  };
+  document.getElementById("drag-shield").classList.add("show");
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!resizeState) return;
+  const dw = (e.clientX - resizeState.startX) / zoomScale;
+  const dh = (e.clientY - resizeState.startY) / zoomScale;
+  const el = resizeState.el;
+  const w = Math.max(40, Math.round(resizeState.origW + dw));
+  el.style.width = w + "px";
+  if (resizeState.isImg) {
+    // 画像は縦横比を保って拡大縮小
+    el.style.height = resizeState.aspect ? Math.round(w / resizeState.aspect) + "px" : "auto";
+  } else if (resizeState.hFree) {
+    el.style.height = Math.max(40, Math.round(resizeState.origH + dh)) + "px";
+  }
+  if (activeBlockEl === el) syncBlockProps(el);
+  positionFloatBar();
+});
+
+document.addEventListener("mouseup", () => {
+  if (resizeState) {
+    resizeState = null;
+    document.getElementById("drag-shield").classList.remove("show");
+    snapshotForUndo();
+    resizeIframe();
+  }
+});
 
 // ツールバーのボタン動作（編集中でなければ選択要素に直接適用）
 function fbTextTarget() { return activeTextEl || (selectedEl && selectedEl.hasAttribute("data-ed") ? selectedEl : null); }
