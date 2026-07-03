@@ -44,6 +44,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 #ed-left { width: 220px; flex-shrink: 0; background: #1e293b; border-right: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; }
 .left-head { padding: 12px 14px 8px; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: rgba(255,255,255,.3); text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
 #section-list { flex: 1; overflow-y: auto; padding: 8px; }
+#page-list { max-height: 240px; overflow-y: auto; padding: 8px; border-top: 1px solid rgba(255,255,255,.07); }
+.page-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,.55); font-size: 11.5px; transition: all .15s; }
+.page-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+.page-item .pg-path { margin-left: auto; font-size: 9.5px; color: rgba(255,255,255,.25); }
+.page-item.current { color: #93c5fd; background: rgba(59,130,246,.12); }
 .sec-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,.6); font-size: 12px; transition: all .15s; margin-bottom: 2px; }
 .sec-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .sec-item.active { background: rgba(59,130,246,.2); color: #93c5fd; }
@@ -120,6 +125,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 #drag-shield { position: fixed; inset: 0; z-index: 10004; display: none; cursor: nwse-resize; }
 #drag-shield.show { display: block; }
 
+/* ── ＋追加 ボタン＆パネル ── */
+#add-btn {
+  background: #fff; color: #0f172a; border: none; border-radius: 8px;
+  padding: 6px 14px; font-weight: 800; font-size: 12px; cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+}
+#add-btn:hover { background: #dbeafe; }
+#add-panel {
+  position: fixed; top: 54px; left: 150px; z-index: 10002; display: none;
+  width: 240px; background: #1e293b; border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.5); padding: 8px;
+}
+#add-panel.show { display: block; }
+.add-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: rgba(255,255,255,.75); transition: background .12s; }
+.add-item:hover { background: rgba(59,130,246,.18); color: #fff; }
+.add-item .ai-icon { width: 18px; text-align: center; }
+
+/* ── 右クリックメニュー ── */
+#ctx-menu {
+  position: fixed; z-index: 10003; display: none; min-width: 190px;
+  background: #1e293b; border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.55); padding: 6px;
+}
+#ctx-menu.show { display: block; }
+.ctx-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; cursor: pointer; font-size: 12.5px; color: rgba(255,255,255,.8); }
+.ctx-item:hover { background: rgba(59,130,246,.2); color: #fff; }
+.ctx-item.danger:hover { background: rgba(239,68,68,.18); color: #fca5a5; }
+.ctx-sep { height: 1px; background: rgba(255,255,255,.1); margin: 5px 6px; }
+.ctx-head { font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,.35); padding: 5px 10px 3px; }
+
 /* ── バージョン履歴パネル ── */
 #history-panel {
   position: fixed; top: 54px; right: 12px; z-index: 10002; display: none;
@@ -165,6 +200,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <div class="top-div"></div>
   <button class="icon-btn" id="undo-btn" title="元に戻す (Ctrl+Z)" disabled>↩</button>
   <button class="icon-btn" id="redo-btn" title="やり直す (Ctrl+Y)" disabled>↪</button>
+  <div class="top-div"></div>
+  <button id="add-btn" title="コンテンツを追加">＋ 追加</button>
   <div class="top-space"></div>
   <div class="dev-toggle">
     <button id="zoom-fit" class="active">🔍 全体表示</button>
@@ -192,9 +229,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   </span>
   <span id="fb-img-tools" style="display:none">
     <button class="fb-btn" id="fb-replace">🖼 差し替え</button>
+    <button class="fb-btn" id="fb-img-link" title="クリックしたときの遷移先を設定">🔗</button>
   </span>
   <span id="fb-block-tools" style="display:none">
-    <span class="fb-hint">ドラッグで移動 ／ 文字はダブルクリック</span>
+    <button class="fb-btn" id="fb-dup" title="複製 (Ctrl+D)">⧉ 複製</button>
+    <button class="fb-btn" id="fb-del" title="削除 (Delete)">🗑</button>
+    <button class="fb-btn" id="fb-blk-link" title="クリックしたときの遷移先を設定">🔗</button>
   </span>
   <span class="fb-sep"></span>
   <button class="fb-btn" id="fb-done" title="選択解除">✓ 完了</button>
@@ -203,6 +243,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <!-- 大きさ調整ハンドル（選択中の項目の右下角） -->
 <div id="rs-handle" title="ドラッグで大きさ調整"></div>
 <div id="drag-shield"></div>
+
+<!-- ＋追加 パネル -->
+<div id="add-panel">
+  <div class="hist-head">クリックで追加（既存デザインと同じ見た目）</div>
+  <div id="add-list"></div>
+</div>
+
+<!-- 右クリックメニュー -->
+<div id="ctx-menu"></div>
 
 <!-- バージョン履歴 -->
 <div id="history-panel">
@@ -219,11 +268,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 
 <div id="ed-body">
 
-  <!-- Left: section list -->
+  <!-- Left: section list + site map -->
   <div id="ed-left">
-    <div class="left-head">ページ構成</div>
+    <div class="left-head">このページの中身</div>
     <div id="section-list"></div>
-    <div class="left-hint">項目クリック → 選択・ドラッグで移動<br>文字ダブルクリック → 編集<br>右下の□ → 大きさ変更<br>画像クリック → 差し替え</div>
+    <div class="left-head">サイトのページ構成</div>
+    <div id="page-list"></div>
+    <div class="left-hint">項目クリック → 選択・ドラッグで移動<br>文字ダブルクリック → 編集<br>右下の□ → 大きさ変更<br>🔗 → 遷移先をページ一覧から選択</div>
   </div>
 
   <!-- Canvas -->
@@ -338,6 +389,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
         <div class="prop-group">
           <div class="prop-label">代替テキスト (alt)</div>
           <input type="text" id="alt-inp" class="prop-input" placeholder="画像の説明">
+        </div>
+        <div class="prop-group">
+          <div class="prop-label">🔗 クリック時の遷移先（空欄＝リンクなし）</div>
+          <input type="text" id="img-link-inp" class="prop-input" placeholder="例: pages/manga.html">
         </div>
       </div>
 
@@ -593,7 +648,7 @@ const TEXT_SEL = [
 const DRAG_SEL = [
   ".hero-content", ".booking-card", ".badges", ".badge",
   ".content-card", ".info-sec", ".reviews-sec", ".access-sec",
-  ".rec-card", ".review-card",
+  ".rec-card", ".review-card", ".ed-free",
 ].join(",");
 const DRAG_LABEL = {
   "hero-content": "キャッチコピー", "booking-card": "予約カード",
@@ -601,6 +656,7 @@ const DRAG_LABEL = {
   "content-card": "サービスカード", "info-sec": "おすすめ情報（全体）",
   "reviews-sec": "お客様の声（全体）", "access-sec": "アクセス",
   "rec-card": "おすすめカード", "review-card": "口コミ",
+  "ed-free": "追加パーツ",
 };
 
 // ── ページを「キャンバス化」：並んでいる項目を1個ずつ絶対配置に固定 ──
@@ -689,11 +745,21 @@ function attachEditHandlers() {
     if (!e.target.closest("[data-ed]") && !e.target.closest("[data-ed-img]") && !e.target.closest("[data-ed-block]")) deselect();
   }, { capture: false });
 
-  // Escape to deselect / 矢印キーでブロック微調整
+  // Escape/Delete/Ctrl+D/矢印キー
   iframeDoc.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") deselect();
+    if (e.key === "Escape") { hideCtxMenu(); deselect(); }
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); handlePublish(); }
+    if (e.key === "Delete" && activeBlockEl && !activeTextEl) { e.preventDefault(); deleteSelected(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D") && activeBlockEl && !activeTextEl) {
+      e.preventDefault(); duplicateItem(activeBlockEl);
+    }
     handleArrowNudge(e);
+  });
+
+  // 右クリックメニュー
+  iframeDoc.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    openCtxMenu(e);
   });
 }
 
@@ -1232,6 +1298,263 @@ document.addEventListener("click", (e) => {
       !e.target.closest("#history-panel") && !e.target.closest("#history-btn")) {
     histPanel.classList.remove("show");
   }
+});
+
+// ================================================================
+// コンテンツ追加・複製・削除・リンク設定（＋追加パネル／右クリック）
+// ================================================================
+
+// ── 複製（Canva/パワポと同じ：右下に少しずらして出る） ──
+function duplicateItem(src) {
+  if (!src) return;
+  const clone = src.cloneNode(true);
+  clone.querySelectorAll("._ed_handle,._ed_rs,._ed_guide").forEach(n => n.remove());
+  clone.classList.remove("ed-sel");
+  clone.removeAttribute("contenteditable");
+  clone.querySelectorAll("[contenteditable]").forEach(n => n.removeAttribute("contenteditable"));
+  src.parentElement.appendChild(clone);
+  const r = blockRect(src);
+  clone.style.position = "absolute";
+  clone.style.width = Math.round(r.width) + "px";
+  setBlockPos(clone, r.left + 18, r.top + 18);
+  attachEditHandlers();
+  selectBlock(clone);
+  snapshotForUndo();
+  toast("複製しました。ドラッグで配置してください", "success");
+}
+
+// ── 削除（Ctrl+Zで戻せる） ──
+function deleteSelected() {
+  if (!activeBlockEl) return;
+  const el = activeBlockEl;
+  deselect();
+  el.remove();
+  snapshotForUndo();
+  buildSectionList();
+  toast("削除しました（Ctrl+Zで元に戻せます）", "info");
+}
+
+// ── リンク設定（画像や項目をクリックしたときの遷移先） ──
+function linkAnchorOf(el) {
+  if (!el) return null;
+  if (el.tagName === "A") return el;
+  if (el.parentElement && el.parentElement.tagName === "A") return el.parentElement;
+  return null;
+}
+function getLink(el) {
+  const a = linkAnchorOf(el);
+  return a ? (a.getAttribute("href") || "") : "";
+}
+function setLink(el, url) {
+  url = (url || "").trim();
+  let a = linkAnchorOf(el);
+  if (url) {
+    if (!a) { // <a>で包む（絶対配置の子はそのまま効くので見た目は不変）
+      a = iframeDoc.createElement("a");
+      a.style.textDecoration = "none";
+      a.style.color = "inherit";
+      el.parentElement.insertBefore(a, el);
+      a.appendChild(el);
+    }
+    a.setAttribute("href", url);
+  } else if (a) {
+    if (a !== el && a.children.length === 1) { // 包んだだけの<a>は外す
+      a.parentElement.insertBefore(el, a);
+      a.remove();
+    } else {
+      a.removeAttribute("href");
+    }
+  }
+}
+// サイトの全ページ（リンク先の選択肢＆左パネルの構成一覧）
+const SITE_PAGES = [
+  { path: "index.html",              name: "🏠 トップページ" },
+  { path: "reserve.html",            name: "📅 予約フォーム" },
+  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更" },
+  { path: "pages/catalog.html",      name: "🎿 板カタログ" },
+  { path: "pages/beginner-guide.html", name: "🔰 初心者ガイド" },
+  { path: "pages/pricing.html",      name: "💰 レンタル料金" },
+  { path: "pages/waxing.html",       name: "🛠 ワクシング" },
+  { path: "pages/access.html",       name: "📍 アクセス" },
+  { path: "pages/onsen-guide.html",  name: "♨️ 遠刈田温泉ガイド" },
+  { path: "pages/gourmet.html",      name: "🍜 周辺グルメ情報" },
+  { path: "pages/zao-ski-info.html", name: "🏔 蔵王のスキー場情報" },
+];
+
+// リンク先をページ一覧から選ぶ（プロのツールと同じ方式）
+function promptLink(el, anchorX, anchorY) {
+  const cur = getLink(el);
+  const entries = [
+    { head: cur ? "現在のリンク先: " + cur : "リンク先を選んでください" },
+    ...SITE_PAGES.map(p => ({
+      icon: "→", label: p.name.replace(/^\S+\s/, ""), fn: () => {
+        setLink(el, p.path); snapshotForUndo();
+        toast("リンクを設定：" + p.name, "success");
+      },
+    })),
+    "---",
+    { icon: "✏️", label: "URLを直接入力…", fn: () => {
+        const url = prompt("遷移先URLを入力\n例: https://instagram.com/... （空欄でリンク解除）", cur);
+        if (url === null) return;
+        setLink(el, url); snapshotForUndo();
+        toast(url.trim() ? "リンクを設定しました" : "リンクを解除しました", "success");
+      } },
+  ];
+  if (cur) entries.push({ icon: "❌", label: "リンクを解除", danger: true, fn: () => {
+    setLink(el, ""); snapshotForUndo(); toast("リンクを解除しました", "info");
+  } });
+  const x = anchorX !== undefined ? anchorX : window.innerWidth / 2 - 100;
+  const y = anchorY !== undefined ? anchorY : 120;
+  showCtxEntries(entries, x, y);
+}
+
+// 左パネル：サイトのページ構成一覧（クリックで別タブ表示）
+(function buildPageList() {
+  const list = document.getElementById("page-list");
+  SITE_PAGES.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "page-item" + (p.path === "index.html" ? " current" : "");
+    item.innerHTML = `<span>${p.name}</span><span class="pg-path">${p.path === "index.html" ? "編集中" : "開く ↗"}</span>`;
+    item.title = p.path;
+    item.addEventListener("click", () => { if (p.path !== "index.html") window.open("../" + p.path, "_blank"); });
+    list.appendChild(item);
+  });
+})();
+
+// ── ＋追加パネル ──
+const ADD_DEFS = [
+  { icon: "✏️", label: "テキスト", kind: "html",
+    html: '<p class="ed-free" style="font-size:14px;line-height:1.7;color:#15314f">テキストを入力</p>' },
+  { icon: "🔠", label: "見出し", kind: "html",
+    html: '<h2 class="ed-free" style="font-size:28px;font-weight:800;color:#15314f">見出しテキスト</h2>' },
+  { icon: "🔘", label: "ボタン（黄色）", kind: "html",
+    html: '<a class="btn btn-primary ed-free" style="width:auto;padding:12px 28px">ボタン</a>' },
+  { icon: "🖼", label: "画像（後で差し替え）", kind: "html",
+    html: '<img class="ed-free" src="assets/img/onsen.jpg" alt="" style="width:220px;height:auto;border-radius:8px">' },
+  { icon: "⭐", label: "口コミをもう1件", kind: "dup", sel: ".review-card" },
+  { icon: "📍", label: "おすすめカードをもう1枚", kind: "dup", sel: ".rec-card" },
+  { icon: "🎿", label: "サービスカードをもう1枚", kind: "dup", sel: ".content-card" },
+  { icon: "✓", label: "バッジをもう1個", kind: "dup", sel: ".badge" },
+];
+
+function addContent(def) {
+  hideCtxMenu();
+  document.getElementById("add-panel").classList.remove("show");
+  if (def.kind === "dup") {
+    const all = iframeDoc.querySelectorAll(def.sel);
+    if (!all.length) { toast("元になる項目が見つかりません", "error"); return; }
+    duplicateItem(all[all.length - 1]);
+    return;
+  }
+  const tmp = iframeDoc.createElement("div");
+  tmp.innerHTML = def.html;
+  const el = tmp.firstElementChild;
+  const c = (activeBlockEl && containerOf(activeBlockEl)) || heroEl();
+  c.appendChild(el);
+  el.style.position = "absolute";
+  el.style.left = "60px";
+  el.style.top = "60px";
+  el.style.zIndex = "30";
+  attachEditHandlers();
+  selectBlock(el);
+  snapshotForUndo();
+  toast("追加しました。ドラッグで好きな場所へ", "success");
+}
+
+// パネルを組み立て
+(function buildAddPanel() {
+  const list = document.getElementById("add-list");
+  ADD_DEFS.forEach(def => {
+    const item = document.createElement("div");
+    item.className = "add-item";
+    item.innerHTML = `<span class="ai-icon">${def.icon}</span><span>${def.label}</span>`;
+    item.addEventListener("click", () => addContent(def));
+    list.appendChild(item);
+  });
+})();
+
+document.getElementById("add-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  hideCtxMenu();
+  document.getElementById("add-panel").classList.toggle("show");
+});
+
+// ── 右クリックメニュー ──
+const ctxMenu = document.getElementById("ctx-menu");
+function hideCtxMenu() { ctxMenu.classList.remove("show"); }
+
+function showCtxEntries(entries, outerX, outerY) {
+  ctxMenu.innerHTML = "";
+  entries.forEach(en => {
+    if (en === "---") {
+      const s = document.createElement("div"); s.className = "ctx-sep"; ctxMenu.appendChild(s); return;
+    }
+    if (en.head) {
+      const h = document.createElement("div"); h.className = "ctx-head"; h.textContent = en.head; ctxMenu.appendChild(h); return;
+    }
+    const item = document.createElement("div");
+    item.className = "ctx-item" + (en.danger ? " danger" : "");
+    item.innerHTML = `<span>${en.icon}</span><span>${en.label}</span>`;
+    item.addEventListener("click", () => { hideCtxMenu(); en.fn(); });
+    ctxMenu.appendChild(item);
+  });
+  ctxMenu.classList.add("show");
+  const mw = ctxMenu.offsetWidth, mh = ctxMenu.offsetHeight;
+  ctxMenu.style.left = Math.min(outerX, window.innerWidth - mw - 10) + "px";
+  ctxMenu.style.top = Math.min(outerY, window.innerHeight - mh - 10) + "px";
+}
+
+function openCtxMenu(e) {
+  const ifr = iframe.getBoundingClientRect();
+  const ox = ifr.left + e.clientX * zoomScale;
+  const oy = ifr.top + e.clientY * zoomScale;
+
+  const img = e.target.tagName === "IMG" ? e.target : null;
+  const block = e.target.closest(DRAG_SEL);
+
+  if (block) {
+    selectBlock(block);
+    const entries = [
+      { icon: "⧉", label: "複製", fn: () => duplicateItem(block) },
+      { icon: "🔗", label: "リンク先を設定…", fn: () => promptLink(block) },
+    ];
+    if (img) entries.push({ icon: "🖼", label: "この画像を差し替え", fn: () => { handleImgClick(img); document.getElementById("img-file-inp").click(); } });
+    entries.push("---", { icon: "🗑", label: "削除", danger: true, fn: () => deleteSelected() });
+    showCtxEntries(entries, ox, oy);
+    return;
+  }
+  if (img) {
+    handleImgClick(img);
+    showCtxEntries([
+      { icon: "🖼", label: "画像を差し替え", fn: () => document.getElementById("img-file-inp").click() },
+      { icon: "🔗", label: "リンク先を設定…", fn: () => promptLink(img) },
+    ], ox, oy);
+    return;
+  }
+  // 何もない場所 → 追加メニュー
+  showCtxEntries([{ head: "ここに追加" }, ...ADD_DEFS.map(def => ({ icon: def.icon, label: def.label, fn: () => addContent(def) }))], ox, oy);
+}
+
+// 外側クリックで各メニューを閉じる
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#ctx-menu")) hideCtxMenu();
+  if (!e.target.closest("#add-panel") && !e.target.closest("#add-btn")) {
+    document.getElementById("add-panel").classList.remove("show");
+  }
+});
+
+// ── フロートバーのボタン ──
+document.getElementById("fb-dup").addEventListener("click", () => duplicateItem(activeBlockEl));
+document.getElementById("fb-del").addEventListener("click", () => deleteSelected());
+document.getElementById("fb-blk-link").addEventListener("click", (e) => { if (activeBlockEl) promptLink(activeBlockEl, e.clientX - 95, e.clientY + 16); });
+document.getElementById("fb-img-link").addEventListener("click", (e) => { if (activeImgEl) promptLink(activeImgEl, e.clientX - 95, e.clientY + 16); });
+
+// 画像パネルのリンク入力
+document.getElementById("img-link-inp").addEventListener("change", (e) => {
+  if (!activeImgEl) return;
+  setLink(activeImgEl, e.target.value);
+  snapshotForUndo();
+  toast(e.target.value.trim() ? "リンクを設定しました" : "リンクを解除しました", "success");
 });
 
 // ── 未公開バッジ ──
