@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>8つ森レンタル</title>
+<link rel="stylesheet" href="../assets/css/style.css?v=6">
+</head>
+<body>
+<!-- エディタで追加した「新規ページ」の汎用テンプレート。
+     ?key=xxx で指定されたページ内容をSupabase(site_pages)から読み込んで表示する。 -->
+<div class="page" id="page-root">
+  <header class="subpage-header">
+    <a class="back-link" href="../index.html">&#8249;</a>
+    <span class="subpage-title">8つ森レンタル</span>
+  </header>
+  <div class="container">
+    <p class="help-text">このページはまだ作成されていません。</p>
+  </div>
+</div>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabaseClient.js?v=6"></script>
+<script>window.YATSUMORI_PAGE_KEY = new URLSearchParams(location.search).get("key") || "";</script>
+<script src="../assets/js/pageRenderer.js?v=2"></script>
+</body>
+</html>

@@ -49,6 +49,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 .page-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .page-item .pg-path { margin-left: auto; font-size: 9.5px; color: rgba(255,255,255,.25); }
 .page-item.current { color: #93c5fd; background: rgba(59,130,246,.12); }
+.pg-group { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.28); padding: 8px 8px 3px; letter-spacing: .05em; }
+.page-item.child { padding-left: 22px; }
+#new-page-btn { border: none; background: rgba(59,130,246,.25); color: #93c5fd; border-radius: 6px; padding: 3px 9px; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+#new-page-btn:hover { background: rgba(59,130,246,.45); color: #fff; }
 .sec-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,.6); font-size: 12px; transition: all .15s; margin-bottom: 2px; }
 .sec-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .sec-item.active { background: rgba(59,130,246,.2); color: #93c5fd; }
@@ -272,7 +276,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <div id="ed-left">
     <div class="left-head">このページの中身</div>
     <div id="section-list"></div>
-    <div class="left-head">サイトのページ構成</div>
+    <div class="left-head" style="display:flex;align-items:center;justify-content:space-between">
+      サイトのページ構成
+      <button id="new-page-btn" title="新しいページを作る">＋ 新規</button>
+    </div>
     <div id="page-list"></div>
     <div class="left-hint">項目クリック → 選択・ドラッグで移動<br>文字ダブルクリック → 編集<br>右下の□ → 大きさ変更<br>🔗 → 遷移先をページ一覧から選択</div>
   </div>
@@ -1416,7 +1423,7 @@ function promptLink(el, anchorX, anchorY) {
   const cur = getLink(el);
   const entries = [
     { head: cur ? "現在のリンク先: " + cur : "リンク先を選んでください" },
-    ...SITE_PAGES.map(p => ({
+    ...SITE_PAGES.concat(CUSTOM_PAGES).map(p => ({
       icon: "→", label: p.name.replace(/^\S+\s/, ""), fn: () => {
         setLink(el, p.path); snapshotForUndo();
         toast("リンクを設定：" + p.name, "success");
@@ -1438,25 +1445,93 @@ function promptLink(el, anchorX, anchorY) {
   showCtxEntries(entries, x, y);
 }
 
-// 左パネル：サイトのページ構成一覧
-// 編集可能ページ → エディタ内で切替（左のページ構成は出たまま）
-// 予約機能ページ → 別タブで表示のみ（予約フォームを壊さないため）
-(function buildPageList() {
+// 左パネル：サイトのページ構成（フォルダ構成ツリー表示）
+// 編集可能ページ → エディタ内で切替／予約機能ページ → 別タブ表示のみ
+let CUSTOM_PAGES = []; // エディタから作った追加ページ（Supabaseに保存される仮想ページ）
+
+function renderPageList() {
   const list = document.getElementById("page-list");
-  SITE_PAGES.forEach(p => {
-    const item = document.createElement("div");
-    item.className = "page-item" + (p.path === "index.html" ? " current" : "");
-    item.dataset.path = p.path;
-    item.dataset.editable = p.key ? "1" : "0";
-    item.innerHTML = `<span>${p.name}</span><span class="pg-path">${p.path === "index.html" ? "編集中" : (p.key ? "✏️ 編集" : "開く ↗")}</span>`;
-    item.title = p.path;
-    item.addEventListener("click", () => {
-      if (p.key) switchPage(p);
-      else window.open("../" + p.path, "_blank");
+  list.innerHTML = "";
+  const groups = [
+    { label: "メイン", items: SITE_PAGES.filter(p => !p.path.startsWith("pages/")) },
+    { label: "📁 案内ページ", items: SITE_PAGES.filter(p => p.path.startsWith("pages/")) },
+    { label: "📁 追加したページ", items: CUSTOM_PAGES },
+  ];
+  groups.forEach(g => {
+    if (!g.items.length && g.label !== "📁 追加したページ") return;
+    const gh = document.createElement("div");
+    gh.className = "pg-group";
+    gh.textContent = g.label;
+    list.appendChild(gh);
+    if (!g.items.length) {
+      const empty = document.createElement("div");
+      empty.className = "page-item child";
+      empty.style.opacity = ".45";
+      empty.innerHTML = `<span>（「＋ 新規」で作成）</span>`;
+      list.appendChild(empty);
+      return;
+    }
+    g.items.forEach(p => {
+      const cur = p.path === currentPage.path;
+      const item = document.createElement("div");
+      item.className = "page-item child" + (cur ? " current" : "");
+      item.title = p.path;
+      item.innerHTML = `<span>${p.name}</span><span class="pg-path">${cur ? "編集中" : (p.key ? "✏️ 編集" : "開く ↗")}</span>`;
+      item.addEventListener("click", () => {
+        if (p.key) switchPage(p);
+        else window.open("../" + p.path, "_blank");
+      });
+      list.appendChild(item);
     });
-    list.appendChild(item);
   });
-})();
+}
+function refreshPageList() { renderPageList(); }
+renderPageList();
+
+// Supabaseから「エディタで作った追加ページ」を読み込む
+async function loadCustomPages() {
+  try {
+    const KNOWN = SITE_PAGES.map(p => p.key).filter(Boolean);
+    const { data } = await sb.from("site_pages").select("page_key, project_data");
+    CUSTOM_PAGES = (data || [])
+      .filter(r => !KNOWN.includes(r.page_key))
+      .map(r => ({
+        path: "pages/p.html?key=" + r.page_key,
+        name: "📄 " + ((r.project_data && r.project_data.title) || r.page_key),
+        key: r.page_key,
+        custom: true,
+      }));
+    renderPageList();
+  } catch (e) {}
+}
+loadCustomPages();
+
+// ── ＋新規ページ作成（Git不要・Supabase保存の仮想ページ、即公開） ──
+document.getElementById("new-page-btn").addEventListener("click", async () => {
+  if (isDirty && !confirm("未公開の変更があります。\n（下書きは自動保存済み）\n\nこのまま新しいページを作りますか？")) return;
+  const title = prompt("新しいページの名前を入力してください\n例: やつもりん漫画 第1話");
+  if (!title || !title.trim()) return;
+  isDirty = false; refreshDirtyBadge();
+  const key = "custom-" + Date.now().toString(36);
+  const html = [
+    '<header class="subpage-header"><a class="back-link" href="../index.html">&#8249;</a>',
+    `<span class="subpage-title">${title.trim()}</span></header>`,
+    '<div class="container">',
+    `<h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 10px">${title.trim()}</h2>`,
+    '<p class="help-text">ここに内容を追加してください（上の「＋ 追加」や右クリックで画像・テキストを置けます）。</p>',
+    '</div>',
+  ].join("");
+  try {
+    setEditorPageKey(key);
+    await publishPage({ html, css: "", projectData: { title: title.trim() } });
+    const p = { path: "pages/p.html?key=" + key, name: "📄 " + title.trim(), key, custom: true };
+    CUSTOM_PAGES.push(p);
+    toast("ページを作りました！", "success");
+    switchPage(p);
+  } catch (e) {
+    toast("作成に失敗: " + e.message, "error");
+  }
+});
 
 // ── ＋追加パネル ──
 const ADD_DEFS = [
