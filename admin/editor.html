@@ -196,7 +196,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <!-- Top bar -->
 <div id="ed-top">
   <a class="top-back" href="index.html" title="ダッシュボードに戻る">‹</a>
-  <span class="top-label">8つ森レンタル — ページ編集</span>
+  <span class="top-label">8つ森レンタル — <span id="current-page-name">トップページ</span> を編集中</span>
   <div class="top-div"></div>
   <button class="icon-btn" id="undo-btn" title="元に戻す (Ctrl+Z)" disabled>↩</button>
   <button class="icon-btn" id="redo-btn" title="やり直す (Ctrl+Y)" disabled>↪</button>
@@ -404,7 +404,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="js/adminClient.js?v=6"></script>
 <script src="js/adminAuth.js?v=6"></script>
-<script src="js/editorClient.js?v=1"></script>
+<script src="js/editorClient.js?v=2"></script>
 <script>
 // ================================================================
 // 8つ森レンタル ページエディタ — Phase 1
@@ -642,6 +642,7 @@ const TEXT_SEL = [
   ".access-row",".access-btn",
   ".utility-ig",".utility-links a",
   "a.btn",
+  ".subpage-title",".alert",".btn-nav",   // サブページ用
 ].join(",");
 
 // パワポ風に自由移動できる「項目」たち（1個ずつ独立して動かせる）
@@ -856,7 +857,7 @@ function heroEl() { return iframeDoc.querySelector(".hero"); }
 
 // 項目が属する「キャンバス」（＝positionを持つ親）。この中で自由に動く
 function containerOf(el) {
-  return el.offsetParent || heroEl() || iframeDoc.body;
+  return el.offsetParent || iframeDoc.getElementById("page-root") || iframeDoc.body;
 }
 
 // 項目の現在位置（自分のコンテナ基準のleft/top）を取得
@@ -894,10 +895,11 @@ function clearGuides() {
 }
 
 function drawGuide(axis, pos, container) {
+  if (!container) return;
   const g = iframeDoc.createElement("div");
   g.className = axis === "v" ? "_ed_guide_v" : "_ed_guide_h";
   g.style[axis === "v" ? "left" : "top"] = Math.round(pos) + "px";
-  (container || heroEl()).appendChild(g);
+  container.appendChild(g);
 }
 
 function applySnap(left, top, w, h, targets) {
@@ -1217,14 +1219,14 @@ window.addEventListener("resize", positionFloatBar);
 // ================================================================
 // 自動下書き保存（ブラウザを閉じても作業が消えない）
 // ================================================================
-const DRAFT_KEY = "yatsumori_draft_home";
+function draftKey() { return "yatsumori_draft_" + (currentPage ? currentPage.key : "home"); }
 let draftTimer = null;
 
 function scheduleDraftSave() {
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ html: getCleanHTML(), savedAt: Date.now() }));
+      localStorage.setItem(draftKey(), JSON.stringify({ html: getCleanHTML(), savedAt: Date.now() }));
       const t = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
       setStatus("下書き自動保存 " + t);
     } catch (e) {}
@@ -1233,10 +1235,10 @@ function scheduleDraftSave() {
 
 function checkDraftOnBoot() {
   try {
-    const raw = localStorage.getItem(DRAFT_KEY);
+    const raw = localStorage.getItem(draftKey());
     if (!raw) return;
     const draft = JSON.parse(raw);
-    if (!draft.html || draft.html === getCleanHTML()) { localStorage.removeItem(DRAFT_KEY); return; }
+    if (!draft.html || draft.html === getCleanHTML()) { localStorage.removeItem(draftKey()); return; }
     const banner = document.getElementById("draft-banner");
     banner.classList.add("show");
     document.getElementById("draft-restore-btn").onclick = () => {
@@ -1248,7 +1250,7 @@ function checkDraftOnBoot() {
       toast("下書きを復元しました", "success");
     };
     document.getElementById("draft-discard-btn").onclick = () => {
-      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(draftKey());
       banner.classList.remove("show");
     };
   } catch (e) {}
@@ -1366,20 +1368,47 @@ function setLink(el, url) {
     }
   }
 }
-// サイトの全ページ（リンク先の選択肢＆左パネルの構成一覧）
+// サイトの全ページ（key有り＝このエディタで編集可能／null＝予約機能ページなので表示のみ）
 const SITE_PAGES = [
-  { path: "index.html",              name: "🏠 トップページ" },
-  { path: "reserve.html",            name: "📅 予約フォーム" },
-  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更" },
-  { path: "pages/catalog.html",      name: "🎿 板カタログ" },
-  { path: "pages/beginner-guide.html", name: "🔰 初心者ガイド" },
-  { path: "pages/pricing.html",      name: "💰 レンタル料金" },
-  { path: "pages/waxing.html",       name: "🛠 ワクシング" },
-  { path: "pages/access.html",       name: "📍 アクセス" },
-  { path: "pages/onsen-guide.html",  name: "♨️ 遠刈田温泉ガイド" },
-  { path: "pages/gourmet.html",      name: "🍜 周辺グルメ情報" },
-  { path: "pages/zao-ski-info.html", name: "🏔 蔵王のスキー場情報" },
+  { path: "index.html",              name: "🏠 トップページ",        key: "home" },
+  { path: "reserve.html",            name: "📅 予約フォーム",        key: null },
+  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更",    key: null },
+  { path: "pages/catalog.html",      name: "🎿 板カタログ",          key: "catalog" },
+  { path: "pages/beginner-guide.html", name: "🔰 初心者ガイド",      key: "beginner-guide" },
+  { path: "pages/pricing.html",      name: "💰 レンタル料金",        key: "pricing" },
+  { path: "pages/waxing.html",       name: "🛠 ワクシング",          key: "waxing" },
+  { path: "pages/access.html",       name: "📍 アクセス",            key: "access" },
+  { path: "pages/onsen-guide.html",  name: "♨️ 遠刈田温泉ガイド",    key: "onsen-guide" },
+  { path: "pages/gourmet.html",      name: "🍜 周辺グルメ情報",      key: "gourmet" },
+  { path: "pages/zao-ski-info.html", name: "🏔 蔵王のスキー場情報",  key: "zao-ski-info" },
 ];
+let currentPage = SITE_PAGES[0];
+
+// ── ページ切替（エディタの中で別ページを開いて編集） ──
+function switchPage(p) {
+  if (p.path === currentPage.path) return;
+  if (isDirty && !confirm("未公開の変更があります。\n（下書きは自動保存済みなので、戻ってくれば復元できます）\n\nこのままページを移動しますか？")) return;
+  currentPage = p;
+  setEditorPageKey(p.key);
+  deselect();
+  hideCtxMenu();
+  document.getElementById("draft-banner").classList.remove("show");
+  document.getElementById("current-page-name").textContent = p.name.replace(/^\S+\s/, "");
+  document.getElementById("canvas-loading").style.display = "flex";
+  isDirty = false;
+  refreshDirtyBadge();
+  setStatus("読み込み中...");
+  iframe.src = "../" + p.path;   // loadイベントで初期化が再実行される
+  refreshPageList();
+}
+
+function refreshPageList() {
+  document.querySelectorAll(".page-item").forEach(el => {
+    el.classList.toggle("current", el.dataset.path === currentPage.path);
+    const tag = el.querySelector(".pg-path");
+    if (tag) tag.textContent = el.dataset.path === currentPage.path ? "編集中" : (el.dataset.editable === "1" ? "✏️ 編集" : "開く ↗");
+  });
+}
 
 // リンク先をページ一覧から選ぶ（プロのツールと同じ方式）
 function promptLink(el, anchorX, anchorY) {
@@ -1408,15 +1437,22 @@ function promptLink(el, anchorX, anchorY) {
   showCtxEntries(entries, x, y);
 }
 
-// 左パネル：サイトのページ構成一覧（クリックで別タブ表示）
+// 左パネル：サイトのページ構成一覧
+// 編集可能ページ → エディタ内で切替（左のページ構成は出たまま）
+// 予約機能ページ → 別タブで表示のみ（予約フォームを壊さないため）
 (function buildPageList() {
   const list = document.getElementById("page-list");
   SITE_PAGES.forEach(p => {
     const item = document.createElement("div");
     item.className = "page-item" + (p.path === "index.html" ? " current" : "");
-    item.innerHTML = `<span>${p.name}</span><span class="pg-path">${p.path === "index.html" ? "編集中" : "開く ↗"}</span>`;
+    item.dataset.path = p.path;
+    item.dataset.editable = p.key ? "1" : "0";
+    item.innerHTML = `<span>${p.name}</span><span class="pg-path">${p.path === "index.html" ? "編集中" : (p.key ? "✏️ 編集" : "開く ↗")}</span>`;
     item.title = p.path;
-    item.addEventListener("click", () => { if (p.path !== "index.html") window.open("../" + p.path, "_blank"); });
+    item.addEventListener("click", () => {
+      if (p.key) switchPage(p);
+      else window.open("../" + p.path, "_blank");
+    });
     list.appendChild(item);
   });
 })();
@@ -1449,7 +1485,8 @@ function addContent(def) {
   const tmp = iframeDoc.createElement("div");
   tmp.innerHTML = def.html;
   const el = tmp.firstElementChild;
-  const c = (activeBlockEl && containerOf(activeBlockEl)) || heroEl();
+  const c = (activeBlockEl && containerOf(activeBlockEl)) || heroEl() || iframeDoc.getElementById("page-root") || iframeDoc.body;
+  if (iframeWin.getComputedStyle(c).position === "static") c.style.position = "relative";
   c.appendChild(el);
   el.style.position = "absolute";
   el.style.left = "60px";
@@ -1668,6 +1705,9 @@ const SEC_MAP = [
   { sel: ".reviews-sec",   icon: "⭐", label: "お客様の声" },
   { sel: ".access-sec",    icon: "🚗", label: "アクセス" },
   { sel: ".utility-bar",   icon: "📞", label: "フッター" },
+  // サブページ用
+  { sel: ".subpage-header", icon: "🔖", label: "ページ見出し" },
+  { sel: ".container",      icon: "📄", label: "本文" },
 ];
 
 function buildSectionList() {
@@ -1750,9 +1790,9 @@ document.getElementById("zoom-100").addEventListener("click", (e) => {
   e.currentTarget.classList.add("active");
 });
 
-// ── Preview ──
+// ── Preview（編集中のページを別タブで表示） ──
 document.getElementById("preview-btn").addEventListener("click", () => {
-  window.open("../index.html", "_blank");
+  window.open("../" + currentPage.path, "_blank");
 });
 
 // ── Publish ──
@@ -1775,7 +1815,7 @@ async function handlePublish() {
 
     isDirty = false;
     refreshDirtyBadge();
-    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+    try { localStorage.removeItem(draftKey()); } catch (e) {}
     const now = new Date().toLocaleString("ja-JP", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" });
     setStatus("公開済み " + now);
     btn.textContent = "✓ 公開しました";

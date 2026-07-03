@@ -2,7 +2,9 @@
 // 既存の sb クライアント（adminClient.js で生成済み）をそのまま使う
 // （新たに createClient しない＝ supabase 変数名衝突バグを構造的に回避）。
 
-const PAGE_KEY = "home";
+// 編集対象のページキー（エディタのページ切替で変わる）
+let PAGE_KEY = "home";
+function setEditorPageKey(key) { PAGE_KEY = key; }
 
 // 公開中の内容を取得（無ければ null）
 async function loadPublishedPage() {

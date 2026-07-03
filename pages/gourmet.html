@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../assets/css/style.css?v=5">
 </head>
 <body>
-<div class="page">
+<div class="page" id="page-root">
   <header class="subpage-header">
     <a class="back-link" href="../index.html">&#8249;</a>
     <span class="subpage-title">周辺グルメ情報</span>
@@ -23,5 +23,9 @@
     </div>
   </div>
 </div>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="../assets/js/supabaseClient.js?v=6"></script>
+<script>window.YATSUMORI_PAGE_KEY="gourmet";</script>
+<script src="../assets/js/pageRenderer.js?v=2"></script>
 </body>
 </html>
