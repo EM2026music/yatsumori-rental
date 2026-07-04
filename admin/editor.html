@@ -295,7 +295,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
     <div class="left-head">このページの中身</div>
     <div id="section-list"></div>
     <button id="rescue-btn" title="ページの外に飛んだ項目・つぶれた項目を見える場所に戻します"
-      style="margin:6px 10px;padding:7px 10px;width:calc(100% - 20px);background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.45);color:inherit;border-radius:8px;font-size:12px;cursor:pointer">🚑 迷子の項目を呼び戻す</button>
+      style="margin:6px 10px 4px;padding:7px 10px;width:calc(100% - 20px);background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.45);color:inherit;border-radius:8px;font-size:12px;cursor:pointer">🚑 迷子の項目を呼び戻す</button>
+    <button id="reset-btn" title="このページの未公開の変更（下書き）を全部捨てて、いま公開されている状態から編集をやり直します"
+      style="margin:0 10px 6px;padding:7px 10px;width:calc(100% - 20px);background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.4);color:inherit;border-radius:8px;font-size:12px;cursor:pointer">🔄 編集をやり直す（公開状態に戻す）</button>
     <div class="left-head" style="display:flex;align-items:center;justify-content:space-between">
       サイトのページ構成
       <button id="new-page-btn" title="新しいページを作る">＋ 新規</button>
@@ -2176,6 +2178,18 @@ document.getElementById("icon-file-inp").addEventListener("change", async (e) =>
   } finally {
     e.target.value = "";
   }
+});
+
+// 🔄 未公開の変更（下書き）を捨てて、公開されている状態から編集をやり直す
+document.getElementById("reset-btn").addEventListener("click", () => {
+  if (!confirm("このページの保存していない変更（下書き）を全部捨てて、\nいま公開されている状態に戻します。\n\nよろしいですか？")) return;
+  try { localStorage.removeItem(draftKey()); } catch (e) {}
+  isDirty = false; refreshDirtyBadge();
+  deselect(); hideCtxMenu();
+  document.getElementById("draft-banner").classList.remove("show");
+  setStatus("読み込み中...");
+  iframe.src = pageSrc(currentPage.path); // loadイベントで全部初期化される
+  toast("公開されている状態に戻しました。ここから編集をやり直せます", "success");
 });
 
 // 🚑 画面外に飛んだ・つぶれた項目をページ内に呼び戻す（座標バグ時代の保存データの救済）
