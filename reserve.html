@@ -7,18 +7,20 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>WEB予約 | 8つ森レンタル</title>
-<link rel="stylesheet" href="assets/css/style.css?v=8">
+<link rel="stylesheet" href="assets/css/style.css?v=9">
 </head>
 <body>
-<div class="page">
+<div class="page" id="page-root">
 
   <header class="brand-header">
     <a class="back-link" href="index.html">&#8249;</a>
+    <a href="index.html" style="display:flex;align-items:center;gap:10px">
     <img class="bh-logo" src="assets/img/logo.png" alt="8つ森レンタル">
     <div>
       <div class="bh-name">8つ森レンタル</div>
       <div class="bh-sub">SKI &amp; SNOWBOARD RENTAL</div>
     </div>
+    </a>
     <span class="bh-page">WEB予約</span>
   </header>
 
@@ -229,6 +231,7 @@ function refreshStepper(stepper, id) {
 
 // ---- 予約送信 ----
 async function handleSubmit() {
+  if (window.__YATSUMORI_EDITOR__) { alert("編集モードのため送信は無効です"); return; }
   showError("");
   const name = document.getElementById("cust-name").value.trim();
   const phone = document.getElementById("cust-phone").value.trim();
@@ -291,7 +294,7 @@ function showResult(res, input) {
 }
 
 // ---- 初期化 ----
-(function init() {
+window.__yatsumoriRebind = function () {
   const dateInput = document.getElementById("rental-date");
   dateInput.min = todayStr();
   dateInput.max = addDaysStr(todayStr(), 90); // business_settings.max_advance_days と合わせる
@@ -301,7 +304,9 @@ function showResult(res, input) {
   document.getElementById("to-step2").addEventListener("click", handleToStep2);
   document.getElementById("back-step1").addEventListener("click", () => { showError(""); gotoStep(1); });
   document.getElementById("submit-reservation").addEventListener("click", handleSubmit);
-})();
+}; window.__yatsumoriRebind();
 </script>
+<script>window.YATSUMORI_PAGE_KEY="reserve";</script>
+<script src="assets/js/pageRenderer.js?v=3"></script>
 </body>
 </html>

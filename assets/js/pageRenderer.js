@@ -1,4 +1,4 @@
-// 公開ページの「差し替えローダー」。
+﻿// 公開ページの「差し替えローダー」。
 //
 // 仕組み:
 //   1. 静的HTML（index.html本体）がそのまま最初に表示される（フォールバック）。
@@ -46,6 +46,7 @@
       }
 
       rebindNavToggle();
+      if (typeof window.__yatsumoriRebind === "function") { try { window.__yatsumoriRebind(); } catch (e) {} }
     } catch (e) {
       // タイムアウト・通信エラー等：何もしない＝静的HTMLのまま表示され続ける
     } finally {

@@ -557,6 +557,7 @@ window.addEventListener("resize", () => { if (iframeDoc) applyZoom(); });
 iframe.addEventListener("load", () => {
   iframeDoc = iframe.contentDocument;
   iframeWin = iframe.contentWindow;
+  try { iframeWin.__YATSUMORI_EDITOR__ = true; } catch (e) {} // 編集モードでは予約送信を無効化
 
   // pageRenderer（公開済み内容の差し替え）が終わるのを待ってから編集を開始する。
   // 途中で innerHTML が置き換わるとハンドラが消えるため。最大5.5秒でタイムアウト。
@@ -673,7 +674,7 @@ const TEXT_SEL = [
   ".access-row",".access-btn",
   ".utility-ig",".utility-links a",
   "a.btn",
-  ".subpage-title",".alert",".btn-nav",   // サブページ用
+  ".subpage-title",".alert",".btn-nav",".bh-name",".bh-sub",".bh-page",".mh-t",".wp-label",".field-label",".help-text",".page-footer div div",   // サブページ・予約ページ用
 ].join(",");
 
 // パワポ風に自由移動できる「項目」たち（1個ずつ独立して動かせる）
@@ -1454,8 +1455,8 @@ function setLink(el, url) {
 const SITE_PAGES = [
   { path: "index.html",              name: "🏠 トップページ（PC版）", key: "home", width: 1536 },
   { path: "mobile.html",             name: "📱 トップページ（スマホ版）", key: "home-m", width: 390 },
-  { path: "reserve.html",            name: "📅 予約フォーム",        key: null },
-  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更",    key: null },
+  { path: "reserve.html",            name: "📅 予約フォーム",        key: "reserve", width: 480 },
+  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更",    key: "reserve-lookup", width: 480 },
   { path: "pages/catalog.html",      name: "🎿 板カタログ",          key: "catalog" },
   { path: "pages/beginner-guide.html", name: "🔰 初心者ガイド",      key: "beginner-guide" },
   { path: "pages/pricing.html",      name: "💰 レンタル料金",        key: "pricing" },

@@ -7,18 +7,20 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>予約の確認・変更 | 8つ森レンタル</title>
-<link rel="stylesheet" href="assets/css/style.css?v=8">
+<link rel="stylesheet" href="assets/css/style.css?v=9">
 </head>
 <body>
-<div class="page">
+<div class="page" id="page-root">
 
   <header class="brand-header">
     <a class="back-link" href="index.html">&#8249;</a>
+    <a href="index.html" style="display:flex;align-items:center;gap:10px">
     <img class="bh-logo" src="assets/img/logo.png" alt="8つ森レンタル">
     <div>
       <div class="bh-name">8つ森レンタル</div>
       <div class="bh-sub">SKI &amp; SNOWBOARD RENTAL</div>
     </div>
+    </a>
     <span class="bh-page">予約の確認・変更</span>
   </header>
 
@@ -131,6 +133,7 @@ async function handleSearch() {
 }
 
 async function handleCancel() {
+  if (window.__YATSUMORI_EDITOR__) { alert("編集モードのためキャンセル操作は無効です"); return; }
   if (!current) return;
   if (!confirm("この予約をキャンセルします。よろしいですか？")) return;
   showError("");
@@ -155,9 +158,14 @@ function resetToSearch() {
   document.getElementById("search-section").style.display = "block";
 }
 
+window.__yatsumoriRebind = function () {
 document.getElementById("search-btn").addEventListener("click", handleSearch);
 document.getElementById("cancel-btn").addEventListener("click", handleCancel);
 document.getElementById("search-again").addEventListener("click", resetToSearch);
+};
+window.__yatsumoriRebind();
 </script>
+<script>window.YATSUMORI_PAGE_KEY="reserve-lookup";</script>
+<script src="assets/js/pageRenderer.js?v=3"></script>
 </body>
 </html>
