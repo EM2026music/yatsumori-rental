@@ -53,6 +53,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 .page-item.child { padding-left: 22px; }
 #new-page-btn { border: none; background: rgba(59,130,246,.25); color: #93c5fd; border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
 #new-page-btn:hover { background: rgba(59,130,246,.45); color: #fff; }
+.pg-tools { display: flex; gap: 2px; margin-left: 6px; flex-shrink: 0; }
+.pg-tools button { background: none; border: none; color: rgba(255,255,255,.35); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px; }
+.pg-tools button:hover { color: #fff; background: rgba(255,255,255,.12); }
 .sec-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,.72); font-size: 14px; transition: all .15s; margin-bottom: 2px; }
 .sec-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .sec-item.active { background: rgba(59,130,246,.2); color: #93c5fd; }
@@ -136,6 +139,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   transition: all .15s; white-space: nowrap;
 }
 #add-btn:hover { background: #dbeafe; }
+#sync-btn { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); border: none; border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+#sync-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
 #add-panel {
   position: fixed; top: 54px; left: 150px; z-index: 10002; display: none;
   width: 240px; background: #1e293b; border: 1px solid rgba(255,255,255,.12);
@@ -206,6 +211,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <button class="icon-btn" id="redo-btn" title="やり直す (Ctrl+Y)" disabled>↪</button>
   <div class="top-div"></div>
   <button id="add-btn" title="コンテンツを追加">＋ 追加</button>
+  <button id="sync-btn" title="PC版トップの文言をスマホ版に取り込む" style="display:none">⇄ PC版から文言取込</button>
   <div class="top-space"></div>
   <div class="dev-toggle">
     <button id="zoom-fit" class="active">🔍 全体表示</button>
@@ -421,7 +427,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="js/adminClient.js?v=6"></script>
 <script src="js/adminAuth.js?v=6"></script>
-<script src="js/editorClient.js?v=2"></script>
+<script src="js/editorClient.js?v=3"></script>
 <script>
 // ================================================================
 // 8つ森レンタル ページエディタ — Phase 1
@@ -454,11 +460,12 @@ function getCleanHTML() {
   const root = iframeDoc.getElementById("page-root") || iframeDoc.body;
   const clone = root.cloneNode(true);
   clone.querySelectorAll("._ed_handle,._ed_rs,._ed_guide").forEach(n => n.remove());
-  clone.querySelectorAll("[data-ed],[data-ed-img],[contenteditable]").forEach(el => {
+  clone.querySelectorAll("[data-ed],[data-ed-img],[data-ed-block],[contenteditable],.ed-multi").forEach(el => {
     el.removeAttribute("data-ed");
     el.removeAttribute("data-ed-img");
+    el.removeAttribute("data-ed-block");
     el.removeAttribute("contenteditable");
-    el.classList.remove("ed-sel", "_ed_sec");
+    el.classList.remove("ed-sel", "ed-multi", "_ed_sec");
     if (el.getAttribute("class") === "") el.removeAttribute("class");
   });
   clone.querySelectorAll("._ed_sec").forEach(el => el.classList.remove("_ed_sec"));
@@ -623,6 +630,7 @@ function injectEditingCSS() {
     [data-ed-block] { cursor: move !important; }
     [data-ed-block]:hover { outline: 1.5px dashed rgba(59,130,246,.55) !important; outline-offset: 3px !important; }
     [data-ed-block].ed-sel { outline: 2px solid #3b82f6 !important; outline-offset: 3px !important; }
+    .ed-multi { outline: 2px dashed #60a5fa !important; outline-offset: 3px !important; }
     ._ed_rs { position: absolute !important; right: -7px !important; bottom: -7px !important;
       width: 14px !important; height: 14px !important; background: #fff !important;
       border: 2px solid #3b82f6 !important; border-radius: 3px !important;
@@ -876,6 +884,16 @@ let resizeState = null;
 let panState = null;
 let nudgeTimer = null;
 let suppressClickUntil = 0; // ドラッグ直後の誤クリック（差し替えパネル等）を防ぐ
+let multiSel = [];          // Shift+クリックの複数選択（まとめて移動できる）
+
+function refreshMultiMarks() {
+  iframeDoc.querySelectorAll(".ed-multi").forEach(el => el.classList.remove("ed-multi"));
+  if (multiSel.length > 1) multiSel.forEach(el => el.classList.add("ed-multi"));
+}
+function clearMulti() {
+  multiSel = [];
+  if (iframeDoc) refreshMultiMarks();
+}
 
 function heroEl() { return iframeDoc.querySelector(".hero"); }
 
@@ -981,7 +999,11 @@ function attachBlockDrag() {
     const block = e.target.closest(DRAG_SEL);
     if (block) {
       const r = blockRect(block);
-      dragState = { block, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
+      // 複数選択中のメンバーをつかんだら全員一緒に動く
+      const members = (multiSel.length > 1 && multiSel.includes(block))
+        ? multiSel.map(b => ({ b, r: blockRect(b) }))
+        : null;
+      dragState = { block, shift: e.shiftKey, members, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
       e.preventDefault();
       return;
     }
@@ -1015,7 +1037,13 @@ function attachBlockDrag() {
     if (!dragState.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
     dragState.moved = true;
     const { L, T } = applySnap(dragState.origL + dx, dragState.origT + dy, dragState.w, dragState.h, dragState.targets);
-    setBlockPos(dragState.block, L, T);
+    if (dragState.members) {
+      // 複数同時移動：つかんだ項目の移動量を全員に適用
+      const dL = L - dragState.origL, dT = T - dragState.origT;
+      dragState.members.forEach(m => setBlockPos(m.b, m.r.left + dL, m.r.top + dT));
+    } else {
+      setBlockPos(dragState.block, L, T);
+    }
     syncBlockProps(dragState.block);
   });
 
@@ -1026,10 +1054,25 @@ function attachBlockDrag() {
       return;
     }
     if (!dragState) return;
-    const { block, moved } = dragState;
+    const { block, moved, shift } = dragState;
     dragState = null;
     clearGuides();
-    if (moved) { suppressClickUntil = Date.now() + 400; snapshotForUndo(); }
+    if (moved) {
+      suppressClickUntil = Date.now() + 400;
+      snapshotForUndo();
+      selectBlock(block);
+      return;
+    }
+    if (shift) {
+      // Shift+クリック：複数選択に追加/除外
+      if (!multiSel.length && activeBlockEl && activeBlockEl !== block) multiSel = [activeBlockEl];
+      const i = multiSel.indexOf(block);
+      if (i >= 0) multiSel.splice(i, 1); else multiSel.push(block);
+      refreshMultiMarks();
+      if (multiSel.length > 1) toast(multiSel.length + "個選択中（ドラッグでまとめて移動）", "info");
+    } else {
+      clearMulti();
+    }
     selectBlock(block);
   });
 }
@@ -1089,8 +1132,11 @@ function handleArrowNudge(e) {
   const mv = moves[e.key];
   if (!mv) return;
   e.preventDefault();
-  const r = blockRect(activeBlockEl);
-  setBlockPos(activeBlockEl, r.left + mv[0], r.top + mv[1]);
+  const targets = (multiSel.length > 1 && multiSel.includes(activeBlockEl)) ? multiSel : [activeBlockEl];
+  targets.forEach(b => {
+    const r = blockRect(b);
+    setBlockPos(b, r.left + mv[0], r.top + mv[1]);
+  });
   syncBlockProps(activeBlockEl);
   clearTimeout(nudgeTimer);
   nudgeTimer = setTimeout(snapshotForUndo, 700); // 連打が終わってから1回だけ記録
@@ -1297,6 +1343,8 @@ const histPanel = document.getElementById("history-panel");
 document.getElementById("history-btn").addEventListener("click", async () => {
   if (histPanel.classList.contains("show")) { histPanel.classList.remove("show"); return; }
   histPanel.classList.add("show");
+  histPanel.querySelector(".hist-head").textContent =
+    "保存の履歴 — " + currentPage.name.replace(/^\S+\s/, "") + "（読み込みのみ・公開は別操作）";
   const list = document.getElementById("history-list");
   list.innerHTML = `<div class="hist-empty">読み込み中...</div>`;
   try {
@@ -1435,8 +1483,47 @@ function switchPage(p) {
   refreshDirtyBadge();
   setStatus("読み込み中...");
   iframe.src = "../" + p.path;   // loadイベントで初期化が再実行される
+  document.getElementById("sync-btn").style.display = p.key === "home-m" ? "" : "none";
   refreshPageList();
 }
+
+// ── #5 PC版→スマホ版の文言取込（同じクラス名の文字を順番に対応付けてコピー） ──
+const SYNC_SEL = [
+  ".hero-title", ".hero-desc", ".booking-card-title", ".booking-step-label",
+  ".badge-label", ".badge-sub", ".content-card-title", ".content-card-desc",
+  ".pill-btn", ".sec-kicker", ".sec-head-title", ".rec-title", ".rec-sub",
+];
+async function syncFromPC() {
+  if (!confirm("PC版トップの文言をこのスマホ版に取り込みます。\nスマホ版の同じ場所の文字は上書きされます（Ctrl+Zで戻せます）。\n\n実行しますか？")) return;
+  let html = null;
+  try {
+    const { data } = await sb.from("site_pages").select("html").eq("page_key", "home").maybeSingle();
+    html = data && data.html;
+  } catch (e) {}
+  if (!html) {
+    try {
+      const res = await fetch("../index.html?sync=" + Date.now());
+      const doc0 = new DOMParser().parseFromString(await res.text(), "text/html");
+      const r = doc0.getElementById("page-root");
+      html = r ? r.innerHTML : null;
+    } catch (e) {}
+  }
+  if (!html) { toast("PC版の内容を取得できませんでした", "error"); return; }
+  const src = new DOMParser().parseFromString("<div>" + html + "</div>", "text/html");
+  let n = 0;
+  SYNC_SEL.forEach(sel => {
+    const from = src.querySelectorAll(sel);
+    iframeDoc.querySelectorAll(sel).forEach((el, i) => {
+      if (from[i] && from[i].innerHTML.trim() && el.innerHTML !== from[i].innerHTML) {
+        el.innerHTML = from[i].innerHTML; n++;
+      }
+    });
+  });
+  reattach();
+  snapshotForUndo();
+  toast(n + "箇所の文言を取り込みました", "success");
+}
+document.getElementById("sync-btn").addEventListener("click", syncFromPC);
 
 function refreshPageList() {
   document.querySelectorAll(".page-item").forEach(el => {
@@ -1505,6 +1592,14 @@ function renderPageList() {
       item.className = "page-item child" + (cur ? " current" : "");
       item.title = p.path;
       item.innerHTML = `<span>${p.name}</span><span class="pg-path">${cur ? "編集中" : (p.key ? "✏️ 編集" : "開く ↗")}</span>`;
+      if (p.custom) {
+        const tools = document.createElement("span");
+        tools.className = "pg-tools";
+        tools.innerHTML = `<button title="名前を変更">✎</button><button title="削除">🗑</button>`;
+        tools.children[0].addEventListener("click", (e) => { e.stopPropagation(); renameCustomPage(p); });
+        tools.children[1].addEventListener("click", (e) => { e.stopPropagation(); deleteCustomPage(p); });
+        item.appendChild(tools);
+      }
       item.addEventListener("click", () => {
         if (p.key) switchPage(p);
         else window.open("../" + p.path, "_blank");
@@ -1515,6 +1610,29 @@ function renderPageList() {
 }
 function refreshPageList() { renderPageList(); }
 renderPageList();
+
+// 追加ページの名前変更・削除
+async function renameCustomPage(p) {
+  const t = prompt("新しいページ名を入力してください", p.name.replace(/^📄 /, ""));
+  if (!t || !t.trim()) return;
+  try {
+    await sb.from("site_pages").update({ project_data: { title: t.trim() } }).eq("page_key", p.key);
+    p.name = "📄 " + t.trim();
+    renderPageList();
+    toast("名前を変更しました", "success");
+  } catch (e) { toast("変更に失敗: " + e.message, "error"); }
+}
+async function deleteCustomPage(p) {
+  if (!confirm(`「${p.name.replace(/^📄 /, "")}」を削除しますか？\nこのページは完全に消えて、元に戻せません。`)) return;
+  try {
+    await sb.from("site_page_versions").delete().eq("page_key", p.key);
+    await sb.from("site_pages").delete().eq("page_key", p.key);
+    CUSTOM_PAGES = CUSTOM_PAGES.filter(x => x.key !== p.key);
+    toast("削除しました", "info");
+    if (currentPage.key === p.key) { isDirty = false; refreshDirtyBadge(); switchPage(SITE_PAGES[0]); }
+    else renderPageList();
+  } catch (e) { toast("削除に失敗: " + e.message, "error"); }
+}
 
 // Supabaseから「エディタで作った追加ページ」を読み込む
 async function loadCustomPages() {
@@ -1687,14 +1805,23 @@ document.addEventListener("click", (e) => {
 // ── フロートバーのボタン ──
 document.getElementById("fb-dup").addEventListener("click", () => duplicateItem(activeBlockEl));
 document.getElementById("fb-del").addEventListener("click", () => deleteSelected());
-document.getElementById("fb-blk-link").addEventListener("click", (e) => { if (activeBlockEl) promptLink(activeBlockEl, e.clientX - 95, e.clientY + 16); });
-document.getElementById("fb-img-link").addEventListener("click", (e) => { if (activeImgEl) promptLink(activeImgEl, e.clientX - 95, e.clientY + 16); });
+// ※stopPropagation必須：外側クリックでメニューを閉じる判定より先に伝播を止める
+document.getElementById("fb-blk-link").addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (activeBlockEl) promptLink(activeBlockEl, e.clientX - 95, e.clientY + 16);
+});
+document.getElementById("fb-img-link").addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (activeImgEl) promptLink(activeImgEl, e.clientX - 95, e.clientY + 16);
+});
 
 // 右パネルの「リンク先を選ぶ…」ボタン
 document.getElementById("blk-link-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
   if (activeBlockEl) promptLink(activeBlockEl, e.clientX - 260, e.clientY + 10);
 });
 document.getElementById("txt-link-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
   const t = activeTextEl || (selectedEl && selectedEl.hasAttribute("data-ed") ? selectedEl : null);
   if (t) promptLink(t, e.clientX - 260, e.clientY + 10);
 });
@@ -1753,6 +1880,7 @@ function deselect() {
   activeImgEl = null;
   activeBlockEl = null;
   clearGuides();
+  clearMulti();
   hideFloatBar();
   document.getElementById("no-sel").style.display = "block";
   document.getElementById("text-props").style.display = "none";

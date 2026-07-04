@@ -64,8 +64,26 @@ async function getVersion(versionId) {
   return data;
 }
 
+// 大きい画像は自動で縮小・圧縮してからアップロード（ページ表示を軽く保つ）
+async function compressImageIfNeeded(file) {
+  try {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
+    if (file.size < 400 * 1024) return file; // 400KB未満はそのまま
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / bmp.width);
+    const w = Math.round(bmp.width * scale), h = Math.round(bmp.height * scale);
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    cv.getContext("2d").drawImage(bmp, 0, 0, w, h);
+    const blob = await new Promise(r => cv.toBlob(r, "image/jpeg", 0.85));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch (e) { return file; } // 圧縮に失敗したら元のまま
+}
+
 // 画像アップロード（Supabase Storage）→ 公開URLを返す
 async function uploadSiteAsset(file) {
+  file = await compressImageIfNeeded(file);
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const path = `home/${Date.now()}-${safeName}`;
   const { error } = await sb.storage.from("site-assets").upload(path, file);

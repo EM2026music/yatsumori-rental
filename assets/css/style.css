@@ -1,19 +1,19 @@
-/* ============================================================
+﻿/* ============================================================
    8つ森レンタル 共通スタイル（ダークネイビー＋ゴールド）
    index.html のGPTデザインに合わせて、予約フォーム・確認・
    管理画面のトーンを統一する。
    ============================================================ */
 :root {
-  --bg: #0b1d33;
-  --bg-deep: #071426;
-  --panel: rgba(255, 255, 255, 0.06);
-  --panel-2: rgba(255, 255, 255, 0.09);
-  --border: rgba(255, 255, 255, 0.14);
-  --gold: #f5c542;
-  --gold-dark: #e0b22f;
-  --text: #ffffff;
-  --text-dim: #c9d5e5;
-  --text-mute: #8ea0b6;
+  --bg: #ffffff;
+  --bg-deep: #eef1f5;
+  --panel: #f5f6f8;
+  --panel-2: #eef1f5;
+  --border: #dde2e8;
+  --gold: #f0b429;
+  --gold-dark: #d9960f;
+  --text: #15314f;
+  --text-dim: #41546b;
+  --text-mute: #6b7785;
   --danger: #ff6b6b;
   --radius-lg: 22px;
   --radius-md: 14px;
@@ -48,8 +48,8 @@ button { font-family: inherit; cursor: pointer; }
   gap: 12px;
   height: 72px;
   padding: 0 20px;
-  background: rgba(7, 20, 38, 0.96);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid rgba(21, 49, 79, 0.08);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -247,7 +247,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .status-pending { background: rgba(245, 197, 66, 0.18); color: #f3d489; }
 .status-confirmed { background: rgba(76, 217, 123, 0.18); color: #8be0a6; }
-.status-cancelled { background: rgba(255, 255, 255, 0.1); color: var(--text-mute); }
+.status-cancelled { background: rgba(21, 49, 79, 0.12); color: var(--text-mute); }
 
 /* ---------- admin ---------- */
 .admin-nav {
