@@ -1563,17 +1563,17 @@ function setLink(el, url) {
 const SITE_PAGES = [
   { path: "index.html",              name: "🏠 トップページ（PC版）", key: "home", width: 1536 },
   { path: "mobile.html",             name: "📱 トップページ（スマホ版）", key: "home-m", width: 390 },
-  { path: "reserve.html",            name: "📅 予約フォーム",        key: "reserve", width: 480 },
-  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更",    key: "reserve-lookup", width: 480 },
-  { path: "pages/catalog.html",      name: "🎿 板カタログ",          key: "catalog" },
-  { path: "pages/beginner-guide.html", name: "🔰 初心者ガイド",      key: "beginner-guide" },
-  { path: "pages/pricing.html",      name: "💰 レンタル料金",        key: "pricing" },
-  { path: "pages/waxing.html",       name: "🛠 ワクシング",          key: "waxing" },
-  { path: "pages/access.html",       name: "📍 アクセス",            key: "access" },
-  { path: "pages/onsen-guide.html",  name: "♨️ 遠刈田温泉ガイド",    key: "onsen-guide" },
-  { path: "pages/gourmet.html",      name: "🍜 周辺グルメ情報",      key: "gourmet" },
-  { path: "pages/zao-ski-info.html", name: "🏔 蔵王のスキー場情報",  key: "zao-ski-info" },
-  { path: "pages/yatsumorin.html",   name: "🌲 やつもりん",          key: "yatsumorin" },
+  { path: "reserve.html",            name: "📅 予約フォーム",        key: "reserve", width: 760 },
+  { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更",    key: "reserve-lookup", width: 760 },
+  { path: "pages/catalog.html",      name: "🎿 板カタログ",          key: "catalog", width: 760 },
+  { path: "pages/beginner-guide.html", name: "🔰 初心者ガイド",      key: "beginner-guide", width: 760 },
+  { path: "pages/pricing.html",      name: "💰 レンタル料金",        key: "pricing", width: 760 },
+  { path: "pages/waxing.html",       name: "🛠 ワクシング",          key: "waxing", width: 760 },
+  { path: "pages/access.html",       name: "📍 アクセス",            key: "access", width: 760 },
+  { path: "pages/onsen-guide.html",  name: "♨️ 遠刈田温泉ガイド",    key: "onsen-guide", width: 760 },
+  { path: "pages/gourmet.html",      name: "🍜 周辺グルメ情報",      key: "gourmet", width: 760 },
+  { path: "pages/zao-ski-info.html", name: "🏔 蔵王のスキー場情報",  key: "zao-ski-info", width: 760 },
+  { path: "pages/yatsumorin.html",   name: "🌲 やつもりん",          key: "yatsumorin", width: 760 },
 ];
 let currentPage = SITE_PAGES[0];
 
@@ -1754,6 +1754,7 @@ async function loadCustomPages() {
         path: "pages/p.html?key=" + r.page_key,
         name: "📄 " + ((r.project_data && r.project_data.title) || r.page_key),
         key: r.page_key,
+        width: 760,
         custom: true,
       }));
     renderPageList();
@@ -1779,7 +1780,7 @@ document.getElementById("new-page-btn").addEventListener("click", async () => {
   try {
     setEditorPageKey(key);
     await publishPage({ html, css: "", projectData: { title: title.trim() } });
-    const p = { path: "pages/p.html?key=" + key, name: "📄 " + title.trim(), key, custom: true };
+    const p = { path: "pages/p.html?key=" + key, name: "📄 " + title.trim(), key, width: 760, custom: true };
     CUSTOM_PAGES.push(p);
     toast("ページを作りました！", "success");
     switchPage(p);

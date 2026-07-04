@@ -359,7 +359,7 @@ button { font-family: inherit; cursor: pointer; }
 .back-link::after { content:"トップへ"; font-size:11.5px; font-weight:800; }
 
 /* ---------- PC表示（900px以上）：予約・案内ページを広いレイアウトに ---------- */
-@media (min-width: 900px) {
+@media (min-width: 760px) {
   :root { --max-width: 760px; }
   .page { box-shadow: 0 0 48px rgba(20, 40, 60, 0.1); min-height: 100vh; }
   .brand-header, .subpage-header { padding: 0 28px; height: 72px; }
