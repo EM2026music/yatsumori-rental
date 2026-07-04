@@ -666,7 +666,9 @@ function injectEditingCSS() {
       outline-offset: 2px !important;
       cursor: text !important;
     }
-    [data-ed-img] { position: relative !important; cursor: move !important; }
+    /* 注意: ここで position を上書きしてはいけない（自由配置画像の absolute が
+       relative 扱いになり、編集と本番の座標が全ページでズレる大事故になった） */
+    [data-ed-img] { cursor: move !important; }
     [data-ed-pan] { cursor: move !important; }
     [data-ed-img]:hover::after {
       content: "🖼 クリックで差し替え ／ ドラッグで位置調整" !important;
@@ -2296,7 +2298,9 @@ async function handlePublish() {
     const html = getCleanHTML();
 
     // Get page CSS (inline style tags)
-    const css = Array.from(iframeDoc.querySelectorAll("style:not(#_ed_style)"))
+    // #published-css は前回公開分（pageRendererが追記したもの）なので除外。
+    // 含めると保存のたびにCSSが重複して増殖する。
+    const css = Array.from(iframeDoc.querySelectorAll("style:not(#_ed_style):not(#published-css)"))
       .map(s => s.textContent).join("\n");
 
     await publishPage({ html, css, projectData: { savedAt: new Date().toISOString() } });
