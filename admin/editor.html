@@ -2104,6 +2104,21 @@ function buildSectionList() {
     });
     list.appendChild(item);
   });
+
+  // 「＋追加」で足したパーツを一覧に出す（隠れていてもクリックで選択→Deleteで削除できる）
+  iframeDoc.querySelectorAll(".ed-free").forEach((el, i) => {
+    const item = document.createElement("div");
+    item.className = "sec-item";
+    item.innerHTML = `<span class="sec-icon">🧩</span><span>追加パーツ${i + 1}（${el.tagName === "IMG" ? "画像" : "テキスト"}）</span>`;
+    item.addEventListener("click", () => {
+      const scroller = document.getElementById("canvas-scroller");
+      const rootTop = iframeDoc.documentElement.getBoundingClientRect().top;
+      const y = (el.getBoundingClientRect().top - rootTop) * zoomScale;
+      scroller.scrollTo({ top: Math.max(0, y - 200), behavior: "smooth" });
+      selectBlock(el);
+    });
+    list.appendChild(item);
+  });
 }
 
 // ── Section drag-to-reorder (Sortable.js injected into iframe) ──
