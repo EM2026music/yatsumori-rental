@@ -353,12 +353,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
         </div>
         <div class="prop-group">
           <div class="prop-label">読みやすさ（写真と被って読みにくい時）</div>
-          <select id="text-legibility-inp" class="prop-input">
-            <option value="">そのまま</option>
-            <option value="glow">白フチ（ふんわり光る）</option>
-            <option value="plate-light">白い下地を敷く</option>
-            <option value="plate-dark">紺の下地を敷く（文字は白に）</option>
-          </select>
+          <select id="text-legibility-inp" class="prop-input"></select>
+        </div>
+        <div class="prop-group">
+          <div class="prop-label">文字の背景色（下地の色を自由に）</div>
+          <div class="prop-row">
+            <input type="color" id="text-bg-inp" class="prop-input" value="#ffffff">
+            <button id="text-bg-clear" style="background:none;border:1px solid rgba(255,255,255,.25);color:inherit;border-radius:6px;padding:4px 10px;font-size:11px">なし</button>
+          </div>
         </div>
         <div class="prop-group">
           <div class="prop-label">太さ</div>
@@ -1975,7 +1977,9 @@ function showCtxEntries(entries, outerX, outerY) {
     const item = document.createElement("div");
     item.className = "ctx-item" + (en.danger ? " danger" : "");
     item.innerHTML = `<span>${en.icon}</span><span>${en.label}</span>`;
-    item.addEventListener("click", () => { hideCtxMenu(); en.fn(); });
+    // stopPropagation必須：これが無いと同じクリックが「外側クリック＝メニューを閉じる」
+    // 判定に届き、fn()が開き直したサブメニュー（フォント一覧等）が即閉じてしまう
+    item.addEventListener("click", (ev) => { ev.stopPropagation(); hideCtxMenu(); en.fn(); });
     ctxMenu.appendChild(item);
   });
   ctxMenu.classList.add("show");
@@ -1985,13 +1989,29 @@ function showCtxEntries(entries, outerX, outerY) {
 }
 
 // 右クリックメニュー用：フォント/読みやすさのサブメニュー（リンク選択と同じ再表示方式）
+// Webフォント(Google Fonts)は全ページの<head>で読み込み済み → お客さんのスマホでも同じ見た目
 const FONT_CHOICES = [
   { label: "標準（ゴシック体）", v: "" },
-  { label: "明朝体（上品）", v: '"Yu Mincho","Hiragino Mincho ProN",serif' },
-  { label: "メイリオ（やわらか）", v: 'Meiryo,"Hiragino Kaku Gothic ProN",sans-serif' },
-  { label: "手書き風", v: '"Segoe Print","Yu Gothic",cursive' },
-  { label: "極太（英数字向け）", v: 'Impact,"Arial Black",sans-serif' },
+  { label: "明朝体（上品）", v: '"Noto Serif JP","Yu Mincho","Hiragino Mincho ProN",serif' },
+  { label: "丸ゴシック（やわらか）", v: '"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif' },
+  { label: "モダンゴシック（すっきり）", v: '"Zen Kaku Gothic New","Yu Gothic",sans-serif' },
+  { label: "手書き風（やさしい）", v: '"Klee One","UD Digi Kyokasho N-R",cursive' },
+  { label: "手書きマジック（POP）", v: '"Yusei Magic","Segoe Print",sans-serif' },
+  { label: "極太ポップ（見出し向け）", v: '"Dela Gothic One",Impact,sans-serif' },
+  { label: "和風・筆文字", v: '"Yuji Syuku","Yu Mincho",serif' },
+  { label: "メイリオ", v: 'Meiryo,"Hiragino Kaku Gothic ProN",sans-serif' },
 ];
+// 右パネルの2つのフォント選択欄もこの一覧から作る（1箇所直せば全部に反映）
+["font-family-inp", "block-font-inp"].forEach(id => {
+  const sel = document.getElementById(id);
+  sel.innerHTML = "";
+  FONT_CHOICES.forEach(f => {
+    const o = document.createElement("option");
+    o.value = f.v; o.textContent = f.label;
+    o.style.fontFamily = f.v || "inherit"; // 一覧自体をそのフォントでプレビュー表示
+    sel.appendChild(o);
+  });
+});
 // バッジ等のSVGアイコンを画像に差し替える（丸枠にフィット）
 let iconTargetBox = null;
 document.getElementById("icon-file-inp").addEventListener("change", async (e) => {
@@ -2015,9 +2035,8 @@ function ctxFontMenu(target, ox, oy) {
     ...FONT_CHOICES.map(f => ({ icon: "🔠", label: f.label, fn: () => { target.style.fontFamily = f.v; snapshotForUndo(); } }))], ox, oy);
 }
 function ctxLegibilityMenu(target, ox, oy) {
-  const opts = [["", "そのまま"], ["glow", "白フチ（ふんわり光る）"], ["plate-light", "白い下地を敷く"], ["plate-dark", "紺の下地（文字は白に）"]];
   showCtxEntries([{ head: "読みやすさ（写真と被るとき）" },
-    ...opts.map(([v, label]) => ({ icon: "✨", label, fn: () => applyLegibility(target, v) }))], ox, oy);
+    ...LEGIBILITY_LABELS.map(([v, label]) => ({ icon: "✨", label, fn: () => applyLegibility(target, v) }))], ox, oy);
 }
 
 function openCtxMenu(e) {
@@ -2242,9 +2261,29 @@ document.getElementById("font-family-inp").addEventListener("change", (e) => {
 const LEGIBILITY_STYLES = {
   "":            { textShadow: "", background: "", padding: "", borderRadius: "" },
   "glow":        { textShadow: "0 0 6px rgba(255,255,255,.95), 0 0 16px rgba(255,255,255,.9), 0 0 32px rgba(255,255,255,.85)", background: "", padding: "", borderRadius: "" },
+  "outline-w":   { textShadow: "-1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff, 0 0 10px rgba(255,255,255,.9)", background: "", padding: "", borderRadius: "" },
+  "outline-b":   { textShadow: "-1.5px -1.5px 0 #15314f, 1.5px -1.5px 0 #15314f, -1.5px 1.5px 0 #15314f, 1.5px 1.5px 0 #15314f, 0 1px 10px rgba(8,18,46,.6)", background: "", padding: "", borderRadius: "" },
   "plate-light": { textShadow: "none", background: "rgba(255,255,255,.82)", padding: "6px 14px", borderRadius: "8px" },
   "plate-dark":  { textShadow: "none", background: "rgba(8,18,46,.68)", padding: "6px 14px", borderRadius: "8px" },
 };
+const LEGIBILITY_LABELS = [
+  ["", "そのまま"],
+  ["glow", "白フチ（ふんわり光る）"],
+  ["outline-w", "くっきり白フチ"],
+  ["outline-b", "くっきり紺フチ（白文字向け）"],
+  ["plate-light", "白い下地を敷く"],
+  ["plate-dark", "紺の下地（文字は白に）"],
+];
+// 右パネルの読みやすさ選択欄もこの一覧から作る
+(function () {
+  const sel = document.getElementById("text-legibility-inp");
+  sel.innerHTML = "";
+  LEGIBILITY_LABELS.forEach(([v, l]) => {
+    const o = document.createElement("option");
+    o.value = v; o.textContent = l;
+    sel.appendChild(o);
+  });
+})();
 function applyLegibility(t, v) {
   const prev = t.dataset.legibility || "";
   const s = LEGIBILITY_STYLES[v] || LEGIBILITY_STYLES[""];
@@ -2261,6 +2300,28 @@ document.getElementById("text-legibility-inp").addEventListener("change", (e) =>
   const t = fbTextTarget();
   if (!t) return;
   applyLegibility(t, e.target.value);
+});
+
+// 文字の背景色を自由に選ぶ（下地の色違い版。パディングと角丸も自動で付ける）
+document.getElementById("text-bg-inp").addEventListener("input", (e) => {
+  const t = fbTextTarget();
+  if (!t) return;
+  t.style.background = e.target.value;
+  if (!t.style.padding) t.style.padding = "6px 14px";
+  if (!t.style.borderRadius) t.style.borderRadius = "8px";
+  t.style.textShadow = "none";
+  isDirty = true; refreshDirtyBadge();
+});
+document.getElementById("text-bg-inp").addEventListener("change", () => {
+  if (fbTextTarget()) snapshotForUndo();
+});
+document.getElementById("text-bg-clear").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const t = fbTextTarget();
+  if (!t) return;
+  t.style.background = ""; t.style.padding = ""; t.style.borderRadius = ""; t.style.textShadow = "";
+  delete t.dataset.legibility;
+  snapshotForUndo();
 });
 
 document.getElementById("text-color-inp").addEventListener("input", (e) => {
