@@ -218,7 +218,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <button class="icon-btn" id="redo-btn" title="やり直す (Ctrl+Y)" disabled>↪</button>
   <div class="top-div"></div>
   <button id="add-btn" title="コンテンツを追加">＋ 追加</button>
-  <button id="sync-btn" title="PC版トップの文言をスマホ版に取り込む" style="display:none">⇄ PC版から文言取込</button>
+  <button id="sync-btn" title="PC版トップの文言・写真・追加パーツをスマホ版に反映します（反映後に自由に微調整できます）" style="display:none">⇄ PC版をスマホ版へ反映</button>
   <div class="top-space"></div>
   <div class="dev-toggle">
     <button id="zoom-fit" class="active">🔍 全体</button>
@@ -294,6 +294,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   <div id="ed-left">
     <div class="left-head">このページの中身</div>
     <div id="section-list"></div>
+    <button id="rescue-btn" title="ページの外に飛んだ項目・つぶれた項目を見える場所に戻します"
+      style="margin:6px 10px;padding:7px 10px;width:calc(100% - 20px);background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.45);color:inherit;border-radius:8px;font-size:12px;cursor:pointer">🚑 迷子の項目を呼び戻す</button>
     <div class="left-head" style="display:flex;align-items:center;justify-content:space-between">
       サイトのページ構成
       <button id="new-page-btn" title="新しいページを作る">＋ 新規</button>
@@ -886,9 +888,12 @@ function attachEditHandlers() {
   iframeDoc.addEventListener("wheel", handleCtrlWheel, { passive: false });
 
   // エディタ内ではリンク遷移を全て無効化（クリック編集を優先）
+  // ただし Ctrl+クリックはリンク先ページの編集画面へ移動（プロのエディタと同じ操作）
   iframeDoc.addEventListener("click", (e) => {
     const a = e.target.closest("a");
-    if (a) e.preventDefault();
+    if (!a) return;
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) followLinkInEditor(a);
   }, true);
 
   // Click elsewhere to deselect
@@ -963,6 +968,11 @@ function handleImgClick(el) {
   const preview = document.getElementById("img-preview");
   preview.src = el.src;
   preview.style.display = "block";
+  // トリミングされている写真なら「見える場所を動かせる」ことを知らせる
+  const ovHint = coverOverflow(el);
+  if (ovHint && (ovHint.ox > 1 || ovHint.oy > 1)) {
+    toast("この写真はこのままドラッグすると『見せたい場所』を調整できます", "info");
+  }
   document.getElementById("alt-inp").value = el.alt || "";
   const w = el.offsetWidth || el.naturalWidth || "";
   document.getElementById("img-width-inp").value = w || "";
@@ -1124,7 +1134,19 @@ function attachBlockDrag() {
   iframeDoc._ed_drag_attached = true;
 
   iframeDoc.addEventListener("mousedown", (e) => {
+    hideCtxMenu(); // ページ内のどこかを押したら右クリックメニューを閉じる
     if (e.target.isContentEditable) return;
+
+    // 選択済みの画像の中をドラッグ → 項目の移動ではなく「写真の見える場所」を調整
+    // （縦横比を変えてトリミングされた写真の、見せたい部分を選べる）
+    if (e.target.tagName === "IMG" && e.target === activeImgEl) {
+      const ovSel = coverOverflow(e.target);
+      if (ovSel && (ovSel.ox > 1 || ovSel.oy > 1)) {
+        panState = { img: e.target, startX: e.clientX, startY: e.clientY, ov: ovSel, pct: objPosPct(e.target, ovSel), moved: false };
+        e.preventDefault();
+        return;
+      }
+    }
 
     // 項目ドラッグ（画像が項目の中にある場合は項目ごと動く）
     let block = e.target.closest(DRAG_SEL);
@@ -1732,8 +1754,12 @@ const SYNC_SEL = [
   ".badge-label", ".badge-sub", ".content-card-title", ".content-card-desc",
   ".pill-btn", ".sec-kicker", ".sec-head-title", ".rec-title", ".rec-sub",
 ];
+const SYNC_IMG_SEL = [".hero-photo", ".rec-card img", ".page-footer img", ".badge-icon img"];
+function keyOfFree(el) {
+  return el.tagName === "IMG" ? "img:" + (el.getAttribute("src") || "") : "txt:" + el.textContent.trim().slice(0, 60);
+}
 async function syncFromPC() {
-  if (!confirm("PC版トップの文言をこのスマホ版に取り込みます。\nスマホ版の同じ場所の文字は上書きされます（Ctrl+Zで戻せます）。\n\n実行しますか？")) return;
+  if (!confirm("PC版トップの内容（文言・写真・追加した部品）をこのスマホ版に反映します。\nスマホ版の同じ場所は上書きされます（Ctrl+Zで戻せます）。\n反映後は自由に位置や大きさを微調整できます。\n\n実行しますか？")) return;
   let html = null;
   try {
     const { data } = await sb.from("site_pages").select("html").eq("page_key", "home").maybeSingle();
@@ -1749,18 +1775,58 @@ async function syncFromPC() {
   }
   if (!html) { toast("PC版の内容を取得できませんでした", "error"); return; }
   const src = new DOMParser().parseFromString("<div>" + html + "</div>", "text/html");
-  let n = 0;
+
+  // ① 文言（同じクラス名を順番に対応付け）
+  let nText = 0;
   SYNC_SEL.forEach(sel => {
     const from = src.querySelectorAll(sel);
     iframeDoc.querySelectorAll(sel).forEach((el, i) => {
       if (from[i] && from[i].innerHTML.trim() && el.innerHTML !== from[i].innerHTML) {
-        el.innerHTML = from[i].innerHTML; n++;
+        el.innerHTML = from[i].innerHTML; nText++;
       }
     });
   });
+
+  // ② 写真（差し替え済みのsrc・サービスカードの背景写真）
+  let nImg = 0;
+  SYNC_IMG_SEL.forEach(sel => {
+    const from = src.querySelectorAll(sel);
+    iframeDoc.querySelectorAll(sel).forEach((el, i) => {
+      const s = from[i] && from[i].getAttribute("src");
+      if (s && el.getAttribute("src") !== s) { el.setAttribute("src", s); nImg++; }
+    });
+  });
+  const fromCards = src.querySelectorAll(".content-card");
+  iframeDoc.querySelectorAll(".content-card").forEach((el, i) => {
+    const bg = fromCards[i] && fromCards[i].style.backgroundImage;
+    if (bg && el.style.backgroundImage !== bg) { el.style.backgroundImage = bg; nImg++; }
+  });
+
+  // ③ PC版で追加した部品(.ed-free)をスマホ版にも取込（同じものが既にあればスキップ）
+  //    スマホ幅に収まるサイズにして下に並べる → ユーザーがドラッグで好きな場所へ
+  let nParts = 0;
+  const root = iframeDoc.getElementById("page-root");
+  const have = new Set(Array.from(iframeDoc.querySelectorAll(".ed-free")).map(keyOfFree));
+  let y = root.scrollHeight + 16;
+  src.querySelectorAll(".ed-free").forEach(pc => {
+    if (have.has(keyOfFree(pc))) return;
+    const el = pc.cloneNode(true);
+    const w = Math.min(parseInt(el.style.width) || 300, 350);
+    el.style.width = w + "px";
+    el.style.height = "";           // 自然な縦横比に戻す
+    el.style.position = "absolute";
+    el.style.left = Math.round((390 - w) / 2) + "px";
+    el.style.top = y + "px";
+    el.style.right = "auto"; el.style.margin = "0";
+    if (!el.style.zIndex) el.style.zIndex = "30";
+    root.appendChild(el);
+    y += Math.round(el.getBoundingClientRect().height || 80) + 16;
+    nParts++;
+  });
+
   reattach();
   snapshotForUndo();
-  toast(n + "箇所の文言を取り込みました", "success");
+  toast("反映しました：文言" + nText + "箇所・写真" + nImg + "枚・追加パーツ" + nParts + "個" + (nParts ? "（取り込んだパーツはページの下に並んでいます）" : ""), "success");
 }
 document.getElementById("sync-btn").addEventListener("click", syncFromPC);
 
@@ -1802,6 +1868,26 @@ function promptLink(el, anchorX, anchorY) {
 // 左パネル：サイトのページ構成（フォルダ構成ツリー表示）
 // 編集可能ページ → エディタ内で切替／予約機能ページ → 別タブ表示のみ
 let CUSTOM_PAGES = []; // エディタから作った追加ページ（Supabaseに保存される仮想ページ）
+
+// Ctrl+クリックされたリンクの先を、エディタ内で開く
+function followLinkInEditor(a) {
+  const href = a.getAttribute("href") || "";
+  if (!href || href.charAt(0) === "#") return;
+  if (/^https?:/i.test(href)) { window.open(href, "_blank"); return; } // 外部リンクは新しいタブで
+  const km = href.match(/p\.html\?key=([\w-]+)/); // エディタで作った追加ページ
+  if (km) {
+    const cp = CUSTOM_PAGES.find(c => c.path.indexOf(km[1]) !== -1);
+    if (cp) { switchPage(cp); return; }
+  }
+  const clean = href.replace(/^(\.\.\/|\.\/)+/, "").split("?")[0].split("#")[0];
+  const p = SITE_PAGES.find(pg => pg.path === clean || pg.path === "pages/" + clean);
+  if (p) {
+    switchPage(p);
+    toast("「" + p.name + "」に移動しました", "info");
+  } else {
+    toast("このリンク先はエディタでは開けません: " + href, "info");
+  }
+}
 
 function renderPageList() {
   const list = document.getElementById("page-list");
@@ -2085,6 +2171,43 @@ document.getElementById("icon-file-inp").addEventListener("change", async (e) =>
   } finally {
     e.target.value = "";
   }
+});
+
+// 🚑 画面外に飛んだ・つぶれた項目をページ内に呼び戻す（座標バグ時代の保存データの救済）
+document.getElementById("rescue-btn").addEventListener("click", () => {
+  if (!iframeDoc) return;
+  const root = iframeDoc.getElementById("page-root");
+  if (!root) return;
+  const pr = root.getBoundingClientRect();
+  const W = pageW();
+  let cand = Array.from(iframeDoc.querySelectorAll(DRAG_SEL))
+    .filter(el => !/_ed_/.test(String(el.className)))
+    .filter(el => !(isReservePage() && el.matches(".container > *")))
+    .filter(el => {
+      const r = el.getBoundingClientRect();
+      const cx = (r.left + r.right) / 2 - pr.left;
+      const cy = (r.top + r.bottom) / 2 - pr.top;
+      const offPage = cx < 0 || cx > W || cy < 0;      // 中心がページの外（左右 or 上）
+      const squished = r.width > 0 && r.width < 50;     // ぺちゃんこに潰れている
+      return offPage || squished;
+    });
+  cand = cand.filter(el => !cand.some(o => o !== el && o.contains(el))); // 親子両方なら親だけ
+  if (!cand.length) { toast("画面の外に出ている項目は見つかりませんでした", "info"); return; }
+  let y = 90;
+  cand.forEach(el => {
+    const r0 = el.getBoundingClientRect();
+    if (r0.width > 0 && r0.width < 50) { // 潰れは扱いやすいサイズに戻す
+      el.style.width = Math.min(300, W - 40) + "px";
+      el.style.height = ""; el.style.objectFit = "";
+    }
+    const cr = containerOf(el).getBoundingClientRect();
+    setBlockPos(el, Math.round(20 - (cr.left - pr.left)), Math.round(y - (cr.top - pr.top)));
+    const h = el.getBoundingClientRect().height || 60;
+    y += Math.round(Math.max(70, h + 24));
+  });
+  snapshotForUndo();
+  selectBlock(cand[0]);
+  toast(cand.length + "個をページ左上に呼び戻しました。位置を直して保存してください", "success");
 });
 
 function ctxFontMenu(target, ox, oy) {

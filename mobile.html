@@ -54,12 +54,13 @@ img{display:block}
 .btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:8px}
 .btn-secondary{border:1.5px solid var(--border);background:#fff}
 
-/* バッジ */
+/* バッジ（※.page付き詳細度＝公開済みデータ内の古いCSSコピーに勝つため） */
 .badges{display:flex;justify-content:space-between;padding:18px 16px 6px}
 .badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:86px}
-.badge-icon{width:56px;height:56px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(20,40,60,.08)}
-.badge-label{font-size:11px;font-weight:800}
-.badge-sub{font-size:9px;color:var(--text-gray)}
+.page .badges .badge-icon{width:58px;height:58px;border-radius:50%;background:linear-gradient(165deg,#ffffff 15%,#eaf2fb 100%);border:2px solid #f0b429;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(20,40,60,.14);font-size:26px}
+.page .badges .badge-icon img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.page .badges .badge-label{font-size:11px;font-weight:800;color:#15314f}
+.page .badges .badge-sub{font-size:9px;font-weight:700;color:#39506a;background:#f2f6fb;border:1px solid var(--border);padding:1px 8px;border-radius:999px}
 
 /* サービスカード 2×2 */
 .content-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 14px 20px}
