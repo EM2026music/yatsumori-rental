@@ -54,6 +54,9 @@ img{display:block}
 .btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:8px}
 .btn-secondary{border:1.5px solid var(--border);background:#fff}
 
+/* はみ出した項目で横スクロールが発生しないように（スマホ版は390px固定） */
+html,body{overflow-x:hidden}
+
 /* バッジ（※詳細度高め＝公開済みデータ内の旧CSSコピーに勝って元デザインを保つ） */
 .badges{display:flex;justify-content:space-between;padding:18px 16px 6px}
 .badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:86px}
