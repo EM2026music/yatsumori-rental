@@ -352,6 +352,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
           </div>
         </div>
         <div class="prop-group">
+          <div class="prop-label">読みやすさ（写真と被って読みにくい時）</div>
+          <select id="text-legibility-inp" class="prop-input">
+            <option value="">そのまま</option>
+            <option value="glow">白フチ（ふんわり光る）</option>
+            <option value="plate-light">白い下地を敷く</option>
+            <option value="plate-dark">紺の下地を敷く（文字は白に）</option>
+          </select>
+        </div>
+        <div class="prop-group">
           <div class="prop-label">太さ</div>
           <select id="font-weight-inp" class="prop-input">
             <option value="400">通常</option>
@@ -669,6 +678,9 @@ function injectEditingCSS() {
     /* 注意: ここで position を上書きしてはいけない（自由配置画像の absolute が
        relative 扱いになり、編集と本番の座標が全ページでズレる大事故になった） */
     [data-ed-img] { cursor: move !important; }
+    /* 写真の上に重なる色膜はエディタ内ではクリックを通す（膜が邪魔で
+       ヒーロー写真等を選択・差し替えできなかった問題の修正） */
+    .hero-overlay, .mh-ov { pointer-events: none !important; }
     [data-ed-pan] { cursor: move !important; }
     [data-ed-img]:hover::after {
       content: "🖼 クリックで差し替え ／ ドラッグで位置調整" !important;
@@ -2107,6 +2119,7 @@ function syncTextProps(el) {
   document.getElementById("sel-tag").textContent = el.tagName.toLowerCase();
   document.getElementById("txt-link-cur").textContent = getLink(el) || "リンクなし";
   document.getElementById("font-family-inp").value = el.style.fontFamily || "";
+  document.getElementById("text-legibility-inp").value = el.dataset.legibility || "";
 }
 
 function rgbToHex(rgb) {
@@ -2142,6 +2155,29 @@ document.getElementById("font-family-inp").addEventListener("change", (e) => {
   const t = fbTextTarget();
   if (!t) return;
   t.style.fontFamily = e.target.value;
+  snapshotForUndo();
+});
+
+// 読みやすさ：写真の上の文字に白フチ or 下地プレートを敷く
+const LEGIBILITY_STYLES = {
+  "":            { textShadow: "", background: "", padding: "", borderRadius: "" },
+  "glow":        { textShadow: "0 0 6px rgba(255,255,255,.95), 0 0 16px rgba(255,255,255,.9), 0 0 32px rgba(255,255,255,.85)", background: "", padding: "", borderRadius: "" },
+  "plate-light": { textShadow: "none", background: "rgba(255,255,255,.82)", padding: "6px 14px", borderRadius: "8px" },
+  "plate-dark":  { textShadow: "none", background: "rgba(8,18,46,.68)", padding: "6px 14px", borderRadius: "8px" },
+};
+document.getElementById("text-legibility-inp").addEventListener("change", (e) => {
+  const t = fbTextTarget();
+  if (!t) return;
+  const prev = t.dataset.legibility || "";
+  const v = e.target.value;
+  const s = LEGIBILITY_STYLES[v] || LEGIBILITY_STYLES[""];
+  t.style.textShadow = s.textShadow;
+  t.style.background = s.background;
+  t.style.padding = s.padding;
+  t.style.borderRadius = s.borderRadius;
+  if (v === "plate-dark") t.style.color = "#ffffff";
+  else if (prev === "plate-dark") t.style.color = ""; // 紺下地をやめたら文字色を元(CSS既定)に戻す
+  if (v) t.dataset.legibility = v; else delete t.dataset.legibility;
   snapshotForUndo();
 });
 
