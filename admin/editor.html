@@ -797,6 +797,8 @@ function normalizeFreeItems() {
   if (!root) return;
   const pr = root.getBoundingClientRect();
   iframeDoc.querySelectorAll(".ed-free").forEach(el => {
+    // 既にページ直下＆absoluteの項目は完成形なので一切触らない（動くリスクをゼロに）
+    if (el.parentElement === root && el.style.position === "absolute") return;
     const r = el.getBoundingClientRect();
     if (el.parentElement !== root) root.appendChild(el);
     el.style.position = "absolute";
@@ -2286,8 +2288,10 @@ async function handlePublish() {
   btn.disabled = true; btn.textContent = "公開中...";
 
   try {
+    const keepScroll = document.getElementById("canvas-scroller").scrollTop;
     deselect();
     normalizeFreeItems(); // 公開データは必ずページ基準の座標で保存
+    document.getElementById("canvas-scroller").scrollTop = keepScroll;
     // クローンから編集用の目印を除去した完成HTMLを保存（ライブDOMは触らない）
     const html = getCleanHTML();
 
