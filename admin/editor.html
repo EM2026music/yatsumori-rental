@@ -974,7 +974,9 @@ function blockRect(el) {
 function setBlockPos(el, left, top) {
   el.style.left = Math.round(left) + "px";
   el.style.top = Math.round(top) + "px";
-  el.style.right = "auto"; // right基準の要素もleft基準に切替
+  el.style.right = "auto";  // right基準の要素もleft基準に切替
+  el.style.margin = "0";    // マージンがあるとカーソルより下/右にズレて置かれるため打ち消す
+  if (iframeWin.getComputedStyle(el).position === "static") el.style.position = "absolute";
 }
 
 // ── スナップ（同じコンテナ内の他項目の端/中央、コンテナの端/中央に吸着） ──
@@ -1701,12 +1703,17 @@ function renderPageList() {
       item.className = "page-item child" + (cur ? " current" : "");
       item.title = p.path;
       item.innerHTML = `<span>${p.name}</span><span class="pg-path">${cur ? "編集中" : (p.key ? "✏️ 編集" : "開く ↗")}</span>`;
-      if (p.custom) {
+      if (p.key) {
         const tools = document.createElement("span");
         tools.className = "pg-tools";
-        tools.innerHTML = `<button title="名前を変更">✎</button><button title="削除">🗑</button>`;
-        tools.children[0].addEventListener("click", (e) => { e.stopPropagation(); renameCustomPage(p); });
-        tools.children[1].addEventListener("click", (e) => { e.stopPropagation(); deleteCustomPage(p); });
+        tools.innerHTML = p.custom
+          ? `<button title="名前を変更">✎</button><button title="削除">🗑</button>`
+          : `<button title="名前を変更">✎</button>`;
+        tools.children[0].addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (p.custom) renameCustomPage(p); else renameStaticPage(p);
+        });
+        if (p.custom) tools.children[1].addEventListener("click", (e) => { e.stopPropagation(); deleteCustomPage(p); });
         item.appendChild(tools);
       }
       item.addEventListener("click", () => {
@@ -1719,6 +1726,29 @@ function renderPageList() {
 }
 function refreshPageList() { renderPageList(); }
 renderPageList();
+
+// 固定ページの表示名変更（エディタ内一覧の名前。ブラウザに保存）
+const NAME_KEY = "yatsumori_page_names";
+function renameStaticPage(p) {
+  const t = prompt("一覧での表示名を変更してください\n例: ギャラリー", p.name.replace(/^\S+\s/, ""));
+  if (!t || !t.trim()) return;
+  const emoji = (p.name.match(/^\S+/) || ["📄"])[0];
+  p.name = emoji + " " + t.trim();
+  try {
+    const m = JSON.parse(localStorage.getItem(NAME_KEY) || "{}");
+    m[p.key] = p.name;
+    localStorage.setItem(NAME_KEY, JSON.stringify(m));
+  } catch (e) {}
+  renderPageList();
+  document.getElementById("current-page-name").textContent = currentPage.name.replace(/^\S+\s/, "");
+  toast("名前を変更しました", "success");
+}
+(function loadNameOverrides() {
+  try {
+    const m = JSON.parse(localStorage.getItem(NAME_KEY) || "{}");
+    SITE_PAGES.forEach(p => { if (p.key && m[p.key]) p.name = m[p.key]; });
+  } catch (e) {}
+})();
 
 // 追加ページの名前変更・削除
 async function renameCustomPage(p) {
