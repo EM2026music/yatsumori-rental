@@ -617,6 +617,7 @@ iframe.addEventListener("load", () => {
     document.getElementById("canvas-loading").style.display = "none";
     resizeIframe();
     injectEditingCSS();
+    normalizeFreeItems(); // 追加パーツの座標基準をページに統一
     canvasizeItems();   // 並んでいる項目を1個ずつ動かせる状態に固定
     attachEditHandlers();
     buildSectionList();
@@ -789,6 +790,24 @@ function canvasizeSection(container, childSel) {
   });
 }
 
+// 追加パーツ(.ed-free)の座標基準を「ページ全体」に統一する正規化。
+// 読み込み時・公開時に必ず実行することで、編集と本番の位置ズレを構造的に防ぐ。
+function normalizeFreeItems() {
+  const root = iframeDoc.getElementById("page-root");
+  if (!root) return;
+  const pr = root.getBoundingClientRect();
+  iframeDoc.querySelectorAll(".ed-free").forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (el.parentElement !== root) root.appendChild(el);
+    el.style.position = "absolute";
+    el.style.margin = "0";
+    el.style.right = "auto";
+    el.style.left = Math.round(r.left - pr.left) + "px";
+    el.style.top = Math.round(r.top - pr.top) + "px";
+    if (!el.style.zIndex) el.style.zIndex = "30";
+  });
+}
+
 function canvasizeItems() {
   canvasizeSection(iframeDoc.querySelector(".info-row"), ".info-sec,.reviews-sec,.access-sec");
   canvasizeSection(iframeDoc.querySelector(".content-grid"), ".content-card");
@@ -866,6 +885,7 @@ function attachEditHandlers() {
 
 function reattach() {
   injectEditingCSS();
+  normalizeFreeItems();
   canvasizeItems(); // 履歴読込・Undo後も項目を動かせる状態を維持（適用済みならスキップ）
   attachEditHandlers();
   buildSectionList();
@@ -1866,6 +1886,7 @@ function addContent(def) {
   el.style.top = "60px";
   el.style.zIndex = "30";
   el.style.boxShadow = "0 6px 20px rgba(0,0,0,.25)"; // 追加直後に見つけやすく
+  normalizeFreeItems();
   attachEditHandlers();
   selectBlock(el);
   snapshotForUndo();
@@ -2266,6 +2287,7 @@ async function handlePublish() {
 
   try {
     deselect();
+    normalizeFreeItems(); // 公開データは必ずページ基準の座標で保存
     // クローンから編集用の目印を除去した完成HTMLを保存（ライブDOMは触らない）
     const html = getCleanHTML();
 
