@@ -754,7 +754,14 @@ function canvasizeSection(container, childSel) {
   const kids = Array.from(container.querySelectorAll(childSel)).filter(k => k.parentElement === container || k.closest(childSel) === k);
   const direct = kids.filter(k => k.parentElement === container);
   if (!direct.length) return;
-  if (direct.every(k => k.style.position === "absolute")) return; // 既にキャンバス化済み
+  if (direct.every(k => k.style.position === "absolute")) {
+    // 既にキャンバス化済み → 古い保存データの幅が今のキャンバス幅とズレていたら直す
+    const cur = Math.round(container.getBoundingClientRect().width);
+    container.style.width = "";
+    const natural = Math.round(container.getBoundingClientRect().width);
+    container.style.width = natural + "px";
+    return;
+  }
   const crect = container.getBoundingClientRect();
   // 先に全項目を測ってから一括適用（順に適用すると位置がずれるため）
   const meas = direct.map(k => {
