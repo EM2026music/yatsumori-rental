@@ -340,3 +340,16 @@ button { font-family: inherit; cursor: pointer; }
 #blocks-container .gjs-block { width: auto !important; }
 #layers-container, #style-manager-container, #trait-manager-container { font-size: 12px; }
 
+
+/* ---------- ブランドヘッダー・写真帯・店舗フッター（予約系ページ用） ---------- */
+.brand-header { display:flex; align-items:center; gap:10px; height:64px; padding:0 14px; background:rgba(255,255,255,.97); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; }
+.bh-logo { width:40px; height:40px; border-radius:50%; object-fit:contain; border:1px solid var(--border); background:#fff; }
+.bh-name { font-weight:800; font-size:15px; line-height:1.2; color:var(--text); }
+.bh-sub { font-size:9px; color:var(--text-mute); letter-spacing:.08em; margin-top:2px; }
+.bh-page { margin-left:auto; font-size:11.5px; font-weight:800; color:var(--text-dim); background:var(--panel); border:1px solid var(--border); padding:5px 12px; border-radius:999px; white-space:nowrap; }
+.mini-hero { position:relative; height:104px; overflow:hidden; }
+.mini-hero img { width:100%; height:104px; object-fit:cover; object-position:left 30%; display:block; }
+.mh-ov { position:absolute; inset:0; background:linear-gradient(90deg, rgba(8,18,46,.5), rgba(8,18,46,.12)); }
+.mh-t { position:absolute; left:16px; bottom:14px; color:#fff; font-weight:800; font-size:15px; text-shadow:0 1px 6px rgba(0,0,0,.4); }
+.page-footer { display:flex; gap:12px; align-items:center; background:var(--panel); border-top:1px solid var(--border); padding:14px 16px; margin-top:26px; font-size:11.5px; color:var(--text-dim); line-height:1.7; }
+.page-footer img { width:46px; height:46px; border-radius:10px; object-fit:contain; border:1px solid var(--border); background:#fff; flex-shrink:0; }
