@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1536">
 <script>
-// スマホは専用ページへ自動振り分け（mobile.html）。?pc=1 でPC版を強制表示できる
-if (Math.min(screen.width, window.innerWidth || 9999) < 768 && location.search.indexOf("pc=1") === -1) {
+// スマホ端末だけ専用ページへ自動振り分け（mobile.html）。?pc=1 でPC版を強制表示できる。
+// ※画面幅ではなく機種で判定：PCはズームや表示スケールに関係なく必ずPC版になる
+if (/Android|iPhone|iPod|Mobile/i.test(navigator.userAgent) && location.search.indexOf("pc=1") === -1) {
   location.replace("mobile.html");
 }
 </script>
