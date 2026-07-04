@@ -415,6 +415,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
             <span class="prop-unit">px</span>
           </div>
         </div>
+        <div class="prop-group">
+          <div class="prop-label">フォント（この項目だけ変わります）</div>
+          <select id="block-font-inp" class="prop-input">
+            <option value="">標準（ゴシック体）</option>
+            <option value='"Yu Mincho","Hiragino Mincho ProN",serif'>明朝体（上品）</option>
+            <option value='Meiryo,"Hiragino Kaku Gothic ProN",sans-serif'>メイリオ（やわらか）</option>
+            <option value='"Segoe Print","Yu Gothic",cursive'>手書き風</option>
+            <option value='Impact,"Arial Black",sans-serif'>極太（英数字向け）</option>
+          </select>
+        </div>
         <div class="prop-group" id="blk-bg-group" style="display:none">
           <div class="prop-label">🖼 背景写真</div>
           <button class="btn-replace" id="blk-bg-btn">背景写真を差し替える</button>
@@ -437,6 +447,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
           <img id="img-preview" class="img-preview" src="" alt="" style="display:none">
           <button class="btn-replace" id="replace-img-btn">🖼 画像を変更する</button>
           <input type="file" id="img-file-inp" accept="image/*" style="display:none">
+          <input type="file" id="icon-file-inp" accept="image/*" style="display:none">
         </div>
         <div class="prop-group">
           <div class="prop-label">幅</div>
@@ -885,6 +896,13 @@ function attachEditHandlers() {
   iframeDoc.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { hideCtxMenu(); deselect(); }
     if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); handlePublish(); }
+    // ページ内にフォーカスがあってもCtrl+Z/Yが効くように（文字入力中はブラウザ標準のUndoに任せる）
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "z" || e.key === "Z") && !activeTextEl) {
+      e.preventDefault(); doUndo();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y" || (e.shiftKey && (e.key === "z" || e.key === "Z"))) && !activeTextEl) {
+      e.preventDefault(); doRedo();
+    }
     if (e.key === "Delete" && activeBlockEl && !activeTextEl) { e.preventDefault(); deleteSelected(); }
     if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D") && activeBlockEl && !activeTextEl) {
       e.preventDefault(); duplicateItem(activeBlockEl);
@@ -956,10 +974,10 @@ document.getElementById("img-file-inp").addEventListener("change", async (e) => 
   const btn = document.getElementById("replace-img-btn");
   btn.disabled = true; btn.textContent = "アップロード中...";
   try {
-    snapshotForUndo();
     const url = await uploadSiteAsset(file);
     activeImgEl.src = url;
     document.getElementById("img-preview").src = url;
+    snapshotForUndo(); // 変更「後」に記録（前に記録するとCtrl+Zが1回空振りする）
     resizeIframe();
     toast("画像を変更しました", "success");
   } catch (err) {
@@ -976,8 +994,8 @@ document.getElementById("alt-inp").addEventListener("input", (e) => {
 
 document.getElementById("img-width-inp").addEventListener("change", (e) => {
   if (!activeImgEl) return;
-  snapshotForUndo();
   activeImgEl.style.width = e.target.value + "px";
+  snapshotForUndo();
 });
 
 // ================================================================
@@ -1227,8 +1245,16 @@ function syncBlockProps(el) {
   document.getElementById("block-y-inp").value = Math.round(r.top);
   document.getElementById("block-w-inp").value = Math.round(r.width);
   document.getElementById("block-h-inp").value = Math.round(r.height);
+  document.getElementById("block-font-inp").value = el.style.fontFamily || "";
   positionFloatBar();
 }
+
+// ブロック単位のフォント変更（選択した項目とその中の文字だけに効く）
+document.getElementById("block-font-inp").addEventListener("change", (e) => {
+  if (!activeBlockEl) return;
+  activeBlockEl.style.fontFamily = e.target.value;
+  snapshotForUndo();
+});
 
 // 位置/サイズ入力
 document.getElementById("block-x-inp").addEventListener("change", (e) => {
@@ -1958,6 +1984,42 @@ function showCtxEntries(entries, outerX, outerY) {
   ctxMenu.style.top = Math.min(outerY, window.innerHeight - mh - 10) + "px";
 }
 
+// 右クリックメニュー用：フォント/読みやすさのサブメニュー（リンク選択と同じ再表示方式）
+const FONT_CHOICES = [
+  { label: "標準（ゴシック体）", v: "" },
+  { label: "明朝体（上品）", v: '"Yu Mincho","Hiragino Mincho ProN",serif' },
+  { label: "メイリオ（やわらか）", v: 'Meiryo,"Hiragino Kaku Gothic ProN",sans-serif' },
+  { label: "手書き風", v: '"Segoe Print","Yu Gothic",cursive' },
+  { label: "極太（英数字向け）", v: 'Impact,"Arial Black",sans-serif' },
+];
+// バッジ等のSVGアイコンを画像に差し替える（丸枠にフィット）
+let iconTargetBox = null;
+document.getElementById("icon-file-inp").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file || !iconTargetBox) return;
+  try {
+    const url = await uploadSiteAsset(file);
+    iconTargetBox.innerHTML = '<img src="' + url + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    attachEditHandlers(); // 入れた画像もクリックで差し替えできるように
+    snapshotForUndo();
+    toast("アイコンを画像に差し替えました", "success");
+  } catch (err) {
+    toast("アップロード失敗: " + err.message, "error");
+  } finally {
+    e.target.value = "";
+  }
+});
+
+function ctxFontMenu(target, ox, oy) {
+  showCtxEntries([{ head: "フォントを選ぶ（この項目だけ）" },
+    ...FONT_CHOICES.map(f => ({ icon: "🔠", label: f.label, fn: () => { target.style.fontFamily = f.v; snapshotForUndo(); } }))], ox, oy);
+}
+function ctxLegibilityMenu(target, ox, oy) {
+  const opts = [["", "そのまま"], ["glow", "白フチ（ふんわり光る）"], ["plate-light", "白い下地を敷く"], ["plate-dark", "紺の下地（文字は白に）"]];
+  showCtxEntries([{ head: "読みやすさ（写真と被るとき）" },
+    ...opts.map(([v, label]) => ({ icon: "✨", label, fn: () => applyLegibility(target, v) }))], ox, oy);
+}
+
 function openCtxMenu(e) {
   const ifr = iframe.getBoundingClientRect();
   const ox = ifr.left + e.clientX * zoomScale;
@@ -1968,11 +2030,19 @@ function openCtxMenu(e) {
 
   if (block) {
     selectBlock(block);
-    const entries = [
+    const txt = e.target.closest ? e.target.closest(TEXT_SEL) : null;
+    const textTarget = (txt && block.contains(txt)) ? txt : block; // 文字の上なら文字だけ、そうでなければ項目全体
+    const entries = [];
+    if (txt && block.contains(txt)) entries.push({ icon: "✏️", label: "文字を編集", fn: () => handleTextClick(txt) });
+    if (img) entries.push({ icon: "🖼", label: "この画像を差し替え", fn: () => { handleImgClick(img); document.getElementById("img-file-inp").click(); } });
+    const iconBox = block.querySelector(".badge-icon");
+    if (iconBox) entries.push({ icon: "🎯", label: "アイコンを画像に差し替え", fn: () => { iconTargetBox = iconBox; document.getElementById("icon-file-inp").click(); } });
+    entries.push(
+      { icon: "🔠", label: "フォントを変える…", fn: () => ctxFontMenu(textTarget, ox, oy) },
+      { icon: "✨", label: "読みやすさ（白フチ/下地）…", fn: () => ctxLegibilityMenu(textTarget, ox, oy) },
       { icon: "⧉", label: "複製", fn: () => duplicateItem(block) },
       { icon: "🔗", label: "リンク先を設定…", fn: () => promptLink(block) },
-    ];
-    if (img) entries.push({ icon: "🖼", label: "この画像を差し替え", fn: () => { handleImgClick(img); document.getElementById("img-file-inp").click(); } });
+    );
     entries.push("---", { icon: "🗑", label: "削除", danger: true, fn: () => deleteSelected() });
     showCtxEntries(entries, ox, oy);
     return;
@@ -1982,6 +2052,16 @@ function openCtxMenu(e) {
     showCtxEntries([
       { icon: "🖼", label: "画像を差し替え", fn: () => document.getElementById("img-file-inp").click() },
       { icon: "🔗", label: "リンク先を設定…", fn: () => promptLink(img) },
+    ], ox, oy);
+    return;
+  }
+  // 画像でも項目でもない文字（ヘッダー等）→ フォント/読みやすさだけ出す
+  const soloTxt = e.target.closest ? e.target.closest(TEXT_SEL) : null;
+  if (soloTxt) {
+    showCtxEntries([
+      { icon: "✏️", label: "文字を編集", fn: () => handleTextClick(soloTxt) },
+      { icon: "🔠", label: "フォントを変える…", fn: () => ctxFontMenu(soloTxt, ox, oy) },
+      { icon: "✨", label: "読みやすさ（白フチ/下地）…", fn: () => ctxLegibilityMenu(soloTxt, ox, oy) },
     ], ox, oy);
     return;
   }
@@ -2140,15 +2220,15 @@ document.querySelectorAll("[data-cmd]").forEach(btn => {
 
 document.getElementById("font-size-inp").addEventListener("change", (e) => {
   if (!activeTextEl) return;
-  snapshotForUndo();
   activeTextEl.style.fontSize = e.target.value + "px";
   syncTextProps(activeTextEl);
+  snapshotForUndo();
 });
 
 document.getElementById("font-weight-inp").addEventListener("change", (e) => {
   if (!activeTextEl) return;
-  snapshotForUndo();
   activeTextEl.style.fontWeight = e.target.value;
+  snapshotForUndo();
 });
 
 document.getElementById("font-family-inp").addEventListener("change", (e) => {
@@ -2165,11 +2245,8 @@ const LEGIBILITY_STYLES = {
   "plate-light": { textShadow: "none", background: "rgba(255,255,255,.82)", padding: "6px 14px", borderRadius: "8px" },
   "plate-dark":  { textShadow: "none", background: "rgba(8,18,46,.68)", padding: "6px 14px", borderRadius: "8px" },
 };
-document.getElementById("text-legibility-inp").addEventListener("change", (e) => {
-  const t = fbTextTarget();
-  if (!t) return;
+function applyLegibility(t, v) {
   const prev = t.dataset.legibility || "";
-  const v = e.target.value;
   const s = LEGIBILITY_STYLES[v] || LEGIBILITY_STYLES[""];
   t.style.textShadow = s.textShadow;
   t.style.background = s.background;
@@ -2179,6 +2256,11 @@ document.getElementById("text-legibility-inp").addEventListener("change", (e) =>
   else if (prev === "plate-dark") t.style.color = ""; // 紺下地をやめたら文字色を元(CSS既定)に戻す
   if (v) t.dataset.legibility = v; else delete t.dataset.legibility;
   snapshotForUndo();
+}
+document.getElementById("text-legibility-inp").addEventListener("change", (e) => {
+  const t = fbTextTarget();
+  if (!t) return;
+  applyLegibility(t, e.target.value);
 });
 
 document.getElementById("text-color-inp").addEventListener("input", (e) => {
