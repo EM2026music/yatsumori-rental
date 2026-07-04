@@ -2105,21 +2105,35 @@ function buildSectionList() {
     list.appendChild(item);
   });
 
-  // 「＋追加」で足したパーツを一覧に出す（隠れていてもクリックで選択→Deleteで削除できる）
-  iframeDoc.querySelectorAll(".ed-free").forEach((el, i) => {
-    const item = document.createElement("div");
-    item.className = "sec-item";
-    item.innerHTML = `<span class="sec-icon">🧩</span><span>追加パーツ${i + 1}（${el.tagName === "IMG" ? "画像" : "テキスト"}）</span>`;
-    item.addEventListener("click", () => {
-      const scroller = document.getElementById("canvas-scroller");
-      const rootTop = iframeDoc.documentElement.getBoundingClientRect().top;
-      const y = (el.getBoundingClientRect().top - rootTop) * zoomScale;
-      scroller.scrollTo({ top: Math.max(0, y - 200), behavior: "smooth" });
-      selectBlock(el);
-    });
-    list.appendChild(item);
-  });
+  // 「＋追加」で足したパーツ：フォルダのように開閉できるグループ
+  try {
+  const parts = iframeDoc.querySelectorAll(".ed-free");
+  if (parts.length) {
+    const head = document.createElement("div");
+    head.className = "sec-item";
+    head.innerHTML = `<span class="sec-icon">${addedPartsOpen ? "▾" : "▸"}</span><span>🧩 追加パーツ（${parts.length}）</span>`;
+    head.addEventListener("click", () => { addedPartsOpen = !addedPartsOpen; buildSectionList(); });
+    list.appendChild(head);
+    if (addedPartsOpen) {
+      parts.forEach((el, i) => {
+        const item = document.createElement("div");
+        item.className = "sec-item";
+        item.style.paddingLeft = "30px";
+        item.innerHTML = `<span class="sec-icon">${el.tagName === "IMG" ? "📷" : "✏️"}</span><span>パーツ${i + 1}（${el.tagName === "IMG" ? "画像" : "テキスト"}）</span>`;
+        item.addEventListener("click", () => {
+          const scroller = document.getElementById("canvas-scroller");
+          const rootTop = iframeDoc.documentElement.getBoundingClientRect().top;
+          const y = (el.getBoundingClientRect().top - rootTop) * zoomScale;
+          scroller.scrollTo({ top: Math.max(0, y - 200), behavior: "smooth" });
+          selectBlock(el);
+        });
+        list.appendChild(item);
+      });
+    }
+  }
+  } catch (e) {}
 }
+let addedPartsOpen = true; // 追加パーツグループの開閉状態（開いたままが初期値）
 
 // ── Section drag-to-reorder (Sortable.js injected into iframe) ──
 function injectSortable() {
