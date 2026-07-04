@@ -130,6 +130,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
   cursor: nwse-resize; box-shadow: 0 2px 8px rgba(0,0,0,.35);
 }
 #rs-handle.show { display: block; }
+/* 右辺・下辺のハンドル（幅だけ／高さだけを調整） */
+#rs-e, #rs-s { position: fixed; z-index: 10001; display: none; background: #fff; border: 2.5px solid #3b82f6; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+#rs-e { width: 10px; height: 24px; cursor: ew-resize; }
+#rs-s { width: 24px; height: 10px; cursor: ns-resize; }
+#rs-e.show, #rs-s.show { display: block; }
 /* リサイズ中はiframeがマウスを奪わないよう透明シールドを被せる */
 #drag-shield { position: fixed; inset: 0; z-index: 10004; display: none; cursor: nwse-resize; }
 #drag-shield.show { display: block; }
@@ -249,13 +254,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
     <button class="fb-btn" id="fb-dup" title="複製 (Ctrl+D)">⧉ 複製</button>
     <button class="fb-btn" id="fb-del" title="削除 (Delete)">🗑</button>
     <button class="fb-btn" id="fb-blk-link" title="クリックしたときの遷移先を設定">🔗</button>
+    <button class="fb-btn" id="fb-bg" title="背景写真を差し替え" style="display:none">🖼</button>
   </span>
   <span class="fb-sep"></span>
   <button class="fb-btn" id="fb-done" title="選択解除">✓ 完了</button>
 </div>
 
-<!-- 大きさ調整ハンドル（選択中の項目の右下角） -->
+<!-- 大きさ調整ハンドル（右下角＝両方向 / 右辺＝幅 / 下辺＝高さ） -->
 <div id="rs-handle" title="ドラッグで大きさ調整"></div>
+<div id="rs-e" title="横幅を調整"></div>
+<div id="rs-s" title="高さを調整"></div>
 <div id="drag-shield"></div>
 
 <!-- ＋追加 パネル -->
@@ -353,6 +361,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
           </select>
         </div>
         <div class="prop-group">
+          <div class="prop-label">フォント</div>
+          <select id="font-family-inp" class="prop-input">
+            <option value="">標準（ゴシック体）</option>
+            <option value='"Yu Mincho","Hiragino Mincho ProN",serif'>明朝体（上品）</option>
+            <option value='Meiryo,"Hiragino Kaku Gothic ProN",sans-serif'>メイリオ（やわらか）</option>
+            <option value='"Segoe Print","Yu Gothic",cursive'>手書き風</option>
+            <option value='Impact,"Arial Black",sans-serif'>極太（英数字向け）</option>
+          </select>
+        </div>
+        <div class="prop-group">
           <div class="prop-label">🔗 クリック時の遷移先</div>
           <div id="txt-link-cur" style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:6px;word-break:break-all">リンクなし</div>
           <button class="btn-replace" id="txt-link-btn">リンク先を選ぶ…</button>
@@ -387,6 +405,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
             <input type="number" id="block-h-inp" class="prop-input" min="60" step="1">
             <span class="prop-unit">px</span>
           </div>
+        </div>
+        <div class="prop-group" id="blk-bg-group" style="display:none">
+          <div class="prop-label">🖼 背景写真</div>
+          <button class="btn-replace" id="blk-bg-btn">背景写真を差し替える</button>
+          <input type="file" id="bg-file-inp" accept="image/*" style="display:none">
         </div>
         <div class="prop-group">
           <div class="prop-label">🔗 クリック時の遷移先</div>
@@ -1118,6 +1141,11 @@ function selectBlock(el) {
   document.getElementById("block-h-row").style.display = hasH ? "flex" : "none";
   syncBlockProps(el);
   document.getElementById("blk-link-cur").textContent = getLink(el) || "リンクなし";
+  // 背景写真つきの項目（サービスカード等）は差し替えボタンを表示
+  const bgImg = iframeWin.getComputedStyle(el).backgroundImage;
+  const hasBg = bgImg && bgImg !== "none";
+  document.getElementById("blk-bg-group").style.display = hasBg ? "block" : "none";
+  document.getElementById("fb-bg").style.display = hasBg ? "" : "none";
 }
 
 function syncBlockProps(el) {
@@ -1214,6 +1242,8 @@ function showFloatBar(el, type) {
 function hideFloatBar() {
   floatBar.classList.remove("show");
   document.getElementById("rs-handle").classList.remove("show");
+  document.getElementById("rs-e").classList.remove("show");
+  document.getElementById("rs-s").classList.remove("show");
 }
 
 function positionFloatBar() {
@@ -1230,8 +1260,10 @@ function positionFloatBar() {
   positionRsHandle();
 }
 
-// ── 大きさ調整ハンドル（選択中の項目・画像の右下角に表示） ──
+// ── 大きさ調整ハンドル（右下角＝両方向／右辺＝幅／下辺＝高さ） ──
 const rsHandle = document.getElementById("rs-handle");
+const rsE = document.getElementById("rs-e");
+const rsS = document.getElementById("rs-s");
 
 function rsEligible(el) {
   if (!el) return false;
@@ -1240,40 +1272,58 @@ function rsEligible(el) {
 }
 
 function positionRsHandle() {
-  if (!rsEligible(selectedEl)) { rsHandle.classList.remove("show"); return; }
+  if (!rsEligible(selectedEl)) {
+    rsHandle.classList.remove("show"); rsE.classList.remove("show"); rsS.classList.remove("show");
+    return;
+  }
   const ifr = iframe.getBoundingClientRect();
   const r = selectedEl.getBoundingClientRect();
   rsHandle.style.left = Math.round(ifr.left + r.right * zoomScale - 8) + "px";
   rsHandle.style.top  = Math.round(ifr.top  + r.bottom * zoomScale - 8) + "px";
-  rsHandle.classList.add("show");
+  rsE.style.left = Math.round(ifr.left + r.right * zoomScale - 5) + "px";
+  rsE.style.top  = Math.round(ifr.top  + (r.top + r.height / 2) * zoomScale - 12) + "px";
+  rsS.style.left = Math.round(ifr.left + (r.left + r.width / 2) * zoomScale - 12) + "px";
+  rsS.style.top  = Math.round(ifr.top  + r.bottom * zoomScale - 5) + "px";
+  rsHandle.classList.add("show"); rsE.classList.add("show"); rsS.classList.add("show");
 }
 
-rsHandle.addEventListener("mousedown", (e) => {
+function startResize(e, mode) {
   if (!selectedEl) return;
   e.preventDefault(); e.stopPropagation();
   const r = selectedEl.getBoundingClientRect();
   const isImg = selectedEl.tagName === "IMG";
   resizeState = {
-    el: selectedEl, startX: e.clientX, startY: e.clientY,
+    el: selectedEl, mode, startX: e.clientX, startY: e.clientY,
     origW: r.width, origH: r.height, isImg,
     aspect: isImg && selectedEl.naturalWidth ? selectedEl.naturalWidth / selectedEl.naturalHeight : null,
-    hFree: selectedEl.classList.contains("booking-card") || selectedEl.classList.contains("content-card"),
   };
-  document.getElementById("drag-shield").classList.add("show");
-});
+  const shield = document.getElementById("drag-shield");
+  shield.style.cursor = mode === "e" ? "ew-resize" : (mode === "s" ? "ns-resize" : "nwse-resize");
+  shield.classList.add("show");
+}
+rsHandle.addEventListener("mousedown", (e) => startResize(e, "se"));
+rsE.addEventListener("mousedown", (e) => startResize(e, "e"));
+rsS.addEventListener("mousedown", (e) => startResize(e, "s"));
 
 document.addEventListener("mousemove", (e) => {
   if (!resizeState) return;
   const dw = (e.clientX - resizeState.startX) / zoomScale;
   const dh = (e.clientY - resizeState.startY) / zoomScale;
   const el = resizeState.el;
-  const w = Math.max(40, Math.round(resizeState.origW + dw));
-  el.style.width = w + "px";
+  const m = resizeState.mode;
+  if (m !== "s") el.style.width = Math.max(40, Math.round(resizeState.origW + dw)) + "px";
   if (resizeState.isImg) {
-    // 画像は縦横比を保って拡大縮小
-    el.style.height = resizeState.aspect ? Math.round(w / resizeState.aspect) + "px" : "auto";
-  } else if (resizeState.hFree) {
-    el.style.height = Math.max(40, Math.round(resizeState.origH + dh)) + "px";
+    if (m === "se") {
+      // 角＝縦横比を保って拡大縮小
+      const w = Math.max(40, Math.round(resizeState.origW + dw));
+      el.style.height = resizeState.aspect ? Math.round(w / resizeState.aspect) + "px" : "auto";
+    } else {
+      // 辺＝その方向だけ伸縮（写真は潰さずトリミング）
+      el.style.objectFit = "cover";
+      el.style.height = (m === "s" ? Math.max(30, Math.round(resizeState.origH + dh)) : Math.round(resizeState.origH)) + "px";
+    }
+  } else if (m === "s" || m === "se") {
+    el.style.height = Math.max(30, Math.round(resizeState.origH + dh)) + "px";
   }
   if (activeBlockEl === el) syncBlockProps(el);
   positionFloatBar();
@@ -1282,7 +1332,9 @@ document.addEventListener("mousemove", (e) => {
 document.addEventListener("mouseup", () => {
   if (resizeState) {
     resizeState = null;
-    document.getElementById("drag-shield").classList.remove("show");
+    const shield = document.getElementById("drag-shield");
+    shield.classList.remove("show");
+    shield.style.cursor = "";
     snapshotForUndo();
     resizeIframe();
   }
@@ -1736,6 +1788,10 @@ function addContent(def) {
   const tmp = iframeDoc.createElement("div");
   tmp.innerHTML = def.html;
   const el = tmp.firstElementChild;
+  // サブページ(pages/配下)では相対パスを補正（画像が404で透明に見える問題の修正）
+  if (el.tagName === "IMG" && iframeWin.location.pathname.indexOf("/pages/") !== -1) {
+    el.setAttribute("src", "../" + el.getAttribute("src"));
+  }
   const c = (activeBlockEl && containerOf(activeBlockEl)) || heroEl() || iframeDoc.getElementById("page-root") || iframeDoc.body;
   if (iframeWin.getComputedStyle(c).position === "static") c.style.position = "relative";
   c.appendChild(el);
@@ -1743,10 +1799,17 @@ function addContent(def) {
   el.style.left = "60px";
   el.style.top = "60px";
   el.style.zIndex = "30";
+  el.style.boxShadow = "0 6px 20px rgba(0,0,0,.25)"; // 追加直後に見つけやすく
   attachEditHandlers();
   selectBlock(el);
   snapshotForUndo();
-  toast("追加しました。ドラッグで好きな場所へ", "success");
+  // 追加した場所まで自動スクロール（見失わないように）
+  try {
+    const rootTop = iframeDoc.documentElement.getBoundingClientRect().top;
+    const y = (el.getBoundingClientRect().top - rootTop) * zoomScale;
+    document.getElementById("canvas-scroller").scrollTo({ top: Math.max(0, y - 180), behavior: "smooth" });
+  } catch (e) {}
+  toast("追加しました！青枠が付いている物が今追加した項目です", "success");
 }
 
 // パネルを組み立て
@@ -1855,6 +1918,28 @@ document.getElementById("txt-link-btn").addEventListener("click", (e) => {
   if (t) promptLink(t, e.clientX - 260, e.clientY + 10);
 });
 
+// 背景写真の差し替え（サービスカード等のbackground-image）
+function pickBgFile(e) {
+  e.stopPropagation();
+  if (activeBlockEl) document.getElementById("bg-file-inp").click();
+}
+document.getElementById("blk-bg-btn").addEventListener("click", pickBgFile);
+document.getElementById("fb-bg").addEventListener("click", pickBgFile);
+document.getElementById("bg-file-inp").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file || !activeBlockEl) return;
+  const el = activeBlockEl;
+  toast("アップロード中...", "info");
+  try {
+    const url = await uploadSiteAsset(file);
+    el.style.backgroundImage = "url('" + url + "')";
+    snapshotForUndo();
+    toast("背景写真を差し替えました", "success");
+  } catch (err) {
+    toast("アップロード失敗: " + err.message, "error");
+  } finally { e.target.value = ""; }
+});
+
 // リンク変更後にパネルの表示を最新化
 function refreshLinkDisplays() {
   if (activeBlockEl) document.getElementById("blk-link-cur").textContent = getLink(activeBlockEl) || "リンクなし";
@@ -1930,6 +2015,7 @@ function syncTextProps(el) {
   document.getElementById("text-color-val").textContent = hex;
   document.getElementById("sel-tag").textContent = el.tagName.toLowerCase();
   document.getElementById("txt-link-cur").textContent = getLink(el) || "リンクなし";
+  document.getElementById("font-family-inp").value = el.style.fontFamily || "";
 }
 
 function rgbToHex(rgb) {
@@ -1959,6 +2045,13 @@ document.getElementById("font-weight-inp").addEventListener("change", (e) => {
   if (!activeTextEl) return;
   snapshotForUndo();
   activeTextEl.style.fontWeight = e.target.value;
+});
+
+document.getElementById("font-family-inp").addEventListener("change", (e) => {
+  const t = fbTextTarget();
+  if (!t) return;
+  t.style.fontFamily = e.target.value;
+  snapshotForUndo();
 });
 
 document.getElementById("text-color-inp").addEventListener("input", (e) => {
