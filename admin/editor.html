@@ -716,6 +716,8 @@ function injectEditingCSS() {
       width: 1px !important; background: #f43f5e !important; z-index: 9998 !important; pointer-events: none !important; }
     ._ed_guide_h { position: absolute !important; left: 0 !important; right: 0 !important;
       height: 1px !important; background: #f43f5e !important; z-index: 9998 !important; pointer-events: none !important; }
+    ._ed_marquee { position: fixed !important; border: 1.5px dashed #3b82f6 !important;
+      background: rgba(59,130,246,.08) !important; z-index: 99999 !important; pointer-events: none !important; }
 
     /* Section drag handle */
     ._ed_sec { position: relative !important; }
@@ -891,6 +893,7 @@ function attachEditHandlers() {
 
   // Click elsewhere to deselect
   iframeDoc.addEventListener("click", (e) => {
+    if (Date.now() < suppressClickUntil) return; // 範囲選択・ドラッグ直後のclickでは解除しない
     if (!e.target.closest("[data-ed]") && !e.target.closest("[data-ed-img]") && !e.target.closest("[data-ed-block]")) deselect();
   }, { capture: false });
 
@@ -1007,6 +1010,7 @@ let activeBlockEl = null;
 let dragState = null;
 let resizeState = null;
 let panState = null;
+let marqueeState = null; // 範囲選択（何もない所からドラッグ）
 let nudgeTimer = null;
 let suppressClickUntil = 0; // ドラッグ直後の誤クリック（差し替えパネル等）を防ぐ
 let multiSel = [];          // Shift+クリックの複数選択（まとめて移動できる）
@@ -1144,11 +1148,50 @@ function attachBlockDrag() {
       if (ov && (ov.ox > 1 || ov.oy > 1)) {
         panState = { img, startX: e.clientX, startY: e.clientY, ov, pct: objPosPct(img, ov), moved: false };
         e.preventDefault();
+        return;
       }
+    }
+
+    // 何もない場所からドラッグ → 範囲選択（囲んだ項目をまとめて選択→一緒に動かせる）
+    if (!e.target.closest("input,select,textarea") && !img) {
+      marqueeState = { x0: e.clientX, y0: e.clientY, box: null };
+      e.preventDefault();
     }
   });
 
+  // 範囲選択：四角に触れている項目（親子が両方入る場合は親だけ）
+  function marqueeHits(L, T, R, B) {
+    let els = Array.from(iframeDoc.querySelectorAll(DRAG_SEL));
+    els = els.filter(el => !/_ed_/.test(String(el.className))); // エディタ内部の部品（ハンドル等）は除外
+    if (isReservePage()) els = els.filter(el => !el.matches(".container > *"));
+    els = els.filter(el => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.right > L && r.left < R && r.bottom > T && r.top < B;
+    });
+    return els.filter(el => !els.some(o => o !== el && o.contains(el)));
+  }
+
   iframeDoc.addEventListener("mousemove", (e) => {
+    if (marqueeState) {
+      const dx = e.clientX - marqueeState.x0, dy = e.clientY - marqueeState.y0;
+      if (!marqueeState.box) {
+        if (Math.abs(dx) + Math.abs(dy) < 5) return;
+        const b = iframeDoc.createElement("div");
+        b.className = "_ed_marquee";
+        iframeDoc.body.appendChild(b);
+        marqueeState.box = b;
+      }
+      const L = Math.min(e.clientX, marqueeState.x0), T = Math.min(e.clientY, marqueeState.y0);
+      const R = Math.max(e.clientX, marqueeState.x0), B = Math.max(e.clientY, marqueeState.y0);
+      marqueeState.box.style.left = L + "px";
+      marqueeState.box.style.top = T + "px";
+      marqueeState.box.style.width = (R - L) + "px";
+      marqueeState.box.style.height = (B - T) + "px";
+      // 囲まれている項目をその場でハイライト
+      iframeDoc.querySelectorAll(".ed-multi").forEach(el => el.classList.remove("ed-multi"));
+      marqueeHits(L, T, R, B).forEach(el => el.classList.add("ed-multi"));
+      return;
+    }
     if (panState) {
       const dx = e.clientX - panState.startX;
       const dy = e.clientY - panState.startY;
@@ -1177,6 +1220,20 @@ function attachBlockDrag() {
   });
 
   iframeDoc.addEventListener("mouseup", () => {
+    if (marqueeState) {
+      const st = marqueeState; marqueeState = null;
+      if (!st.box) return; // 動かしていない＝ただのクリック → 通常処理（選択解除）に任せる
+      st.box.remove();
+      const sel = Array.from(iframeDoc.querySelectorAll(".ed-multi"));
+      suppressClickUntil = Date.now() + 400; // 直後のclickで選択が解除されないように
+      if (!sel.length) { clearMulti(); return; }
+      if (sel.length === 1) { multiSel = []; refreshMultiMarks(); selectBlock(sel[0]); return; }
+      multiSel = sel;
+      refreshMultiMarks();
+      selectBlock(sel[0]);
+      toast(sel.length + "個を選択中（どれかをドラッグするとまとめて動きます）", "info");
+      return;
+    }
     if (panState) {
       if (panState.moved) { suppressClickUntil = Date.now() + 400; snapshotForUndo(); }
       panState = null;
