@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390">
+<title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
+<!-- スマホ版トップ（390px固定キャンバス・端末幅へ自動スケール）。PC版はindex.html -->
+<style>
+:root{
+  --navy:#15314f; --navy-dark:#0c2138; --yellow:#f0b429; --yellow-dark:#d9960f;
+  --bg:#f5f6f8; --text-gray:#6b7785; --border:#dde2e8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:#fff;color:var(--navy);-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+img{display:block}
+.page{width:390px;background:#fff;position:relative;overflow:hidden}
+
+/* HEADER */
+.site-header{width:390px;height:64px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--border);position:relative;z-index:100}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-logo{width:42px;height:42px;border-radius:50%;object-fit:contain;border:1px solid var(--border)}
+.brand-name{font-weight:800;font-size:15px;line-height:1.2}
+.brand-sub{font-size:9px;color:var(--text-gray);letter-spacing:.08em;margin-top:2px}
+.menu-btn{border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--navy);font-size:10px;font-weight:700;padding:4px}
+.menu-btn .bar{width:22px;height:2px;background:var(--navy);border-radius:2px;display:block;margin-bottom:4px}
+.global-nav{position:absolute;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);box-shadow:0 12px 24px rgba(20,40,60,.1);display:none;flex-direction:column;z-index:99}
+.global-nav.open{display:flex}
+.global-nav a{padding:14px 20px;font-size:14px;font-weight:600;border-bottom:1px solid var(--border)}
+
+/* HERO */
+.hero{position:relative;width:390px}
+.hero-photo{width:390px;height:340px;object-fit:cover;object-position:left 30%}
+.hero-overlay{position:absolute;top:0;left:0;right:0;height:340px;background:linear-gradient(160deg,rgba(8,18,46,.55) 0%,rgba(8,18,46,.32) 65%,rgba(8,18,46,.12) 100%)}
+.hero-content{position:absolute;top:0;left:0;right:0;height:270px;display:flex;flex-direction:column;justify-content:center;padding:18px;color:#fff}
+.hero-title{font-size:25px;font-weight:800;line-height:1.35;margin-bottom:8px;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.25)}
+.hero-desc{font-size:12px;color:rgba(255,255,255,.85);line-height:1.6}
+
+/* 予約カード（写真に重なる） */
+.booking-card{position:relative;z-index:10;margin:-70px 14px 0;background:#fff;border-radius:14px;box-shadow:0 12px 32px rgba(20,40,60,.16);padding:16px}
+.booking-card-title{text-align:center;font-weight:800;font-size:14px;margin-bottom:12px}
+.booking-steps{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px}
+.booking-step{display:flex;flex-direction:column;align-items:center;gap:4px}
+.booking-step-icon{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;background:#fff}
+.booking-step-label{font-size:10px;font-weight:700}
+.booking-step-chevron{color:#bbb;font-size:14px;font-weight:700}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;padding:13px 18px;font-weight:800;font-size:14px}
+.btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:8px}
+.btn-secondary{border:1.5px solid var(--border);background:#fff}
+
+/* バッジ */
+.badges{display:flex;justify-content:space-between;padding:18px 16px 6px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:86px}
+.badge-icon{width:56px;height:56px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(20,40,60,.08)}
+.badge-label{font-size:11px;font-weight:800}
+.badge-sub{font-size:9px;color:var(--text-gray)}
+
+/* サービスカード 2×2 */
+.content-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 14px 20px}
+.content-card{position:relative;height:150px;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;background-size:cover;background-position:center;color:#fff}
+.content-card::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,46,.05) 25%,rgba(8,18,46,.8) 100%)}
+.content-card>*{position:relative;z-index:1}
+.content-card-title{font-weight:800;font-size:14px;margin-bottom:3px}
+.content-card-desc{font-size:10.5px;opacity:.9;margin-bottom:8px;line-height:1.4}
+.pill-btn{align-self:flex-start;background:rgba(255,255,255,.94);color:var(--navy);font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:999px}
+
+/* おすすめ情報 */
+.sec-kicker{font-size:11px;color:var(--yellow-dark);font-weight:800;margin-bottom:4px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-head-title{font-size:15px;font-weight:800}
+.sec-head-more{font-size:12px;color:var(--text-gray);font-weight:700}
+.info-sec{padding:4px 14px 0}
+.rec-scroll{display:flex;gap:10px;padding-bottom:20px}
+.rec-card{width:114px;color:var(--navy)}
+.rec-photo{width:114px;height:82px;border-radius:10px;object-fit:cover;margin-bottom:6px;background:var(--bg)}
+.rec-title{font-size:11.5px;font-weight:800}
+.rec-sub{font-size:9.5px;color:var(--text-gray);line-height:1.4}
+
+/* フッターカード */
+.footer-mobile{background:var(--bg);margin:4px 14px 24px;border-radius:14px;padding:16px}
+.footer-top{display:flex;gap:12px;align-items:flex-start}
+.footer-shop-photo{width:70px;height:70px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.footer-info-row{display:flex;align-items:flex-start;gap:5px;margin-bottom:4px;font-size:11px}
+.footer-actions{display:flex;gap:8px;margin-top:12px}
+.footer-action-btn{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:10px;padding:11px 6px;font-size:11px;font-weight:800;background:#fff;display:flex;flex-direction:column;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+<div class="page" id="page-root">
+
+<header class="site-header">
+  <a class="brand" href="mobile.html">
+    <img class="brand-logo" src="assets/img/logo.png" alt="8つ森レンタル">
+    <div>
+      <div class="brand-name">8つ森レンタル</div>
+      <div class="brand-sub">SKI &amp; SNOWBOARD RENTAL</div>
+    </div>
+  </a>
+  <button class="menu-btn" id="menu-btn"><span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>メニュー</button>
+</header>
+<nav class="global-nav" id="global-nav">
+  <a href="reserve.html">今すぐ予約する</a>
+  <a href="reserve-lookup.html">予約の確認・変更</a>
+  <a href="pages/catalog.html">板カタログ</a>
+  <a href="pages/beginner-guide.html">初心者ガイド</a>
+  <a href="pages/pricing.html">レンタル料金</a>
+  <a href="pages/waxing.html">ワクシングサービス</a>
+  <a href="pages/yatsumorin.html">やつもりん</a>
+  <a href="pages/access.html">アクセス</a>
+  <a href="index.html?pc=1">PC版サイトを見る</a>
+</nav>
+
+<section class="hero">
+  <img class="hero-photo" src="assets/img/hero-ski.jpg" alt="蔵王の雪山でスキーを持つ人">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">蔵王の雪をもっと自由に。<br>手ぶらでOK！最高の1日を。</h1>
+    <p class="hero-desc">8つ森レンタルは、蔵王・遠刈田温泉の<br>スキー・スノーボードレンタル専門店です。</p>
+  </div>
+</section>
+
+<div class="booking-card">
+  <p class="booking-card-title">かんたんWEB予約</p>
+  <div class="booking-steps">
+    <div class="booking-step"><div class="booking-step-icon">📅</div><div class="booking-step-label">日付を選ぶ</div></div>
+    <span class="booking-step-chevron">›</span>
+    <div class="booking-step"><div class="booking-step-icon">👤</div><div class="booking-step-label">人数を入力</div></div>
+    <span class="booking-step-chevron">›</span>
+    <div class="booking-step"><div class="booking-step-icon">✓</div><div class="booking-step-label">完了！</div></div>
+  </div>
+  <a class="btn btn-primary" href="reserve.html">📅 今すぐ予約する</a>
+  <a class="btn btn-secondary" href="reserve-lookup.html">予約の確認・変更はこちら</a>
+</div>
+
+<div class="badges">
+  <div class="badge"><div class="badge-icon">🎿</div><div class="badge-label">手ぶらでOK</div><div class="badge-sub">ウェアも充実</div></div>
+  <div class="badge"><div class="badge-icon">📅</div><div class="badge-label">WEB予約で</div><div class="badge-sub">スムーズ受取</div></div>
+  <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">高品質な板</div><div class="badge-sub">メンテ済み</div></div>
+  <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街すぐ</div><div class="badge-sub">帰りに温泉も</div></div>
+</div>
+
+<section class="content-grid">
+  <a class="content-card" style="background-image:url('assets/img/catalog.jpg')" href="pages/catalog.html">
+    <h3 class="content-card-title">板カタログ</h3><p class="content-card-desc">豊富なラインナップ</p><span class="pill-btn">一覧を見る ›</span>
+  </a>
+  <a class="content-card" style="background-image:url('assets/img/beginner.jpg')" href="pages/beginner-guide.html">
+    <h3 class="content-card-title">初心者ガイド</h3><p class="content-card-desc">はじめてでも安心！</p><span class="pill-btn">詳しく見る ›</span>
+  </a>
+  <a class="content-card" style="background-image:url('assets/img/pricing.jpg')" href="pages/pricing.html">
+    <h3 class="content-card-title">レンタル料金</h3><p class="content-card-desc">わかりやすい料金プラン</p><span class="pill-btn">料金表を見る ›</span>
+  </a>
+  <a class="content-card" style="background-image:url('assets/img/waxing.jpg')" href="pages/waxing.html">
+    <h3 class="content-card-title">ワクシング</h3><p class="content-card-desc">滑りが変わる！</p><span class="pill-btn">詳しく見る ›</span>
+  </a>
+</section>
+
+<div class="info-sec">
+  <p class="sec-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
+  <div class="sec-head">
+    <div class="sec-head-title">おすすめ情報</div>
+    <a class="sec-head-more" href="pages/yatsumorin.html">もっと見る ›</a>
+  </div>
+  <div class="rec-scroll">
+    <a class="rec-card" href="pages/onsen-guide.html"><img class="rec-photo" src="assets/img/onsen.jpg" alt=""><p class="rec-title">遠刈田温泉ガイド</p><p class="rec-sub">スキーの後は温泉で</p></a>
+    <a class="rec-card" href="pages/gourmet.html"><img class="rec-photo" src="assets/img/gourmet.jpg" alt=""><p class="rec-title">周辺グルメ情報</p><p class="rec-sub">おすすめランチ・カフェ</p></a>
+    <a class="rec-card" href="pages/zao-ski-info.html"><img class="rec-photo" src="assets/img/zao-ski.jpg" alt=""><p class="rec-title">スキー場情報</p><p class="rec-sub">ゲレンデ・天気</p></a>
+  </div>
+</div>
+
+<footer class="footer-mobile">
+  <div class="footer-top">
+    <img class="footer-shop-photo" src="assets/img/shop-thumb.jpg" alt="店舗写真">
+    <div>
+      <div class="footer-info-row">📍 宮城県刈田郡蔵王町遠刈田温泉中町16</div>
+      <div class="footer-info-row">🕒 営業時間 8:30〜18:00（不定休）</div>
+      <div class="footer-info-row">📞 TEL 070-2472-3633</div>
+    </div>
+  </div>
+  <div class="footer-actions">
+    <a class="footer-action-btn" href="https://instagram.com" target="_blank" rel="noopener">📷 Instagram</a>
+    <a class="footer-action-btn" href="pages/access.html">📍 アクセス</a>
+  </div>
+</footer>
+
+</div><!-- .page -->
+<script>document.getElementById("menu-btn").addEventListener("click",()=>document.getElementById("global-nav").classList.toggle("open"));</script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabaseClient.js?v=6"></script>
+<script>window.YATSUMORI_PAGE_KEY="home-m";</script>
+<script src="assets/js/pageRenderer.js?v=2"></script>
+</body>
+</html>

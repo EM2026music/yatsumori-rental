@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -41,23 +41,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 #ed-body { display: flex; height: calc(100vh - 50px); margin-top: 50px; }
 
 /* ── Left sidebar ── */
-#ed-left { width: 220px; flex-shrink: 0; background: #1e293b; border-right: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; }
-.left-head { padding: 12px 14px 8px; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: rgba(255,255,255,.3); text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+#ed-left { width: 258px; flex-shrink: 0; background: #1e293b; border-right: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; }
+.left-head { padding: 13px 14px 9px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; color: rgba(255,255,255,.3); text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
 #section-list { flex: 1; overflow-y: auto; padding: 8px; }
-#page-list { max-height: 240px; overflow-y: auto; padding: 8px; border-top: 1px solid rgba(255,255,255,.07); }
-.page-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,.55); font-size: 11.5px; transition: all .15s; }
+#page-list { max-height: 300px; overflow-y: auto; padding: 8px; border-top: 1px solid rgba(255,255,255,.07); }
+.page-item { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,.68); font-size: 13.5px; transition: all .15s; }
 .page-item:hover { background: rgba(255,255,255,.07); color: #fff; }
-.page-item .pg-path { margin-left: auto; font-size: 9.5px; color: rgba(255,255,255,.25); }
+.page-item .pg-path { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.35); }
 .page-item.current { color: #93c5fd; background: rgba(59,130,246,.12); }
-.pg-group { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.28); padding: 8px 8px 3px; letter-spacing: .05em; }
+.pg-group { font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,.28); padding: 8px 8px 3px; letter-spacing: .05em; }
 .page-item.child { padding-left: 22px; }
-#new-page-btn { border: none; background: rgba(59,130,246,.25); color: #93c5fd; border-radius: 6px; padding: 3px 9px; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+#new-page-btn { border: none; background: rgba(59,130,246,.25); color: #93c5fd; border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
 #new-page-btn:hover { background: rgba(59,130,246,.45); color: #fff; }
-.sec-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,.6); font-size: 12px; transition: all .15s; margin-bottom: 2px; }
+.sec-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,.72); font-size: 14px; transition: all .15s; margin-bottom: 2px; }
 .sec-item:hover { background: rgba(255,255,255,.07); color: #fff; }
 .sec-item.active { background: rgba(59,130,246,.2); color: #93c5fd; }
-.sec-icon { font-size: 14px; flex-shrink: 0; }
-.left-hint { padding: 10px 14px; font-size: 11px; color: rgba(255,255,255,.2); line-height: 1.6; border-top: 1px solid rgba(255,255,255,.07); }
+.sec-icon { font-size: 17px; flex-shrink: 0; }
+.left-hint { padding: 11px 14px; font-size: 12px; color: rgba(255,255,255,.2); line-height: 1.6; border-top: 1px solid rgba(255,255,255,.07); }
 
 /* ── Canvas ── */
 #ed-canvas { flex: 1; min-width: 0; background: #1e293b; display: flex; flex-direction: column; align-items: center; overflow: hidden; position: relative; }
@@ -342,6 +342,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
             <option value="900">エクストラボールド</option>
           </select>
         </div>
+        <div class="prop-group">
+          <div class="prop-label">🔗 クリック時の遷移先</div>
+          <div id="txt-link-cur" style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:6px;word-break:break-all">リンクなし</div>
+          <button class="btn-replace" id="txt-link-btn">リンク先を選ぶ…</button>
+        </div>
       </div>
 
       <!-- Block props (パワポ風・自由配置ブロック) -->
@@ -372,6 +377,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
             <input type="number" id="block-h-inp" class="prop-input" min="60" step="1">
             <span class="prop-unit">px</span>
           </div>
+        </div>
+        <div class="prop-group">
+          <div class="prop-label">🔗 クリック時の遷移先</div>
+          <div id="blk-link-cur" style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:6px;word-break:break-all">リンクなし</div>
+          <button class="btn-replace" id="blk-link-btn">リンク先を選ぶ…</button>
         </div>
         <div class="prop-group" style="font-size:11px;color:rgba(255,255,255,.35);line-height:1.7">
           ドラッグで移動<br>矢印キーで1px微調整（Shift=10px）<br>文字はダブルクリックで編集
@@ -502,23 +512,29 @@ document.getElementById("redo-btn").addEventListener("click", doRedo);
 // ── Load iframe ──
 const iframe = document.getElementById("page-iframe");
 
-// ── ズーム表示（ページは1536px固定 → scaleで縮小して全体を見せる） ──
+// ── ズーム表示（ページはページ毎の固定幅 → scaleで縮小して全体を見せる） ──
 const PAGE_W = 1536;
 let zoomMode = "fit"; // "fit" | "100"
 let zoomScale = 1;
 
+function pageW() {
+  return (typeof currentPage !== "undefined" && currentPage && currentPage.width) || PAGE_W;
+}
+
 function applyZoom() {
   const scroller = document.getElementById("canvas-scroller");
   const wrapper = document.getElementById("canvas-wrapper");
+  const W = pageW();
   const avail = scroller.clientWidth - 48;
-  zoomScale = zoomMode === "fit" ? Math.min(1, avail / PAGE_W) : 1;
+  zoomScale = zoomMode === "fit" ? Math.min(1, avail / W) : 1;
+  iframe.style.width = W + "px";
   iframe.style.transform = `scale(${zoomScale})`;
-  wrapper.style.width = Math.round(PAGE_W * zoomScale) + "px";
+  wrapper.style.width = Math.round(W * zoomScale) + "px";
   let h = 600;
   try { h = Math.max(iframeDoc.documentElement.scrollHeight, 600); } catch (e) {}
   iframe.style.height = h + "px";
   wrapper.style.height = Math.round(h * zoomScale) + "px";
-  const fitPct = Math.round(Math.min(1, avail / PAGE_W) * 100);
+  const fitPct = Math.round(Math.min(1, avail / W) * 100);
   document.getElementById("zoom-fit").textContent = "🔍 全体表示 " + fitPct + "%";
   if (typeof positionFloatBar === "function") positionFloatBar();
 }
@@ -814,6 +830,7 @@ function handleImgClick(el) {
   document.getElementById("alt-inp").value = el.alt || "";
   const w = el.offsetWidth || el.naturalWidth || "";
   document.getElementById("img-width-inp").value = w || "";
+  document.getElementById("img-link-inp").value = getLink(el) || "";
 }
 
 document.getElementById("replace-img-btn").addEventListener("click", () => {
@@ -912,16 +929,24 @@ function drawGuide(axis, pos, container) {
 function applySnap(left, top, w, h, targets) {
   clearGuides();
   let L = left, T = top;
-  const edgesV = [ [left, 0], [left + w / 2, w / 2], [left + w, w] ];
-  for (const [edge, off] of edgesV) {
-    const hit = targets.v.find(t => Math.abs(t - edge) <= SNAP_TH);
-    if (hit !== undefined) { L = hit - off; drawGuide("v", hit, targets.container); break; }
+  // 縮小表示中でも吸着しやすいよう、しきい値はズームを考慮。最も近い候補に吸着する
+  const TH = 8 / Math.max(zoomScale, 0.35);
+  let bestV = null;
+  for (const [edge, off] of [[left, 0], [left + w / 2, w / 2], [left + w, w]]) {
+    for (const t of targets.v) {
+      const d = Math.abs(t - edge);
+      if (d <= TH && (!bestV || d < bestV.d)) bestV = { t, off, d };
+    }
   }
-  const edgesH = [ [top, 0], [top + h / 2, h / 2], [top + h, h] ];
-  for (const [edge, off] of edgesH) {
-    const hit = targets.h.find(t => Math.abs(t - edge) <= SNAP_TH);
-    if (hit !== undefined) { T = hit - off; drawGuide("h", hit, targets.container); break; }
+  if (bestV) { L = bestV.t - bestV.off; drawGuide("v", bestV.t, targets.container); }
+  let bestH = null;
+  for (const [edge, off] of [[top, 0], [top + h / 2, h / 2], [top + h, h]]) {
+    for (const t of targets.h) {
+      const d = Math.abs(t - edge);
+      if (d <= TH && (!bestH || d < bestH.d)) bestH = { t, off, d };
+    }
   }
+  if (bestH) { T = bestH.t - bestH.off; drawGuide("h", bestH.t, targets.container); }
   return { L, T };
 }
 
@@ -1020,6 +1045,7 @@ function selectBlock(el) {
   const hasH = el.classList.contains("booking-card") || el.classList.contains("content-card");
   document.getElementById("block-h-row").style.display = hasH ? "flex" : "none";
   syncBlockProps(el);
+  document.getElementById("blk-link-cur").textContent = getLink(el) || "リンクなし";
 }
 
 function syncBlockProps(el) {
@@ -1374,10 +1400,12 @@ function setLink(el, url) {
       a.removeAttribute("href");
     }
   }
+  if (typeof refreshLinkDisplays === "function") refreshLinkDisplays();
 }
 // サイトの全ページ（key有り＝このエディタで編集可能／null＝予約機能ページなので表示のみ）
 const SITE_PAGES = [
-  { path: "index.html",              name: "🏠 トップページ",        key: "home" },
+  { path: "index.html",              name: "🏠 トップページ（PC版）", key: "home", width: 1536 },
+  { path: "mobile.html",             name: "📱 トップページ（スマホ版）", key: "home-m", width: 390 },
   { path: "reserve.html",            name: "📅 予約フォーム",        key: null },
   { path: "reserve-lookup.html",     name: "🔍 予約の確認・変更",    key: null },
   { path: "pages/catalog.html",      name: "🎿 板カタログ",          key: "catalog" },
@@ -1662,6 +1690,23 @@ document.getElementById("fb-del").addEventListener("click", () => deleteSelected
 document.getElementById("fb-blk-link").addEventListener("click", (e) => { if (activeBlockEl) promptLink(activeBlockEl, e.clientX - 95, e.clientY + 16); });
 document.getElementById("fb-img-link").addEventListener("click", (e) => { if (activeImgEl) promptLink(activeImgEl, e.clientX - 95, e.clientY + 16); });
 
+// 右パネルの「リンク先を選ぶ…」ボタン
+document.getElementById("blk-link-btn").addEventListener("click", (e) => {
+  if (activeBlockEl) promptLink(activeBlockEl, e.clientX - 260, e.clientY + 10);
+});
+document.getElementById("txt-link-btn").addEventListener("click", (e) => {
+  const t = activeTextEl || (selectedEl && selectedEl.hasAttribute("data-ed") ? selectedEl : null);
+  if (t) promptLink(t, e.clientX - 260, e.clientY + 10);
+});
+
+// リンク変更後にパネルの表示を最新化
+function refreshLinkDisplays() {
+  if (activeBlockEl) document.getElementById("blk-link-cur").textContent = getLink(activeBlockEl) || "リンクなし";
+  const t = activeTextEl || (selectedEl && selectedEl.hasAttribute && selectedEl.hasAttribute("data-ed") ? selectedEl : null);
+  if (t) document.getElementById("txt-link-cur").textContent = getLink(t) || "リンクなし";
+  if (activeImgEl) document.getElementById("img-link-inp").value = getLink(activeImgEl) || "";
+}
+
 // 画像パネルのリンク入力
 document.getElementById("img-link-inp").addEventListener("change", (e) => {
   if (!activeImgEl) return;
@@ -1727,6 +1772,7 @@ function syncTextProps(el) {
   document.getElementById("text-color-inp").value = hex;
   document.getElementById("text-color-val").textContent = hex;
   document.getElementById("sel-tag").textContent = el.tagName.toLowerCase();
+  document.getElementById("txt-link-cur").textContent = getLink(el) || "リンクなし";
 }
 
 function rgbToHex(rgb) {
