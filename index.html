@@ -95,21 +95,20 @@ img{display:block}
 .hero-desc{font-size:14px;color:#415062;line-height:1.7;text-shadow:0 0 12px rgba(255,255,255,.95)}
 
 /* バッジ（heroテキスト直下・left 456px・画像の大きな白丸に合わせる）
-   ※.page付きの詳細度が高いルール：公開済みデータに古いCSSのコピーが
-   含まれていても、この新デザインが勝つようにするため */
+   ※詳細度を高くしてある：公開済みデータに旧デザインのCSSコピーが
+   含まれていても、この（元の）デザインが必ず勝つようにするため */
 .badges{position:absolute;left:456px;top:232px;z-index:2;display:flex;gap:38px}
 .badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
-.page .badges .badge-icon{
-  width:84px;height:84px;border-radius:50%;
-  background:linear-gradient(165deg,#ffffff 15%,#e9f1fa 100%);
-  border:2.5px solid #f0b429;
-  box-shadow:0 8px 22px rgba(20,40,60,.20),0 2px 6px rgba(20,40,60,.10);
+.page .badges .badge .badge-icon{
+  width:84px;height:84px;border-radius:50%;border:0;
+  background:rgba(255,255,255,.95);
   display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 12px rgba(20,40,60,.12);
 }
-.page .badges .badge-icon svg{stroke:#1c4f82;stroke-width:1.9}
-.page .badges .badge-icon img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.page .badges .badge-label{font-size:13.5px;font-weight:800;color:#15314f;letter-spacing:.02em;text-shadow:0 0 10px rgba(255,255,255,.95),0 0 20px rgba(255,255,255,.8)}
-.page .badges .badge-sub{font-size:10.5px;font-weight:700;color:#39506a;background:rgba(255,255,255,.85);padding:2px 10px;border-radius:999px;box-shadow:0 1px 4px rgba(20,40,60,.10)}
+.page .badges .badge .badge-icon svg{stroke:#15314f;stroke-width:1.6}
+.page .badges .badge .badge-icon img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.page .badges .badge .badge-label{font-size:13px;font-weight:800;color:#15314f;background:none;padding:0;text-shadow:0 0 10px rgba(255,255,255,.95),0 0 20px rgba(255,255,255,.8)}
+.page .badges .badge .badge-sub{font-size:10px;font-weight:400;color:#4a5867;background:none;padding:0;border-radius:0;box-shadow:none;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 16px rgba(255,255,255,.85)}
 
 /* 予約カード：right 64px / top 76px / 336x276（absolute） */
 .booking-card{
