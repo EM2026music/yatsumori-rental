@@ -667,7 +667,11 @@ iframe.addEventListener("load", () => {
   })();
 });
 
-iframe.src = "../index.html";
+// キャッシュ対策：常に最新のページを読み込む（古いデザインが編集画面に残る事故防止）
+function pageSrc(path) {
+  return "../" + path + (path.indexOf("?") !== -1 ? "&" : "?") + "edcache=" + Date.now();
+}
+iframe.src = pageSrc("index.html");
 
 // ── CSS injected into iframe ──
 function injectEditingCSS() {
@@ -1744,7 +1748,7 @@ function switchPage(p) {
   isDirty = false;
   refreshDirtyBadge();
   setStatus("読み込み中...");
-  iframe.src = "../" + p.path;   // loadイベントで初期化が再実行される
+  iframe.src = pageSrc(p.path);   // loadイベントで初期化が再実行される（キャッシュ回避付き）
   document.getElementById("sync-btn").style.display = p.key === "home-m" ? "" : "none";
   refreshPageList();
 }
