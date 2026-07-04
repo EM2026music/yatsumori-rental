@@ -299,7 +299,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
       <button id="new-page-btn" title="新しいページを作る">＋ 新規</button>
     </div>
     <div id="page-list"></div>
-    <div class="left-hint">項目クリック → 選択・ドラッグで移動<br>文字ダブルクリック → 編集<br>右下の□ → 大きさ変更<br>🔗 → 遷移先をページ一覧から選択</div>
+    <div class="left-hint">1回クリック → 項目を選択（移動/削除）<br>もう1回クリック → 文字・画像を編集<br>右下の□ → 大きさ変更<br>🔗 → 遷移先をページ一覧から選択</div>
   </div>
 
   <!-- Canvas -->
@@ -417,7 +417,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
           <button class="btn-replace" id="blk-link-btn">リンク先を選ぶ…</button>
         </div>
         <div class="prop-group" style="font-size:11px;color:rgba(255,255,255,.35);line-height:1.7">
-          ドラッグで移動<br>矢印キーで1px微調整（Shift=10px）<br>文字はダブルクリックで編集
+          ドラッグで移動・Deleteで削除<br>矢印キーで1px微調整（Shift=10px）<br>もう1回クリックで中の文字を編集
         </div>
       </div>
 
@@ -730,7 +730,13 @@ const DRAG_SEL = [
   ".hero-content", ".booking-card", ".badges", ".badge",
   ".content-card", ".info-sec", ".reviews-sec", ".access-sec",
   ".rec-card", ".review-card", ".ed-free",
+  ".container > *",   // サブページの本文項目もTOPと同じ扱い（予約ページはコード側で除外）
 ].join(",");
+
+// 予約系ページでは本文項目の自由移動を無効化（フォームを壊さないため）
+function isReservePage() {
+  return /^reserve/.test((typeof currentPage !== "undefined" && currentPage && currentPage.key) || "");
+}
 const DRAG_LABEL = {
   "hero-content": "キャッチコピー", "booking-card": "予約カード",
   "badges": "特徴バッジ（全体）", "badge": "バッジ",
@@ -782,6 +788,10 @@ function canvasizeItems() {
   canvasizeSection(iframeDoc.querySelector(".reviews-sec"), ".review-card");
   canvasizeSection(iframeDoc.querySelector(".rec-scroll"), ".rec-card");
   canvasizeSection(iframeDoc.querySelector(".badges"), ".badge");
+  // サブページ本文もTOPと同じ自由配置に（予約ページは対象外＝フォーム保護）
+  if (!isReservePage()) {
+    canvasizeSection(iframeDoc.querySelector(".container"), ":scope > *");
+  }
 }
 
 function attachEditHandlers() {
@@ -1048,14 +1058,16 @@ function attachBlockDrag() {
     if (e.target.isContentEditable) return;
 
     // 項目ドラッグ（画像が項目の中にある場合は項目ごと動く）
-    const block = e.target.closest(DRAG_SEL);
+    let block = e.target.closest(DRAG_SEL);
+    // 予約ページの本文項目は自由移動の対象外（フォーム保護）
+    if (block && isReservePage() && block.matches(".container > *")) block = null;
     if (block) {
       const r = blockRect(block);
       // 複数選択中のメンバーをつかんだら全員一緒に動く
       const members = (multiSel.length > 1 && multiSel.includes(block))
         ? multiSel.map(b => ({ b, r: blockRect(b) }))
         : null;
-      dragState = { block, shift: e.shiftKey, members, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
+      dragState = { block, t0: e.target, shift: e.shiftKey, members, startX: e.clientX, startY: e.clientY, origL: r.left, origT: r.top, w: r.width, h: r.height, moved: false, targets: computeSnapTargets(block) };
       e.preventDefault();
       return;
     }
@@ -1106,7 +1118,7 @@ function attachBlockDrag() {
       return;
     }
     if (!dragState) return;
-    const { block, moved, shift } = dragState;
+    const { block, moved, shift, t0 } = dragState;
     dragState = null;
     clearGuides();
     if (moved) {
@@ -1122,9 +1134,25 @@ function attachBlockDrag() {
       if (i >= 0) multiSel.splice(i, 1); else multiSel.push(block);
       refreshMultiMarks();
       if (multiSel.length > 1) toast(multiSel.length + "個選択中（ドラッグでまとめて移動）", "info");
-    } else {
-      clearMulti();
+      selectBlock(block);
+      return;
     }
+    // ルール統一：1回目のクリック＝項目を選択／選択済みの項目をもう1回クリック＝中の文字・画像を編集
+    if (activeBlockEl === block && t0) {
+      const txt = t0.closest ? t0.closest(TEXT_SEL) : null;
+      if (txt && block.contains(txt)) {
+        handleTextClick(txt);
+        suppressClickUntil = Date.now() + 400;
+        return;
+      }
+      if (t0.tagName === "IMG" && t0.hasAttribute("data-ed-img")) {
+        handleImgClick(t0);
+        suppressClickUntil = Date.now() + 400;
+        return;
+      }
+    }
+    clearMulti();
+    suppressClickUntil = Date.now() + 400; // 画像等のクリック処理が二重に走らないように
     selectBlock(block);
   });
 }
