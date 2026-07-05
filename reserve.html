@@ -11,6 +11,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="reserve-wizard-css">
+/* 予約ウィザード専用スタイル（このページだけ） */
+.date-range-row { display:flex; align-items:center; gap:10px; }
+.date-range-row .field-input { flex:1; min-width:0; }
+.date-range-sep { color:var(--text-mute); font-weight:700; flex:0 0 auto; }
+.count-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+.count-row .count-label { font-size:14px; font-weight:700; }
+.count-row .count-sub { font-size:11px; color:var(--text-mute); font-weight:500; margin-left:6px; }
+.member-card { border:1px solid var(--border); border-radius:12px; padding:14px 14px 6px; margin-bottom:14px; background:var(--panel); }
+.member-head { font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.member-head .mh-badge { font-size:10px; font-weight:700; color:var(--text-mute); background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:1px 9px; }
+.two-col { display:flex; gap:10px; }
+.two-col .field { flex:1; min-width:0; }
+.radio-row { display:flex; gap:10px; }
+.radio-pill { flex:1; position:relative; }
+.radio-pill input { position:absolute; opacity:0; pointer-events:none; }
+.radio-pill span { display:block; text-align:center; padding:11px 8px; border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .12s; }
+.radio-pill input:checked + span { border-color:var(--gold); background:rgba(240,180,41,.12); color:var(--text); }
+.avail-hint { font-size:12px; color:var(--text-mute); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:16px; }
+.confirm-sec { margin-bottom:18px; }
+.confirm-sec-title { font-size:12px; font-weight:800; color:var(--gold); margin-bottom:6px; letter-spacing:.04em; }
+.plan-note { font-size:12px; line-height:1.7; color:var(--text-mute); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-top:14px; }
+</style>
 </head>
 <body>
 <div class="page" id="page-root">
@@ -37,71 +60,108 @@
 
     <!-- 進捗バー -->
     <div class="wizard-progress">
-      <div class="wp-step active" id="wp1"><div class="wp-circle">1</div><div class="wp-label">日付</div></div>
+      <div class="wp-step active" id="wp1"><div class="wp-circle">1</div><div class="wp-label">日程</div></div>
       <div class="wp-line" id="wl1"></div>
-      <div class="wp-step" id="wp2"><div class="wp-circle">2</div><div class="wp-label">人数・用具</div></div>
+      <div class="wp-step" id="wp2"><div class="wp-circle">2</div><div class="wp-label">利用者</div></div>
       <div class="wp-line" id="wl2"></div>
-      <div class="wp-step" id="wp3"><div class="wp-circle">3</div><div class="wp-label">完了</div></div>
+      <div class="wp-step" id="wp3"><div class="wp-circle">3</div><div class="wp-label">代表者</div></div>
+      <div class="wp-line" id="wl3"></div>
+      <div class="wp-step" id="wp4"><div class="wp-circle">4</div><div class="wp-label">確認</div></div>
     </div>
 
     <div id="error-box"></div>
 
-    <!-- ステップ1: 日付 -->
+    <!-- ステップ1: 日程 + 人数 -->
     <section class="step-panel active" id="step1">
       <div class="field">
-        <label class="field-label" for="rental-date">利用日を選ぶ<span class="req">必須</span></label>
-        <input type="date" id="rental-date" class="field-input">
-        <p class="help-text">空き状況を確認してから人数・用具の選択に進みます。</p>
+        <label class="field-label">ご利用期間<span class="req">必須</span></label>
+        <div class="date-range-row">
+          <input type="date" id="start-date" class="field-input">
+          <span class="date-range-sep">〜</span>
+          <input type="date" id="end-date" class="field-input">
+        </div>
+        <p class="help-text">日帰りの場合は開始日と返却日を同じ日にしてください。</p>
       </div>
-      <div class="wizard-actions">
-        <button class="btn-nav primary btn-block" id="to-step2">空き状況を確認する</button>
+
+      <p class="field-label" style="margin-top:6px">ご利用人数<span class="req">必須</span></p>
+      <div class="count-row">
+        <div><span class="count-label">大人</span><span class="count-sub">中学生以上</span></div>
+        <div class="stepper" data-count="adults">
+          <button type="button" class="dec">−</button><span class="qty">1</span><button type="button" class="inc">＋</button>
+        </div>
+      </div>
+      <div class="count-row">
+        <div><span class="count-label">子供</span><span class="count-sub">小学生まで（子供料金）</span></div>
+        <div class="stepper" data-count="children">
+          <button type="button" class="dec">−</button><span class="qty">0</span><button type="button" class="inc">＋</button>
+        </div>
+      </div>
+
+      <div class="wizard-actions" style="margin-top:22px">
+        <button class="btn-nav primary btn-block" id="to-step2">次へ（利用者の情報）</button>
       </div>
     </section>
 
-    <!-- ステップ2: 人数・用具 -->
+    <!-- ステップ2: 利用者ごとの情報 -->
     <section class="step-panel" id="step2">
-      <div class="field">
-        <label class="field-label" for="party-size">ご利用人数<span class="req">必須</span></label>
-        <input type="number" id="party-size" class="field-input" min="1" max="20" value="1">
+      <div class="avail-hint" id="avail-hint"></div>
+      <p class="help-text" style="margin-top:0;margin-bottom:14px">
+        板の長さはご来店時にスタッフが身長を見て最適なものをお選びします。ご希望があれば当日お伝えください。
+      </p>
+      <div id="members-container"></div>
+      <div class="wizard-actions">
+        <button class="btn-nav ghost" id="back-step1">戻る</button>
+        <button class="btn-nav primary" id="to-step3">次へ（代表者の入力）</button>
       </div>
+    </section>
 
-      <p class="field-label">ご希望の用具・サイズ<span class="req">必須</span></p>
-      <p class="help-text" style="margin-top:0;margin-bottom:14px">選択した日に在庫のあるサイズのみ表示しています。</p>
-      <div id="equip-container"></div>
-
-      <div class="field" style="margin-top:8px">
-        <label class="field-label" for="cust-name">お名前<span class="req">必須</span></label>
-        <input type="text" id="cust-name" class="field-input" placeholder="山田 太郎">
+    <!-- ステップ3: 代表者情報 -->
+    <section class="step-panel" id="step3">
+      <div class="field">
+        <label class="field-label" for="cust-name">代表者のお名前<span class="req">必須</span></label>
+        <input type="text" id="cust-name" class="field-input" placeholder="山田 太郎" autocomplete="name">
       </div>
       <div class="field">
         <label class="field-label" for="cust-phone">電話番号<span class="req">必須</span></label>
-        <input type="tel" id="cust-phone" class="field-input" placeholder="09012345678">
-        <p class="help-text">予約の確認・変更の際に必要です。</p>
+        <input type="tel" id="cust-phone" class="field-input" placeholder="09012345678" autocomplete="tel">
+        <p class="help-text">当日つながるお電話番号をご入力ください。予約の確認・変更にも使います。</p>
       </div>
       <div class="field">
         <label class="field-label" for="cust-email">メールアドレス（任意）</label>
-        <input type="email" id="cust-email" class="field-input" placeholder="example@email.com">
+        <input type="email" id="cust-email" class="field-input" placeholder="example@email.com" autocomplete="email">
         <p class="help-text">ご入力いただくと確認メールをお送りします。</p>
       </div>
       <div class="field">
         <label class="field-label" for="cust-notes">ご要望など（任意）</label>
-        <input type="text" id="cust-notes" class="field-input" placeholder="ウェアも借りたい 等">
+        <input type="text" id="cust-notes" class="field-input" placeholder="ウェアも借りたい / 板の長さの希望 等">
       </div>
-
       <div class="wizard-actions">
-        <button class="btn-nav ghost" id="back-step1">戻る</button>
+        <button class="btn-nav ghost" id="back-step2">戻る</button>
+        <button class="btn-nav primary" id="to-step4">入力内容を確認する</button>
+      </div>
+    </section>
+
+    <!-- ステップ4: 確認 -->
+    <section class="step-panel" id="step4">
+      <div id="confirm-body"></div>
+      <div class="plan-note">
+        お支払いは当日ご来店時に現金でお願いします（クレジット・電子決済は現在ご利用いただけません）。<br>
+        ご利用日前日の午後2時からお渡しも可能です。
+      </div>
+      <div class="wizard-actions" style="margin-top:20px">
+        <button class="btn-nav ghost" id="back-step3">戻る</button>
         <button class="btn-nav primary" id="submit-reservation">この内容で予約する</button>
       </div>
     </section>
 
-    <!-- ステップ3: 完了 -->
-    <section class="step-panel" id="step3">
+    <!-- ステップ5: 完了 -->
+    <section class="step-panel" id="step5">
       <div class="done-box">
         <div class="done-check">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M5 13L9.5 17.5L19 7"/></svg>
         </div>
         <h2 class="done-title">ご予約を受け付けました</h2>
-        <p class="done-sub">当日は営業時間内にご来店ください。</p>
+        <p class="done-sub">当日は営業時間内にご来店ください。前日午後2時からのお渡しも可能です。</p>
 
         <div class="code-box">
           <p class="code-label">予約番号</p>
@@ -124,18 +184,22 @@
     <img src="assets/img/logo.png" alt="8つ森レンタル">
     <div>
       <div>📍 宮城県刈田郡蔵王町遠刈田温泉中町16</div>
-      <div>🕒 8:30〜18:00（不定休）　📞 070-2472-3633</div>
+      <div>🕒 8:00〜17:00（不定休）　📞 070-2472-3633</div>
     </div>
   </footer>
 </div>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=5"></script>
-<script src="assets/js/booking.js?v=5"></script>
+<script src="assets/js/booking.js?v=6"></script>
 <script>
+const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
+
 const state = {
-  date: null,
-  availability: [],   // [{equipment_item_id, category, size_label, remaining}]
-  quantities: {},     // equipment_item_id -> qty
+  start: null, end: null,
+  adults: 1, children: 0,
+  avail: null,           // { ski, snowboard }
+  members: [],           // [{ label, isChild, height, shoe, board }]
+  name: "", phone: "", email: "", notes: "",
 };
 
 function showError(msg) {
@@ -144,170 +208,271 @@ function showError(msg) {
 }
 
 function gotoStep(n) {
-  for (let i = 1; i <= 3; i++) {
-    document.getElementById("step" + i).classList.toggle("active", i === n);
+  for (let i = 1; i <= 5; i++) {
+    const panel = document.getElementById("step" + i);
+    if (panel) panel.classList.toggle("active", i === n);
+  }
+  for (let i = 1; i <= 4; i++) {
     const wp = document.getElementById("wp" + i);
-    wp.classList.toggle("active", i === n);
-    wp.classList.toggle("done", i < n);
+    if (wp) { wp.classList.toggle("active", i === n); wp.classList.toggle("done", i < n); }
   }
   document.getElementById("wl1").classList.toggle("done", n > 1);
   document.getElementById("wl2").classList.toggle("done", n > 2);
+  document.getElementById("wl3").classList.toggle("done", n > 3);
   window.scrollTo(0, 0);
 }
 
-// ---- ステップ1 -> 2 ----
+// ── ステップ1のカウンター（大人/子供） ──
+function bindCounters() {
+  document.querySelectorAll("#step1 .stepper").forEach((stepper) => {
+    const key = stepper.dataset.count;
+    const min = key === "adults" ? 1 : 0;
+    const refresh = () => {
+      stepper.querySelector(".qty").textContent = state[key];
+      stepper.querySelector(".dec").disabled = state[key] <= min;
+      stepper.querySelector(".inc").disabled = state.adults + state.children >= 20;
+    };
+    stepper.querySelector(".inc").addEventListener("click", () => {
+      if (state.adults + state.children < 20) { state[key]++; refresh(); syncCounters(); }
+    });
+    stepper.querySelector(".dec").addEventListener("click", () => {
+      if (state[key] > min) { state[key]--; refresh(); syncCounters(); }
+    });
+    refresh();
+  });
+}
+function syncCounters() {
+  document.querySelectorAll("#step1 .stepper").forEach((stepper) => {
+    const key = stepper.dataset.count;
+    const min = key === "adults" ? 1 : 0;
+    stepper.querySelector(".qty").textContent = state[key];
+    stepper.querySelector(".dec").disabled = state[key] <= min;
+    stepper.querySelector(".inc").disabled = state.adults + state.children >= 20;
+  });
+}
+
+// ── ステップ1 → 2 ──
 async function handleToStep2() {
   showError("");
-  const dateInput = document.getElementById("rental-date");
-  if (!dateInput.value) { showError("利用日を選択してください。"); return; }
-  state.date = dateInput.value;
+  const start = document.getElementById("start-date").value;
+  const end = document.getElementById("end-date").value;
+  if (!start || !end) { showError("ご利用期間（開始日と返却日）を選択してください。"); return; }
+  if (end < start) { showError("返却日は開始日と同じか、あとの日付にしてください。"); return; }
+  state.start = start; state.end = end;
 
   const btn = document.getElementById("to-step2");
-  btn.disabled = true;
-  btn.textContent = "確認中...";
+  btn.disabled = true; btn.textContent = "空き状況を確認中...";
   try {
-    state.availability = await fetchAvailability(state.date);
-    if (state.availability.length === 0) {
-      showError("選択した日は予約可能な在庫がありません。別の日をお試しください。");
-      return;
-    }
-    state.quantities = {};
-    renderEquip();
+    // 空き状況はUX上のヒント（最終判定はサーバー側）。取得に失敗しても先へ進める。
+    try { state.avail = await fetchAvailabilityV2(start, end); } catch (_) { state.avail = null; }
+    buildMembers();
+    renderAvailHint();
     gotoStep(2);
-  } catch (e) {
-    showError(translateError(e));
   } finally {
-    btn.disabled = false;
-    btn.textContent = "空き状況を確認する";
+    btn.disabled = false; btn.textContent = "次へ（利用者の情報）";
   }
 }
 
-// ---- 用具サイズUIの描画 ----
-function renderEquip() {
-  const container = document.getElementById("equip-container");
-  const byCat = { ski: [], snowboard: [], boots: [] };
-  state.availability.forEach((it) => { (byCat[it.category] || (byCat[it.category] = [])).push(it); });
+function renderAvailHint() {
+  const el = document.getElementById("avail-hint");
+  if (!state.avail) { el.style.display = "none"; return; }
+  el.style.display = "block";
+  el.innerHTML = `この期間の空き状況：スキー <b>${state.avail.ski}</b> 本 ／ スノーボード <b>${state.avail.snowboard}</b> 本`;
+}
 
+// ── 利用者カードの生成 ──
+function buildMembers() {
+  const total = state.adults + state.children;
+  // 人数が変わったら作り直し、変わっていなければ入力値を保持
+  if (state.members.length !== total) {
+    state.members = [];
+    for (let i = 0; i < total; i++) {
+      const isChild = i >= state.adults;
+      state.members.push({ isChild, height: "", shoe: "", board: "" });
+    }
+  }
+  const container = document.getElementById("members-container");
   let html = "";
-  ["ski", "snowboard", "boots"].forEach((cat) => {
-    const list = byCat[cat];
-    if (!list || list.length === 0) return;
-    html += `<div class="equip-group"><div class="equip-group-title">${CATEGORY_LABEL[cat]}</div>`;
-    list.forEach((it) => {
-      const qty = state.quantities[it.equipment_item_id] || 0;
-      html += `
-        <div class="size-row">
-          <div class="size-row-info">${it.size_label}<span class="size-row-remaining">残り${it.remaining}</span></div>
-          <div class="stepper" data-id="${it.equipment_item_id}" data-max="${it.remaining}">
-            <button type="button" class="dec">−</button>
-            <span class="qty">${qty}</span>
-            <button type="button" class="inc">＋</button>
+  state.members.forEach((m, i) => {
+    const isChild = i >= state.adults;
+    m.isChild = isChild;
+    const who = isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
+    html += `
+      <div class="member-card" data-i="${i}">
+        <div class="member-head">${who}<span class="mh-badge">${isChild ? "子供料金" : "大人料金"}</span></div>
+        <div class="two-col">
+          <div class="field">
+            <label class="field-label">身長 (cm)<span class="req">必須</span></label>
+            <input type="number" class="field-input m-height" inputmode="numeric" min="80" max="220" placeholder="${isChild ? "120" : "170"}" value="${m.height}">
           </div>
-        </div>`;
-    });
-    html += `</div>`;
+          <div class="field">
+            <label class="field-label">靴のサイズ (cm)<span class="req">必須</span></label>
+            <input type="number" class="field-input m-shoe" inputmode="decimal" step="0.5" min="14" max="33" placeholder="${isChild ? "20.0" : "26.0"}" value="${m.shoe}">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">ご利用の用具<span class="req">必須</span></label>
+          <div class="radio-row">
+            <label class="radio-pill"><input type="radio" name="board-${i}" value="ski" ${m.board === "ski" ? "checked" : ""}><span>スキー</span></label>
+            <label class="radio-pill"><input type="radio" name="board-${i}" value="snowboard" ${m.board === "snowboard" ? "checked" : ""}><span>スノーボード</span></label>
+          </div>
+        </div>
+      </div>`;
   });
   container.innerHTML = html;
 
-  container.querySelectorAll(".stepper").forEach((stepper) => {
-    const id = stepper.dataset.id;
-    const max = parseInt(stepper.dataset.max, 10);
-    stepper.querySelector(".inc").addEventListener("click", () => {
-      const cur = state.quantities[id] || 0;
-      if (cur < max) { state.quantities[id] = cur + 1; refreshStepper(stepper, id); }
+  // 入力値をstateに反映
+  container.querySelectorAll(".member-card").forEach((card) => {
+    const i = parseInt(card.dataset.i, 10);
+    card.querySelector(".m-height").addEventListener("input", (e) => { state.members[i].height = e.target.value; });
+    card.querySelector(".m-shoe").addEventListener("input", (e) => { state.members[i].shoe = e.target.value; });
+    card.querySelectorAll(`input[name="board-${i}"]`).forEach((r) => {
+      r.addEventListener("change", (e) => { state.members[i].board = e.target.value; });
     });
-    stepper.querySelector(".dec").addEventListener("click", () => {
-      const cur = state.quantities[id] || 0;
-      if (cur > 0) { state.quantities[id] = cur - 1; refreshStepper(stepper, id); }
-    });
-    refreshStepper(stepper, id);
   });
 }
 
-function refreshStepper(stepper, id) {
-  const max = parseInt(stepper.dataset.max, 10);
-  const cur = state.quantities[id] || 0;
-  stepper.querySelector(".qty").textContent = cur;
-  stepper.querySelector(".dec").disabled = cur <= 0;
-  stepper.querySelector(".inc").disabled = cur >= max;
+// ── ステップ2 → 3（利用者情報の検証） ──
+function handleToStep3() {
+  showError("");
+  for (let i = 0; i < state.members.length; i++) {
+    const m = state.members[i];
+    const who = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
+    const h = parseInt(m.height, 10);
+    const s = parseFloat(m.shoe);
+    if (!h || h < 80 || h > 220) { showError(`${who}の身長を正しく入力してください（80〜220cm）。`); return; }
+    if (!s || s < 14 || s > 33) { showError(`${who}の靴のサイズを正しく入力してください（14〜33cm）。`); return; }
+    if (m.board !== "ski" && m.board !== "snowboard") { showError(`${who}の用具（スキー / スノーボード）を選んでください。`); return; }
+  }
+  gotoStep(3);
 }
 
-// ---- 予約送信 ----
+// ── ステップ3 → 4（代表者情報の検証 + 確認画面の生成） ──
+function handleToStep4() {
+  showError("");
+  state.name = document.getElementById("cust-name").value.trim();
+  state.phone = document.getElementById("cust-phone").value.trim();
+  state.email = document.getElementById("cust-email").value.trim();
+  state.notes = document.getElementById("cust-notes").value.trim();
+
+  if (!state.name) { showError("代表者のお名前を入力してください。"); return; }
+  const phoneDigits = state.phone.replace(/[^0-9]/g, "");
+  if (phoneDigits.length < 10) { showError("当日つながる電話番号を正しく入力してください。"); return; }
+
+  renderConfirm();
+  gotoStep(4);
+}
+
+function periodLabel() {
+  if (state.start === state.end) return `${state.start}（日帰り）`;
+  const days = Math.round((new Date(state.end) - new Date(state.start)) / 86400000) + 1;
+  return `${state.start} 〜 ${state.end}（${days}日間）`;
+}
+
+function renderConfirm() {
+  const memberRows = state.members.map((m, i) => {
+    const who = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
+    return `<div class="summary-row"><span class="k">${who}</span><span class="v">${m.height}cm / ${m.shoe}cm / ${BOARD_LABEL[m.board]}</span></div>`;
+  }).join("");
+
+  document.getElementById("confirm-body").innerHTML = `
+    <div class="confirm-sec">
+      <div class="confirm-sec-title">ご利用日程</div>
+      <div class="summary-list">
+        <div class="summary-row"><span class="k">期間</span><span class="v">${periodLabel()}</span></div>
+        <div class="summary-row"><span class="k">人数</span><span class="v">大人 ${state.adults}名${state.children ? ` / 子供 ${state.children}名` : ""}</span></div>
+      </div>
+    </div>
+    <div class="confirm-sec">
+      <div class="confirm-sec-title">ご利用者</div>
+      <div class="summary-list">${memberRows}</div>
+    </div>
+    <div class="confirm-sec">
+      <div class="confirm-sec-title">代表者</div>
+      <div class="summary-list">
+        <div class="summary-row"><span class="k">お名前</span><span class="v">${state.name} 様</span></div>
+        <div class="summary-row"><span class="k">電話番号</span><span class="v">${state.phone}</span></div>
+        <div class="summary-row"><span class="k">メール</span><span class="v">${state.email || "（未入力）"}</span></div>
+        ${state.notes ? `<div class="summary-row"><span class="k">ご要望</span><span class="v">${state.notes}</span></div>` : ""}
+      </div>
+    </div>`;
+}
+
+// ── 予約送信 ──
 async function handleSubmit() {
   if (window.__YATSUMORI_EDITOR__) { alert("編集モードのため送信は無効です"); return; }
   showError("");
-  const name = document.getElementById("cust-name").value.trim();
-  const phone = document.getElementById("cust-phone").value.trim();
-  const email = document.getElementById("cust-email").value.trim();
-  const notes = document.getElementById("cust-notes").value.trim();
-  const partySize = parseInt(document.getElementById("party-size").value, 10);
-
-  const items = Object.entries(state.quantities)
-    .filter(([, q]) => q > 0)
-    .map(([equipment_item_id, quantity]) => ({ equipment_item_id, quantity }));
-
-  if (!name) { showError("お名前を入力してください。"); return; }
-  if (!phone) { showError("電話番号を入力してください。"); return; }
-  if (!partySize || partySize < 1) { showError("ご利用人数を入力してください。"); return; }
-  if (items.length === 0) { showError("ご希望の用具・サイズを1つ以上選んでください。"); return; }
+  const members = state.members.map((m) => ({
+    height_cm: parseInt(m.height, 10),
+    shoe_cm: parseFloat(m.shoe),
+    board_type: m.board,
+    is_child: !!m.isChild,
+  }));
 
   const btn = document.getElementById("submit-reservation");
-  btn.disabled = true;
-  btn.textContent = "送信中...";
+  btn.disabled = true; btn.textContent = "送信中...";
   try {
-    const res = await createReservation({
-      rentalDate: state.date, name, phone, email, partySize, items, notes,
+    const res = await createReservationV2({
+      start: state.start, end: state.end,
+      name: state.name, phone: state.phone, email: state.email,
+      adults: state.adults, children: state.children,
+      members, notes: state.notes,
     });
-    showResult(res, { name, phone, email, partySize, items });
-    gotoStep(3);
+    showResult(res);
+    gotoStep(5);
   } catch (e) {
-    // 在庫が埋まった場合は空き状況を取り直して選び直してもらう
-    if ((e.message || "").includes("OUT_OF_STOCK")) {
-      try {
-        state.availability = await fetchAvailability(state.date);
-        state.quantities = {};
-        renderEquip();
-      } catch (_) { /* noop */ }
-    }
     showError(translateError(e));
+    gotoStep(4);
   } finally {
-    btn.disabled = false;
-    btn.textContent = "この内容で予約する";
+    btn.disabled = false; btn.textContent = "この内容で予約する";
   }
 }
 
-function showResult(res, input) {
+function showResult(res) {
   document.getElementById("result-code").textContent = res.reservation_code;
-
-  const itemLines = input.items.map((it) => {
-    const a = state.availability.find((x) => x.equipment_item_id === it.equipment_item_id);
-    const label = a ? `${CATEGORY_LABEL[a.category]} ${a.size_label}` : "用具";
-    return `${label} × ${it.quantity}`;
-  }).join("、");
-
+  const boardTally = state.members.reduce((acc, m) => { acc[m.board] = (acc[m.board] || 0) + 1; return acc; }, {});
+  const boardText = Object.entries(boardTally).map(([b, n]) => `${BOARD_LABEL[b]} ${n}名`).join("、");
   document.getElementById("result-summary").innerHTML = `
-    <div class="summary-row"><span class="k">利用日</span><span class="v">${state.date}</span></div>
-    <div class="summary-row"><span class="k">お名前</span><span class="v">${input.name} 様</span></div>
-    <div class="summary-row"><span class="k">人数</span><span class="v">${input.partySize}名</span></div>
-    <div class="summary-row"><span class="k">用具</span><span class="v">${itemLines}</span></div>`;
-
+    <div class="summary-row"><span class="k">期間</span><span class="v">${periodLabel()}</span></div>
+    <div class="summary-row"><span class="k">お名前</span><span class="v">${state.name} 様</span></div>
+    <div class="summary-row"><span class="k">人数</span><span class="v">大人 ${state.adults}名${state.children ? ` / 子供 ${state.children}名` : ""}</span></div>
+    <div class="summary-row"><span class="k">用具</span><span class="v">${boardText}</span></div>`;
   document.getElementById("email-note").textContent =
-    input.email ? "ご入力のメールアドレスに確認メールをお送りしました。" :
+    state.email ? "ご入力のメールアドレスに確認メールをお送りします。" :
     "予約番号は控えておいてください（確認・変更に必要です）。";
 }
 
-// ---- 初期化 ----
+// ── 初期化（エディタ再配線フックにも対応） ──
 window.__yatsumoriRebind = function () {
-  const dateInput = document.getElementById("rental-date");
-  dateInput.min = todayStr();
-  dateInput.max = addDaysStr(todayStr(), 90); // business_settings.max_advance_days と合わせる
-  // フィールドをタップしたらカレンダーを開く
-  dateInput.addEventListener("click", () => { try { dateInput.showPicker(); } catch (e) {} });
+  const startEl = document.getElementById("start-date");
+  const endEl = document.getElementById("end-date");
+  if (startEl) {
+    startEl.min = todayStr();
+    startEl.max = addDaysStr(todayStr(), 90);
+    startEl.addEventListener("click", () => { try { startEl.showPicker(); } catch (e) {} });
+    startEl.addEventListener("change", () => {
+      // 開始日を選んだら返却日の下限を合わせ、空なら同日を初期値に
+      endEl.min = startEl.value || todayStr();
+      if (!endEl.value || endEl.value < startEl.value) endEl.value = startEl.value;
+    });
+  }
+  if (endEl) {
+    endEl.min = todayStr();
+    endEl.max = addDaysStr(todayStr(), 90);
+    endEl.addEventListener("click", () => { try { endEl.showPicker(); } catch (e) {} });
+  }
+  bindCounters();
 
-  document.getElementById("to-step2").addEventListener("click", handleToStep2);
-  document.getElementById("back-step1").addEventListener("click", () => { showError(""); gotoStep(1); });
-  document.getElementById("submit-reservation").addEventListener("click", handleSubmit);
-}; window.__yatsumoriRebind();
+  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
+  on("to-step2", handleToStep2);
+  on("back-step1", () => { showError(""); gotoStep(1); });
+  on("to-step3", handleToStep3);
+  on("back-step2", () => { showError(""); gotoStep(2); });
+  on("to-step4", handleToStep4);
+  on("back-step3", () => { showError(""); gotoStep(3); });
+  on("submit-reservation", handleSubmit);
+};
+window.__yatsumoriRebind();
 </script>
 <script>window.YATSUMORI_PAGE_KEY="reserve";</script>
 <script src="assets/js/pageRenderer.js?v=3"></script>

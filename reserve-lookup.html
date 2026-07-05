@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="lookup-css">.board-tag{font-size:10px;font-weight:700;color:#39506a;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:1px 8px;margin-left:6px}</style>
 </head>
 <body>
 <div class="page" id="page-root">
@@ -78,8 +79,9 @@
 </div>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=5"></script>
-<script src="assets/js/booking.js?v=5"></script>
+<script src="assets/js/booking.js?v=6"></script>
 <script>
+const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
 let current = null; // 現在表示中の予約
 
 function showError(msg) {
@@ -89,11 +91,26 @@ function showError(msg) {
 
 const STATUS_LABEL = { pending: "予約受付中", confirmed: "予約確定", cancelled: "キャンセル済み" };
 
+function periodText(r) {
+  const start = r.rental_date;
+  const end = r.return_date || r.rental_date;
+  if (start === end) return `${start}（日帰り）`;
+  const days = Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+  return `${start} 〜 ${end}（${days}日間）`;
+}
+
 function renderResult(r) {
   current = r;
-  const items = (r.items || []).map((it) =>
-    `${CATEGORY_LABEL[it.category] || it.category} ${it.size_label} × ${it.quantity}`
-  ).join("、") || "—";
+  const members = (r.members || []);
+  const memberRows = members.length
+    ? members.map((m, i) => {
+        const who = m.is_child ? `お子様` : `大人`;
+        return `<div class="summary-row"><span class="k">利用者${i + 1}（${who}）</span><span class="v">${m.height_cm}cm / ${m.shoe_cm}cm<span class="board-tag">${BOARD_LABEL[m.board_type] || m.board_type}</span></span></div>`;
+      }).join("")
+    : "";
+  const adults = r.adults != null ? r.adults : "";
+  const children = r.children != null ? r.children : 0;
+  const partyText = adults !== "" ? `大人 ${adults}名${children ? ` / 子供 ${children}名` : ""}` : "";
 
   document.getElementById("result-card").innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -101,10 +118,10 @@ function renderResult(r) {
       <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status] || r.status}</span>
     </div>
     <div class="summary-list">
-      <div class="summary-row"><span class="k">利用日</span><span class="v">${r.rental_date}</span></div>
+      <div class="summary-row"><span class="k">ご利用期間</span><span class="v">${periodText(r)}</span></div>
       <div class="summary-row"><span class="k">お名前</span><span class="v">${r.customer_name} 様</span></div>
-      <div class="summary-row"><span class="k">人数</span><span class="v">${r.party_size}名</span></div>
-      <div class="summary-row"><span class="k">用具</span><span class="v">${items}</span></div>
+      ${partyText ? `<div class="summary-row"><span class="k">人数</span><span class="v">${partyText}</span></div>` : ""}
+      ${memberRows}
     </div>`;
 
   // キャンセル済みならキャンセルボタンを隠す
@@ -125,7 +142,7 @@ async function handleSearch() {
   const btn = document.getElementById("search-btn");
   btn.disabled = true; btn.textContent = "確認中...";
   try {
-    const r = await lookupReservation(code, phone);
+    const r = await lookupReservationV2(code, phone);
     if (!r) { showError("予約が見つかりませんでした。予約番号と電話番号をご確認ください。"); return; }
     renderResult(r);
   } catch (e) {
@@ -145,7 +162,7 @@ async function handleCancel() {
   try {
     await cancelReservation(current.reservation_code, document.getElementById("phone").value.trim());
     // 最新状態を取り直して表示
-    const r = await lookupReservation(current.reservation_code, document.getElementById("phone").value.trim());
+    const r = await lookupReservationV2(current.reservation_code, document.getElementById("phone").value.trim());
     if (r) renderResult(r);
   } catch (e) {
     showError(translateError(e));
