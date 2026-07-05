@@ -404,6 +404,20 @@ img{display:block}
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=6"></script>
+<script>
+// 公開版のフッター「よくある質問/お問い合わせ/プライバシー」が古い#リンクのまま
+// でも、正しいページへ繋ぎ直す自己修復（pageRendererが差し替え後にこれを呼ぶ）。
+// ページ差し替えが無い場合は静的HTML側が既に正しいので影響なし。
+window.__yatsumoriRebind = function () {
+  document.querySelectorAll(".utility-links a").forEach(function (a) {
+    var t = a.textContent || "";
+    if (/よくある|質問/.test(t)) a.setAttribute("href", "pages/faq.html");
+    else if (/問い合わせ/.test(t)) a.setAttribute("href", "tel:07024723633");
+    else if (/プライバシー/.test(t)) a.setAttribute("href", "pages/privacy.html");
+  });
+};
+window.__yatsumoriRebind();
+</script>
 <script>window.YATSUMORI_PAGE_KEY="home";</script>
 <script src="assets/js/pageRenderer.js?v=3"></script>
 </body>
