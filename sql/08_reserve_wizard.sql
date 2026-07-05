@@ -24,6 +24,8 @@ create table if not exists public.reservation_members (
 create index if not exists idx_res_members_res on public.reservation_members (reservation_id);
 
 alter table public.reservation_members enable row level security;
+-- 何度実行しても大丈夫なように、既存ポリシーを消してから作り直す
+drop policy if exists "admin full access reservation members" on public.reservation_members;
 create policy "admin full access reservation members" on public.reservation_members
   for all to authenticated using (true) with check (true);
 -- anonにはポリシーを作らない＝RPC経由のみ（reservationsと同じ方針）
