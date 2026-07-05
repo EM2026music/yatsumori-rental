@@ -183,6 +183,8 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 800;
   font-size: 15px;
   border: none;
+  text-align: center;      /* aタグのボタンでも文字を中央に */
+  display: block;
 }
 .btn-nav.primary {
   background: var(--gold);

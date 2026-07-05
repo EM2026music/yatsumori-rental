@@ -90,6 +90,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 .format-btns { display: flex; gap: 4px; }
 .format-btns button { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .15s; }
 .format-btns button:hover { background: rgba(255,255,255,.14); color: #fff; }
+.format-btns button.active { background: #f0b429; color: #15314f; border-color: #f0b429; }
 .prop-row { display: flex; align-items: center; gap: 8px; }
 .prop-input { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 100%; }
 .prop-input:focus { outline: none; border-color: #3b82f6; }
@@ -351,6 +352,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
             <button data-cmd="bold"><b>B</b></button>
             <button data-cmd="italic"><i>I</i></button>
             <button data-cmd="underline"><u>U</u></button>
+          </div>
+        </div>
+        <div class="prop-group">
+          <div class="prop-label">文字ぞろえ</div>
+          <div class="format-btns" id="align-btns">
+            <button data-align="left" title="左寄せ">⬅</button>
+            <button data-align="center" title="中央ぞろえ">↔</button>
+            <button data-align="right" title="右寄せ">➡</button>
           </div>
         </div>
         <div class="prop-group">
@@ -2435,6 +2444,7 @@ function syncTextProps(el) {
   document.getElementById("txt-link-cur").textContent = getLink(el) || "リンクなし";
   document.getElementById("font-family-inp").value = el.style.fontFamily || "";
   document.getElementById("text-legibility-inp").value = el.dataset.legibility || "";
+  if (typeof markAlignButtons === "function") markAlignButtons(el);
 }
 
 function rgbToHex(rgb) {
@@ -2450,6 +2460,26 @@ document.querySelectorAll("[data-cmd]").forEach(btn => {
     if (!activeTextEl) return;
     activeTextEl.focus();
     iframeDoc.execCommand(btn.dataset.cmd, false, null);
+  });
+});
+
+// 文字ぞろえ（左/中央/右）— 選択中のテキスト項目に text-align を設定
+function markAlignButtons(el) {
+  let cur = "left";
+  try { cur = (el.style.textAlign || iframeWin.getComputedStyle(el).textAlign || "left"); } catch (e) {}
+  if (cur === "start") cur = "left";
+  if (cur === "end") cur = "right";
+  document.querySelectorAll("#align-btns [data-align]").forEach(b =>
+    b.classList.toggle("active", b.dataset.align === cur));
+}
+document.querySelectorAll("#align-btns [data-align]").forEach(btn => {
+  btn.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    const t = fbTextTarget();
+    if (!t) return;
+    t.style.textAlign = btn.dataset.align;
+    markAlignButtons(t);
+    snapshotForUndo();
   });
 });
 
