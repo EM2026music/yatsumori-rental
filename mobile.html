@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=390">
 <script>
 // PCでこのスマホ版を開いてしまったら自動でPC版へ戻す（逆方向の安全装置）
-if (!/Android|iPhone|iPod|Mobile/i.test(navigator.userAgent)) {
+// ※編集画面（iframe内）では発動しない：これが無いとスマホ版編集時にPC版が
+//   読み込まれてしまい、レイアウトが崩れて見えた（長年のスマホ編集不調の原因）
+if (window.self === window.top && !/Android|iPhone|iPod|Mobile/i.test(navigator.userAgent)) {
   location.replace("index.html?pc=1");
 }
 </script>
