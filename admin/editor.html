@@ -682,6 +682,9 @@ function injectEditingCSS() {
   const style = iframeDoc.createElement("style");
   style.id = "_ed_style";
   style.textContent = `
+    /* 編集画面では横スクロールを出さない（画面外に飛んだ項目はクリップして
+       表示。🚑「迷子の項目を呼び戻す」で取り戻せる）。縦は自由。 */
+    html { overflow-x: hidden !important; }
     [data-ed]:hover:not([contenteditable="true"]) {
       outline: 2px solid rgba(59,130,246,.65) !important;
       outline-offset: 2px !important;
