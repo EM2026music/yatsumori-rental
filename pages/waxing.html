@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>ワクシングサービス | 8つ森レンタル</title>
+<meta name="description" content="8つ森レンタルのワクシングサービス。フル5,000円・レギュラー3,000円・クイック1,500円。よく滑る・疲れにくい・板が長持ち。エッジ研磨は行っておりません。">
 <link rel="stylesheet" href="../assets/css/style.css?v=11">
 <style id="page-fixed-760">.page{width:760px;max-width:none}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,15 +15,28 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
 <style id="waxing-css">
 .wax-lead{font-size:14px;line-height:1.9;color:#39506a;margin:6px 0 20px}
+.wax-h{font-size:16px;font-weight:800;color:#15314f;margin:26px 0 10px;padding-left:10px;border-left:4px solid #f0b429}
 .plan-card{border:1px solid var(--border,#dde2e8);border-radius:14px;padding:18px 20px;margin-bottom:14px;background:#fff;box-shadow:0 3px 12px rgba(20,40,60,.06)}
 .plan-card.pick{border:2px solid #f0b429;box-shadow:0 6px 18px rgba(240,180,41,.18)}
 .plan-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .plan-name{font-size:17px;font-weight:800;color:#15314f}
 .plan-price{font-size:20px;font-weight:800;color:#15314f;white-space:nowrap}
 .plan-price small{font-size:12px;font-weight:600;color:#6b7785;margin-left:2px}
+.plan-time{font-size:11.5px;font-weight:700;color:#6b7785;margin-top:4px}
 .plan-badge{display:inline-block;font-size:11px;font-weight:800;color:#a86a00;background:rgba(240,180,41,.18);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.plan-target{display:inline-block;font-size:11px;font-weight:800;color:#1c4f82;background:#eaf2fb;border:1px solid #d3e2f2;border-radius:999px;padding:2px 10px;margin-bottom:8px}
 .plan-desc{font-size:13px;line-height:1.8;color:#4a5867;margin-top:8px}
-.wax-note{font-size:12.5px;line-height:1.8;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:8px}
+.wax-body{font-size:13.5px;line-height:1.95;color:#4a5867}
+.wax-effect{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.wax-effect span{font-size:13px;font-weight:800;color:#15314f;background:#f2f6fb;border:1px solid var(--border,#dde2e8);border-radius:999px;padding:6px 14px}
+.wax-target-list{margin:8px 0 0 2px}
+.wax-target-list li{list-style:none;font-size:13px;line-height:1.9;color:#4a5867;padding-left:20px;position:relative}
+.wax-target-list li::before{content:"✔";position:absolute;left:0;color:#f0b429;font-weight:800}
+.wax-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:8px}
+.wax-how{border:1px solid var(--border,#dde2e8);border-radius:12px;padding:16px 18px;background:#fff}
+.wax-how-item{font-size:13.5px;line-height:1.85;color:#4a5867;padding-left:22px;position:relative;margin-bottom:10px}
+.wax-how-item:last-child{margin-bottom:0}
+.wax-how-item::before{content:"●";position:absolute;left:0;color:#1c4f82;font-size:11px;top:3px}
 </style>
 </head>
 <body>
@@ -32,27 +46,29 @@
     <span class="subpage-title">ワクシングサービス</span>
   </header>
   <div class="container">
-    <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 6px">滑りが変わる。ワクシングサービス</h2>
-    <p class="wax-lead">
-      板の裏面（ソール）にワックスを入れると、雪の上での滑走性が上がり、板が長持ちします。<br>
-      「なんだか滑らない」「板を大事に使いたい」という方におすすめです。ご来店時にお気軽にご相談ください。
-    </p>
+    <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 4px">ワクシングサービス</h2>
+    <p class="wax-lead">8つ森レンタルのワクシングサービスで、快適な滑りをサポートします！</p>
+
+    <div class="wax-h">サービス内容</div>
 
     <div class="plan-card pick">
-      <div class="plan-badge">しっかり仕上げ</div>
+      <div class="plan-badge">シーズン初めにおすすめ</div>
       <div class="plan-top">
         <span class="plan-name">フルバージョン</span>
         <span class="plan-price">5,000<small>円</small></span>
       </div>
-      <p class="plan-desc">ソールの汚れ落としからベースワックス、仕上げまで丁寧に施工。シーズン前の一本や、しばらくメンテしていない板におすすめの本格コースです。</p>
+      <div class="plan-time">施工時間 1日〜 ※1</div>
+      <p class="plan-desc">シーズン前・初滑走前の下地作りに最適なフル施工です。滑走性能とワックスの持ちを最大限に引き出します。</p>
     </div>
 
     <div class="plan-card">
+      <div class="plan-target">当店でフル施工済みの板が対象</div>
       <div class="plan-top">
         <span class="plan-name">レギュラーバージョン</span>
         <span class="plan-price">3,000<small>円</small></span>
       </div>
-      <p class="plan-desc">標準的なワクシング。定期的なメンテナンスとして、滑走性をしっかり回復させたい方に。</p>
+      <div class="plan-time">施工時間 半日〜 ※1</div>
+      <p class="plan-desc">定期メンテナンス向けのワクシングです。滑走性能を維持したい方におすすめです。</p>
     </div>
 
     <div class="plan-card">
@@ -60,17 +76,46 @@
         <span class="plan-name">クイックバージョン</span>
         <span class="plan-price">1,500<small>円</small></span>
       </div>
-      <p class="plan-desc">短時間でサッと仕上げるお手軽コース。「今日これから滑る」という時にも。</p>
+      <div class="plan-time">施工時間 30分〜 ※1</div>
+      <p class="plan-desc">「今から滑りたい」「時間がない」という方向けの簡易ワクシング。最低限の滑走性能を素早く整えます。</p>
     </div>
 
     <div class="wax-note">
-      ※ 料金はすべて税込・現金でのお支払いです。<br>
-      ※ エッジ研磨（刃を削る作業）は承っておりません。ワクシング（ソールのメンテナンス）のみのご提供です。<br>
-      ※ 混雑状況により、お渡しまでお時間をいただく場合があります。
+      ※1 施工時間は、板の状態・混雑状況により前後いたします。<br>
+      ※ エッジ研磨は行っておりませんので、ご了承ください。
     </div>
 
-    <div class="wizard-actions" style="margin-top:20px">
-      <a class="btn-nav primary btn-block" href="../reserve.html">レンタルのご予約はこちら</a>
+    <div class="wax-h">ワクシングとは</div>
+    <p class="wax-body">
+      スキー・スノーボードは、新品を含めワクシングなしでは滑走性能が出にくいだけでなく、ソール（滑走面）が乾燥・劣化しやすくなります。
+    </p>
+    <p class="wax-body" style="margin-top:10px">ワクシングを行うことで、こんな効果があります。</p>
+    <div class="wax-effect">
+      <span>🎿 よく滑る</span>
+      <span>💪 疲れにくい</span>
+      <span>🛡 板が長持ち</span>
+    </div>
+    <p class="wax-body" style="margin-top:6px">特に、次のような方には<b>フルバージョン</b>がおすすめです。</p>
+    <ul class="wax-target-list">
+      <li>買ってから一度もワクシングしていない</li>
+      <li>購入時にワクシングをしてもらって以来、一度もメンテナンスをしていない</li>
+      <li>簡易ワックスしか使ったことがない</li>
+      <li>今シーズン初めて滑る</li>
+    </ul>
+
+    <div class="wax-h">ご利用方法</div>
+    <div class="wax-how">
+      <div class="wax-how-item">店舗へ直接ご来店いただき、お渡しする申込書にご記入ください。</div>
+      <div class="wax-how-item">宅配便等を用いての事前持ち込みも可能です。<br>※ 事前にお電話いただき、板の状態とご希望をお伺いいたします。</div>
+    </div>
+    <p class="wax-body" style="margin-top:14px;text-align:center">
+      詳しくは、お電話もしくはInstagramのDMでお問い合わせください。
+    </p>
+    <div class="wizard-actions" style="margin-top:14px">
+      <a class="btn-nav primary btn-block" href="tel:07024723633">📞 電話で問い合わせる（070-2472-3633）</a>
+    </div>
+    <div class="wizard-actions" style="margin-top:10px">
+      <a class="btn-nav ghost btn-block" href="https://www.instagram.com/yatsumorirental/" target="_blank" rel="noopener">📷 InstagramのDMで問い合わせる</a>
     </div>
   </div>
 </div>
