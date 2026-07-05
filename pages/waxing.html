@@ -12,6 +12,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="waxing-css">
+.wax-lead{font-size:14px;line-height:1.9;color:#39506a;margin:6px 0 20px}
+.plan-card{border:1px solid var(--border,#dde2e8);border-radius:14px;padding:18px 20px;margin-bottom:14px;background:#fff;box-shadow:0 3px 12px rgba(20,40,60,.06)}
+.plan-card.pick{border:2px solid #f0b429;box-shadow:0 6px 18px rgba(240,180,41,.18)}
+.plan-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.plan-name{font-size:17px;font-weight:800;color:#15314f}
+.plan-price{font-size:20px;font-weight:800;color:#15314f;white-space:nowrap}
+.plan-price small{font-size:12px;font-weight:600;color:#6b7785;margin-left:2px}
+.plan-badge{display:inline-block;font-size:11px;font-weight:800;color:#a86a00;background:rgba(240,180,41,.18);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.plan-desc{font-size:13px;line-height:1.8;color:#4a5867;margin-top:8px}
+.wax-note{font-size:12.5px;line-height:1.8;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:8px}
+</style>
 </head>
 <body>
 <div class="page" id="page-root">
@@ -20,10 +32,45 @@
     <span class="subpage-title">ワクシングサービス</span>
   </header>
   <div class="container">
-    <div class="alert alert-info">このページは準備中です。内容は後日掲載します。</div>
-    <p class="help-text">板をベストコンディションに保つワクシングを承ります。</p>
-    <div class="wizard-actions" style="margin-top:18px">
-      <a class="btn-nav primary btn-block" href="../reserve.html">今すぐ予約する</a>
+    <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 6px">滑りが変わる。ワクシングサービス</h2>
+    <p class="wax-lead">
+      板の裏面（ソール）にワックスを入れると、雪の上での滑走性が上がり、板が長持ちします。<br>
+      「なんだか滑らない」「板を大事に使いたい」という方におすすめです。ご来店時にお気軽にご相談ください。
+    </p>
+
+    <div class="plan-card pick">
+      <div class="plan-badge">しっかり仕上げ</div>
+      <div class="plan-top">
+        <span class="plan-name">フルバージョン</span>
+        <span class="plan-price">5,000<small>円</small></span>
+      </div>
+      <p class="plan-desc">ソールの汚れ落としからベースワックス、仕上げまで丁寧に施工。シーズン前の一本や、しばらくメンテしていない板におすすめの本格コースです。</p>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-top">
+        <span class="plan-name">レギュラーバージョン</span>
+        <span class="plan-price">3,000<small>円</small></span>
+      </div>
+      <p class="plan-desc">標準的なワクシング。定期的なメンテナンスとして、滑走性をしっかり回復させたい方に。</p>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-top">
+        <span class="plan-name">クイックバージョン</span>
+        <span class="plan-price">1,500<small>円</small></span>
+      </div>
+      <p class="plan-desc">短時間でサッと仕上げるお手軽コース。「今日これから滑る」という時にも。</p>
+    </div>
+
+    <div class="wax-note">
+      ※ 料金はすべて税込・現金でのお支払いです。<br>
+      ※ エッジ研磨（刃を削る作業）は承っておりません。ワクシング（ソールのメンテナンス）のみのご提供です。<br>
+      ※ 混雑状況により、お渡しまでお時間をいただく場合があります。
+    </div>
+
+    <div class="wizard-actions" style="margin-top:20px">
+      <a class="btn-nav primary btn-block" href="../reserve.html">レンタルのご予約はこちら</a>
     </div>
   </div>
 </div>
