@@ -16,10 +16,8 @@
 <style id="bg-css">
 .bg-lead{font-size:14px;line-height:1.9;color:#39506a;margin:6px 0 20px}
 .bg-h{font-size:17px;font-weight:800;color:#15314f;margin:28px 0 12px;padding-left:10px;border-left:4px solid #f0b429}
-.manga-frame{border:2px dashed #cfd8e2;border-radius:14px;background:#fafbfc;padding:26px 18px;text-align:center;color:#8a97a4;font-size:13px;line-height:1.9}
-.manga-frame .mf-title{font-size:15px;font-weight:800;color:#15314f;margin-bottom:6px}
-.manga-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.manga-cell{aspect-ratio:1/1;border:1px solid #dde2e8;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:#b7c1cc;font-size:12px;font-weight:700}
+.manga-cap{font-size:13px;font-weight:800;color:#1c4f3a;background:#eef5ea;border:1px solid #d5e6cd;border-radius:8px;padding:7px 12px;margin:0 0 8px}
+.manga-img{width:100%;border-radius:12px;display:block;margin:0 0 18px;box-shadow:0 6px 18px rgba(20,40,60,.14)}
 .flow-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #eef1f5}
 .flow-step:last-child{border-bottom:none}
 .flow-no{flex:0 0 30px;height:30px;border-radius:50%;background:#f0b429;color:#15314f;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -44,17 +42,15 @@
     <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 4px">はじめての方へ</h2>
     <p class="bg-lead">スキー・スノーボードが初めてでも大丈夫！8つ森レンタルの看板娘「やつもりん」が、レンタルの流れと準備のコツをご案内します。</p>
 
-    <!-- やつもりん8コマ漫画 -->
-    <div class="bg-h">やつもりんの使い方講座（8コマ漫画）</div>
-    <div class="manga-frame">
-      <div class="mf-title">🎨 8コマ漫画をここに掲載予定</div>
-      レンタルの流れ（受付 → サイズ合わせ → ゲレンデ → 温泉 → 返却）を、やつもりんが漫画でご案内します。<br>画像ができたら、この枠に差し込みます。
-      <div class="manga-grid">
-        <div class="manga-cell">1</div><div class="manga-cell">2</div>
-        <div class="manga-cell">3</div><div class="manga-cell">4</div>
-        <div class="manga-cell">5</div><div class="manga-cell">6</div>
-        <div class="manga-cell">7</div><div class="manga-cell">8</div>
-      </div>
+    <!-- やつもりん予約案内マンガ -->
+    <div class="bg-h">やつもりんの予約案内マンガ</div>
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">看板娘やつもりんが、WEB予約のコツを漫画でご案内します。</p>
+    <div class="manga-cap">第1話：予約しておくと当日スムーズ！</div>
+    <img class="manga-img" src="../assets/img/manga-1.jpg" alt="やつもりんの予約案内マンガ 第1話 予約しておくと当日スムーズ">
+    <div class="manga-cap">第2話：予約で入力してほしいこと</div>
+    <img class="manga-img" src="../assets/img/manga-2.jpg" alt="やつもりんの予約案内マンガ 第2話 入力してほしいこと">
+    <div class="wizard-actions" style="margin:4px 0 6px">
+      <a class="btn-nav primary btn-block" href="../reserve.html">さっそくWEBで予約する</a>
     </div>
 
     <!-- 当日の流れ（文字補足） -->
