@@ -26,6 +26,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 .icon-btn { border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,.45); padding: 6px 8px; border-radius: 6px; font-size: 16px; line-height: 1; transition: all .15s; }
 .icon-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
 .icon-btn:disabled { opacity: .25; cursor: not-allowed; }
+#admin-menu-btn { font-size: 12px; font-weight: 700; }
+.am-item { display: block; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #15314f; text-decoration: none; white-space: nowrap; }
+.am-item:hover { background: #f0f4f9; }
 .dev-toggle { display: flex; background: rgba(255,255,255,.07); border-radius: 20px; padding: 2px; }
 .dev-toggle button { border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,.4); padding: 4px 14px; border-radius: 18px; font-size: 12px; font-weight: 600; transition: all .18s; }
 .dev-toggle button.active { background: #fff; color: #0f172a; }
@@ -212,6 +215,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <!-- Top bar -->
 <div id="ed-top">
   <a class="top-back" href="index.html" title="ダッシュボードに戻る">‹</a>
+  <div id="admin-menu-wrap" style="position:relative">
+    <button class="icon-btn" id="admin-menu-btn" title="管理メニュー（予約・在庫など）">☰ 管理</button>
+    <div id="admin-menu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:#fff;color:#15314f;border:1px solid #dde2e8;border-radius:10px;box-shadow:0 12px 32px rgba(20,40,60,.22);padding:6px;min-width:190px;z-index:99999">
+      <a href="index.html" class="am-item">🏠 ダッシュボード</a>
+      <a href="reservations.html" class="am-item">📋 予約一覧</a>
+      <a href="inventory.html" class="am-item">📦 在庫管理</a>
+      <a href="closed-dates.html" class="am-item">🗓 休業日の登録</a>
+    </div>
+  </div>
   <span class="top-label">8つ森レンタル — <span id="current-page-name">トップページ</span> を編集中</span>
   <div class="top-div"></div>
   <button class="icon-btn" id="undo-btn" title="元に戻す (Ctrl+Z)" disabled>↩</button>
@@ -2711,6 +2723,27 @@ async function handlePublish() {
 }
 
 document.getElementById("publish-btn").addEventListener("click", handlePublish);
+
+// 管理メニュー（予約一覧・在庫などへ直接移動）
+(function () {
+  const btn = document.getElementById("admin-menu-btn");
+  const menu = document.getElementById("admin-menu");
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.style.display = menu.style.display === "none" ? "block" : "none";
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#admin-menu-wrap")) menu.style.display = "none";
+  });
+  // 未公開の変更があるときは移動前に確認（下書きは自動保存済み）
+  menu.querySelectorAll("a").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      if (isDirty && !confirm("未公開の変更があります。\n（下書きは自動保存されるので、戻れば復元できます）\n\nこのページを離れて管理画面へ移動しますか？")) {
+        e.preventDefault();
+      }
+    });
+  });
+})();
 
 // ── Keyboard shortcuts ──
 document.addEventListener("keydown", (e) => {
