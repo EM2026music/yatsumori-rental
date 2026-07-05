@@ -29,6 +29,11 @@
 .radio-pill input { position:absolute; opacity:0; pointer-events:none; }
 .radio-pill span { display:block; text-align:center; padding:11px 8px; border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .12s; }
 .radio-pill input:checked + span { border-color:var(--gold); background:rgba(240,180,41,.12); color:var(--text); }
+.radio-pill span.small { padding:9px 4px; font-size:12px; }
+.opt-tag { font-size:10px; font-weight:700; color:var(--text-mute); margin-left:6px; }
+.opt-sec { margin-top:4px; padding:10px 12px 4px; background:rgba(28,79,130,.05); border:1px solid var(--border); border-radius:10px; }
+.opt-sec-title { font-size:11.5px; font-weight:800; color:#1c4f82; margin-bottom:8px; }
+.age-field { flex:0 0 96px; }
 .avail-hint { font-size:12px; color:var(--text-mute); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:16px; }
 .confirm-sec { margin-bottom:18px; }
 .confirm-sec-title { font-size:12px; font-weight:800; color:var(--gold); margin-bottom:6px; letter-spacing:.04em; }
@@ -288,7 +293,7 @@ function buildMembers() {
     state.members = [];
     for (let i = 0; i < total; i++) {
       const isChild = i >= state.adults;
-      state.members.push({ isChild, height: "", shoe: "", board: "" });
+      state.members.push({ isChild, height: "", shoe: "", board: "", age: "", gender: "", stance: "" });
     }
   }
   const container = document.getElementById("members-container");
@@ -297,6 +302,7 @@ function buildMembers() {
     const isChild = i >= state.adults;
     m.isChild = isChild;
     const who = isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
+    const showStance = m.board === "snowboard";
     html += `
       <div class="member-card" data-i="${i}">
         <div class="member-head">${who}<span class="mh-badge">${isChild ? "子供料金" : "大人料金"}</span></div>
@@ -317,6 +323,31 @@ function buildMembers() {
             <label class="radio-pill"><input type="radio" name="board-${i}" value="snowboard" ${m.board === "snowboard" ? "checked" : ""}><span>スノーボード</span></label>
           </div>
         </div>
+
+        <div class="opt-sec">
+          <div class="opt-sec-title">安全・準備のための情報<span class="opt-tag">（任意・分かる範囲でOK）</span></div>
+          <div class="two-col" style="align-items:flex-end">
+            <div class="field" style="margin-bottom:10px">
+              <label class="field-label">性別</label>
+              <div class="radio-row">
+                <label class="radio-pill"><input type="radio" name="gender-${i}" value="male" ${m.gender === "male" ? "checked" : ""}><span class="small">男性</span></label>
+                <label class="radio-pill"><input type="radio" name="gender-${i}" value="female" ${m.gender === "female" ? "checked" : ""}><span class="small">女性</span></label>
+              </div>
+            </div>
+            <div class="field age-field" style="margin-bottom:10px">
+              <label class="field-label">年齢</label>
+              <input type="number" class="field-input m-age" inputmode="numeric" min="1" max="120" placeholder="歳" value="${m.age}">
+            </div>
+          </div>
+          <div class="field m-stance-wrap" style="margin-bottom:10px;${showStance ? "" : "display:none"}">
+            <label class="field-label">スタンス（前にする足）</label>
+            <div class="radio-row">
+              <label class="radio-pill"><input type="radio" name="stance-${i}" value="regular" ${m.stance === "regular" ? "checked" : ""}><span class="small">レギュラー<br>（左足が前）</span></label>
+              <label class="radio-pill"><input type="radio" name="stance-${i}" value="goofy" ${m.stance === "goofy" ? "checked" : ""}><span class="small">グーフィー<br>（右足が前）</span></label>
+              <label class="radio-pill"><input type="radio" name="stance-${i}" value="unknown" ${m.stance === "unknown" ? "checked" : ""}><span class="small">わからない</span></label>
+            </div>
+          </div>
+        </div>
       </div>`;
   });
   container.innerHTML = html;
@@ -326,8 +357,26 @@ function buildMembers() {
     const i = parseInt(card.dataset.i, 10);
     card.querySelector(".m-height").addEventListener("input", (e) => { state.members[i].height = e.target.value; });
     card.querySelector(".m-shoe").addEventListener("input", (e) => { state.members[i].shoe = e.target.value; });
+    card.querySelector(".m-age").addEventListener("input", (e) => { state.members[i].age = e.target.value; });
+    card.querySelectorAll(`input[name="gender-${i}"]`).forEach((r) => {
+      r.addEventListener("change", (e) => { state.members[i].gender = e.target.value; });
+    });
+    card.querySelectorAll(`input[name="stance-${i}"]`).forEach((r) => {
+      r.addEventListener("change", (e) => { state.members[i].stance = e.target.value; });
+    });
     card.querySelectorAll(`input[name="board-${i}"]`).forEach((r) => {
-      r.addEventListener("change", (e) => { state.members[i].board = e.target.value; });
+      r.addEventListener("change", (e) => {
+        state.members[i].board = e.target.value;
+        // スノーボードのときだけスタンス欄を表示。スキーに変えたらスタンスは消す。
+        const wrap = card.querySelector(".m-stance-wrap");
+        if (e.target.value === "snowboard") {
+          wrap.style.display = "";
+        } else {
+          wrap.style.display = "none";
+          state.members[i].stance = "";
+          card.querySelectorAll(`input[name="stance-${i}"]`).forEach((s) => { s.checked = false; });
+        }
+      });
     });
   });
 }
@@ -369,10 +418,18 @@ function periodLabel() {
   return `${state.start} 〜 ${state.end}（${days}日間）`;
 }
 
+const GENDER_LABEL = { male: "男性", female: "女性" };
+const STANCE_LABEL = { regular: "レギュラー", goofy: "グーフィー", unknown: "スタンス未定" };
+
 function renderConfirm() {
   const memberRows = state.members.map((m, i) => {
     const who = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
-    return `<div class="summary-row"><span class="k">${who}</span><span class="v">${m.height}cm / ${m.shoe}cm / ${BOARD_LABEL[m.board]}</span></div>`;
+    const extra = [];
+    if (m.gender) extra.push(GENDER_LABEL[m.gender]);
+    if (m.age) extra.push(m.age + "歳");
+    if (m.board === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance]);
+    const extraStr = extra.length ? `<br><span style="color:var(--text-mute);font-size:11px">${extra.join(" / ")}</span>` : "";
+    return `<div class="summary-row"><span class="k">${who}</span><span class="v">${m.height}cm / ${m.shoe}cm / ${BOARD_LABEL[m.board]}${extraStr}</span></div>`;
   }).join("");
 
   document.getElementById("confirm-body").innerHTML = `
@@ -407,6 +464,9 @@ async function handleSubmit() {
     shoe_cm: parseFloat(m.shoe),
     board_type: m.board,
     is_child: !!m.isChild,
+    age: m.age ? parseInt(m.age, 10) : null,
+    gender: m.gender || null,
+    stance: (m.board === "snowboard" && m.stance) ? m.stance : null,
   }));
 
   const btn = document.getElementById("submit-reservation");

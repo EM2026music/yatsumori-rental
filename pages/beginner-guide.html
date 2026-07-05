@@ -16,8 +16,13 @@
 <style id="bg-css">
 .bg-lead{font-size:14px;line-height:1.9;color:#39506a;margin:6px 0 20px}
 .bg-h{font-size:17px;font-weight:800;color:#15314f;margin:28px 0 12px;padding-left:10px;border-left:4px solid #f0b429}
+.manga-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.manga-tabs button{padding:8px 16px;border-radius:999px;border:1.5px solid #d5e6cd;background:#fff;color:#1c4f3a;font-weight:800;font-size:13px;cursor:pointer}
+.manga-tabs button.active{background:#1c4f3a;color:#fff;border-color:#1c4f3a}
 .manga-cap{font-size:13px;font-weight:800;color:#1c4f3a;background:#eef5ea;border:1px solid #d5e6cd;border-radius:8px;padding:7px 12px;margin:0 0 8px}
-.manga-img{width:100%;border-radius:12px;display:block;margin:0 0 18px;box-shadow:0 6px 18px rgba(20,40,60,.14)}
+.manga-img{width:100%;border-radius:12px;display:block;margin:0 0 8px;box-shadow:0 6px 18px rgba(20,40,60,.14)}
+.manga-ep{display:none}
+.manga-ep.active{display:block}
 .flow-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #eef1f5}
 .flow-step:last-child{border-bottom:none}
 .flow-no{flex:0 0 30px;height:30px;border-radius:50%;background:#f0b429;color:#15314f;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -42,14 +47,22 @@
     <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 4px">はじめての方へ</h2>
     <p class="bg-lead">スキー・スノーボードが初めてでも大丈夫！8つ森レンタルの看板娘「やつもりん」が、レンタルの流れと準備のコツをご案内します。</p>
 
-    <!-- やつもりん予約案内マンガ -->
+    <!-- やつもりん予約案内マンガ（タブで話を切り替え） -->
     <div class="bg-h">やつもりんの予約案内マンガ</div>
-    <p class="help-text" style="margin-top:0;margin-bottom:12px">看板娘やつもりんが、WEB予約のコツを漫画でご案内します。</p>
-    <div class="manga-cap">第1話：予約しておくと当日スムーズ！</div>
-    <img class="manga-img" src="../assets/img/manga-1.jpg" alt="やつもりんの予約案内マンガ 第1話 予約しておくと当日スムーズ">
-    <div class="manga-cap">第2話：予約で入力してほしいこと</div>
-    <img class="manga-img" src="../assets/img/manga-2.jpg" alt="やつもりんの予約案内マンガ 第2話 入力してほしいこと">
-    <div class="wizard-actions" style="margin:4px 0 6px">
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">看板娘やつもりんが、WEB予約のコツを漫画でご案内します。読みたい話を選んでください。</p>
+    <div class="manga-tabs" id="manga-tabs">
+      <button data-ep="1" class="active">第1話</button>
+      <button data-ep="2">第2話</button>
+    </div>
+    <div class="manga-ep active" data-ep="1">
+      <div class="manga-cap">第1話：予約しておくと当日スムーズ！</div>
+      <img class="manga-img" src="../assets/img/manga-1.jpg" alt="やつもりんの予約案内マンガ 第1話 予約しておくと当日スムーズ">
+    </div>
+    <div class="manga-ep" data-ep="2">
+      <div class="manga-cap">第2話：予約で入力してほしいこと</div>
+      <img class="manga-img" src="../assets/img/manga-2.jpg" alt="やつもりんの予約案内マンガ 第2話 入力してほしいこと">
+    </div>
+    <div class="wizard-actions" style="margin:10px 0 6px">
       <a class="btn-nav primary btn-block" href="../reserve.html">さっそくWEBで予約する</a>
     </div>
 
@@ -96,6 +109,21 @@
     </div>
   </div>
 </div>
+<script>
+(function(){
+  var tabs = document.getElementById("manga-tabs");
+  if (!tabs) return;
+  tabs.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-ep]");
+    if (!b) return;
+    var ep = b.dataset.ep;
+    tabs.querySelectorAll("button").forEach(function(x){ x.classList.toggle("active", x === b); });
+    document.querySelectorAll(".manga-ep").forEach(function(el){
+      el.classList.toggle("active", el.getAttribute("data-ep") === ep);
+    });
+  });
+})();
+</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="beginner-guide";</script>

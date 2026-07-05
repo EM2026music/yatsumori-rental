@@ -82,6 +82,8 @@
 <script src="assets/js/booking.js?v=6"></script>
 <script>
 const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
+const GENDER_LABEL = { male: "男性", female: "女性" };
+const STANCE_LABEL = { regular: "レギュラー", goofy: "グーフィー", unknown: "スタンス未定" };
 let current = null; // 現在表示中の予約
 
 function showError(msg) {
@@ -105,7 +107,12 @@ function renderResult(r) {
   const memberRows = members.length
     ? members.map((m, i) => {
         const who = m.is_child ? `お子様` : `大人`;
-        return `<div class="summary-row"><span class="k">利用者${i + 1}（${who}）</span><span class="v">${m.height_cm}cm / ${m.shoe_cm}cm<span class="board-tag">${BOARD_LABEL[m.board_type] || m.board_type}</span></span></div>`;
+        const extra = [];
+        if (m.gender) extra.push(GENDER_LABEL[m.gender] || m.gender);
+        if (m.age) extra.push(m.age + "歳");
+        if (m.board_type === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance] || m.stance);
+        const extraStr = extra.length ? `<br><span style="color:var(--text-mute);font-size:11px">${extra.join(" / ")}</span>` : "";
+        return `<div class="summary-row"><span class="k">利用者${i + 1}（${who}）</span><span class="v">${m.height_cm}cm / ${m.shoe_cm}cm<span class="board-tag">${BOARD_LABEL[m.board_type] || m.board_type}</span>${extraStr}</span></div>`;
       }).join("")
     : "";
   const adults = r.adults != null ? r.adults : "";

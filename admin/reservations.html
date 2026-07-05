@@ -50,6 +50,8 @@ function showError(msg) {
 
 const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "キャンセル" };
 const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
+const GENDER_LABEL = { male: "男性", female: "女性" };
+const STANCE_LABEL = { regular: "レギュラー(左足前)", goofy: "グーフィー(右足前)", unknown: "スタンス未定" };
 
 function periodText(r) {
   const start = r.rental_date;
@@ -69,7 +71,7 @@ async function loadReservations() {
 
   let q = sb
     .from("reservations")
-    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child), reservation_items(quantity, equipment_items(category, size_label))")
+    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance), reservation_items(quantity, equipment_items(category, size_label))")
     .order("rental_date", { ascending: false })
     .order("created_at", { ascending: false });
 
@@ -97,7 +99,12 @@ function renderCard(r) {
       .sort((a, b) => a.member_no - b.member_no)
       .map((m) => {
         const who = m.is_child ? "子供" : "大人";
-        return `<div class="data-card-meta" style="padding-left:6px">・${who}｜身長 ${m.height_cm}cm｜靴 ${m.shoe_cm}cm｜<b>${BOARD_LABEL[m.board_type] || m.board_type}</b></div>`;
+        const extra = [];
+        if (m.gender) extra.push(GENDER_LABEL[m.gender] || m.gender);
+        if (m.age != null) extra.push(m.age + "歳");
+        if (m.board_type === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance] || m.stance);
+        const extraStr = extra.length ? `｜${extra.join("｜")}` : "";
+        return `<div class="data-card-meta" style="padding-left:6px">・${who}｜身長 ${m.height_cm}cm｜靴 ${m.shoe_cm}cm｜<b>${BOARD_LABEL[m.board_type] || m.board_type}</b>${extraStr}</div>`;
       }).join("");
     detail = `<div class="data-card-meta" style="margin-top:4px;font-weight:700">ご利用者（${members.length}名）</div>${rows}`;
   } else {
