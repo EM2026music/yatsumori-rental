@@ -7,11 +7,36 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>レンタル料金 | 8つ森レンタル</title>
+<meta name="description" content="8つ森レンタルの料金プラン。フルセット・滑走セット（大人/子供・1〜4日）、単品レンタルの料金一覧。現金のみ。English price list available.">
 <link rel="stylesheet" href="../assets/css/style.css?v=12">
 <style id="page-fixed-760">.page{width:760px;max-width:none}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="pricing-css">
+.lang-switch{display:flex;gap:8px;margin:4px 0 18px}
+.lang-switch button{flex:1;padding:10px 0;border-radius:999px;border:1.5px solid var(--border,#dde2e8);background:#fff;font-weight:800;font-size:13px;color:#6b7785;cursor:pointer}
+.lang-switch button.active{background:#15314f;color:#fff;border-color:#15314f}
+.pr-lead{font-size:14px;line-height:1.9;color:#39506a;margin:0 0 18px}
+.pr-h{font-size:17px;font-weight:800;color:#15314f;margin:26px 0 10px;padding-left:10px;border-left:4px solid #f0b429}
+.set-card{border:1px solid var(--border,#dde2e8);border-radius:14px;padding:16px 16px 18px;margin-bottom:16px;background:#fff;box-shadow:0 3px 12px rgba(20,40,60,.06)}
+.set-name{font-size:16px;font-weight:800;color:#15314f;margin-bottom:4px}
+.set-incl{font-size:12.5px;line-height:1.7;color:#4a5867;margin-bottom:12px}
+.pr-table{width:100%;border-collapse:collapse;font-size:14px}
+.pr-table th,.pr-table td{border:1px solid #f0d3d3;padding:9px 6px;text-align:center}
+.pr-table thead th{background:#fbe7b0;color:#15314f;font-weight:800}
+.pr-table tbody th{background:#fff7e6;color:#15314f;font-weight:800;width:64px}
+.pr-table .price{color:#d0342c;font-weight:800;white-space:nowrap}
+.set-add{font-size:12px;line-height:1.7;color:#6b7785;margin-top:10px;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:8px;padding:9px 12px}
+.item-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.item-table th,.item-table td{border:1px solid #f0d3d3;padding:10px 8px;vertical-align:middle}
+.item-table thead th{background:#fbe7b0;color:#15314f;font-weight:800;text-align:center}
+.item-table .it-name{font-weight:800;color:#15314f;line-height:1.6}
+.item-table .it-name small{display:block;font-weight:600;color:#6b7785;font-size:11.5px;margin-top:2px}
+.item-table .it-price{text-align:center;color:#d0342c;font-weight:800;white-space:nowrap;width:130px}
+.pr-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:16px}
+.pr-warn{font-size:12.5px;color:#9a3b3b;background:#fff5f5;border:1px solid #f6d5d5;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-weight:700}
+</style>
 </head>
 <body>
 <div class="page" id="page-root">
@@ -20,13 +45,152 @@
     <span class="subpage-title">レンタル料金</span>
   </header>
   <div class="container">
-    <div class="alert alert-info">このページは準備中です。内容は後日掲載します。</div>
-    <p class="help-text">わかりやすい料金プランをご用意しています。</p>
-    <div class="wizard-actions" style="margin-top:18px">
-      <a class="btn-nav primary btn-block" href="../reserve.html">今すぐ予約する</a>
+
+    <div class="lang-switch" id="lang-switch">
+      <button data-lang="ja" class="active">日本語</button>
+      <button data-lang="en">English</button>
     </div>
+
+    <!-- ========== 日本語 ========== -->
+    <div data-langblock="ja">
+      <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:4px 0 4px">レンタル料金</h2>
+      <p class="pr-lead">わかりやすいセット料金と、単品レンタルをご用意しています。お支払いは現金のみです。</p>
+
+      <div class="pr-h">セット料金</div>
+      <div class="pr-warn">⚠ 帽子・グローブ・ネックウォーマーは含まれません（各種販売もございます）</div>
+
+      <div class="set-card">
+        <div class="set-name">フルセット</div>
+        <div class="set-incl">ゴーグル・パスケース・ウェア（上下）・ブーツ・板（スキーはストックも）。手ぶらでOKの全部入りセット。</div>
+        <table class="pr-table">
+          <thead><tr><th></th><th>1日</th><th>2日</th><th>3日</th><th>4日</th></tr></thead>
+          <tbody>
+            <tr><th>大人</th><td class="price">¥6,500</td><td class="price">¥12,000</td><td class="price">¥17,000</td><td class="price">¥22,000</td></tr>
+            <tr><th>キッズ</th><td class="price">¥4,000</td><td class="price">¥7,000</td><td class="price">¥9,500</td><td class="price">¥12,000</td></tr>
+          </tbody>
+        </table>
+        <div class="set-add">5日目以降は1日ごとに追加料金：大人 +5,500円／日、キッズ +3,000円／日（※小学生以下がキッズ料金）</div>
+      </div>
+
+      <div class="set-card">
+        <div class="set-name">滑走セット</div>
+        <div class="set-incl">ブーツ・板（スキーはストックも）。滑るのに必要な基本セット。</div>
+        <table class="pr-table">
+          <thead><tr><th></th><th>1日</th><th>2日</th><th>3日</th><th>4日</th></tr></thead>
+          <tbody>
+            <tr><th>大人</th><td class="price">¥3,500</td><td class="price">¥6,000</td><td class="price">¥8,000</td><td class="price">¥10,000</td></tr>
+            <tr><th>キッズ</th><td class="price">¥2,500</td><td class="price">¥4,000</td><td class="price">¥5,000</td><td class="price">¥6,000</td></tr>
+          </tbody>
+        </table>
+        <div class="set-add">5日目以降は1日ごとに追加料金：大人 +2,500円／日、キッズ +2,000円／日（※小学生以下がキッズ料金）</div>
+      </div>
+
+      <div class="pr-h">単品料金</div>
+      <table class="item-table">
+        <thead><tr><th style="text-align:left">品目</th><th>価格</th></tr></thead>
+        <tbody>
+          <tr><td class="it-name">板<small>スキー(90〜175cm) / ボード(80〜165cm)</small></td><td class="it-price">¥3,000</td></tr>
+          <tr><td class="it-name">ブーツ<small>スキー(15〜31cm) / ボード(15〜31cm)</small></td><td class="it-price">¥2,500</td></tr>
+          <tr><td class="it-name">ストック<small>(70〜130cm)</small></td><td class="it-price">¥500</td></tr>
+          <tr><td class="it-name">ウェア<small>男女共通(SS〜3L) / キッズ(90〜140cm)</small></td><td class="it-price">上下各 ¥2,000</td></tr>
+          <tr><td class="it-name">ヘルメット<small>キッズ有り(S〜XL)</small></td><td class="it-price">¥1,000</td></tr>
+          <tr><td class="it-name">ゴーグル<small>キッズ有り(S〜XL)</small></td><td class="it-price">¥1,000</td></tr>
+          <tr><td class="it-name">ソリ</td><td class="it-price">¥500</td></tr>
+          <tr><td class="it-name">スノーシュー</td><td class="it-price">¥2,000</td></tr>
+          <tr><td class="it-name">キッズ用ハーネス</td><td class="it-price">¥1,500</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pr-note">
+        ・お支払いは<b>現金のみ</b>です（クレジットカード・電子決済は現在ご利用いただけません）。<br>
+        ・ご利用日の<b>前日午後2時から</b>、道具のお渡しが可能です。<br>
+        ・営業時間 8:00〜17:00（不定休）／お電話 070-2472-3633
+      </div>
+
+      <div class="wizard-actions" style="margin-top:18px">
+        <a class="btn-nav primary btn-block" href="../reserve.html">WEBで予約する</a>
+      </div>
+    </div>
+
+    <!-- ========== English ========== -->
+    <div data-langblock="en" style="display:none">
+      <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:4px 0 4px">Rental Price List</h2>
+      <p class="pr-lead">Easy set plans and single-item rentals. Payment is cash only.</p>
+
+      <div class="pr-h">Set Rental</div>
+      <div class="pr-warn">⚠ Knit cap, gloves and neck warmer are not included (also available for purchase).</div>
+
+      <div class="set-card">
+        <div class="set-name">Complete Set (Full Set)</div>
+        <div class="set-incl">Goggles, pass holder, clothing (top &amp; bottom), boots, board (poles for ski). Everything you need — come empty-handed.</div>
+        <table class="pr-table">
+          <thead><tr><th></th><th>1 day</th><th>2 days</th><th>3 days</th><th>4 days</th></tr></thead>
+          <tbody>
+            <tr><th>Adult</th><td class="price">¥6,500</td><td class="price">¥12,000</td><td class="price">¥17,000</td><td class="price">¥22,000</td></tr>
+            <tr><th>Kids</th><td class="price">¥4,000</td><td class="price">¥7,000</td><td class="price">¥9,500</td><td class="price">¥12,000</td></tr>
+          </tbody>
+        </table>
+        <div class="set-add">From the 5th day, an additional daily fee applies: Adult +¥5,500/day, Kids +¥3,000/day (Kids = elementary school age and under).</div>
+      </div>
+
+      <div class="set-card">
+        <div class="set-name">Riding Set (Board / Boots)</div>
+        <div class="set-incl">Boots, board (poles for ski). The basics you need to ride.</div>
+        <table class="pr-table">
+          <thead><tr><th></th><th>1 day</th><th>2 days</th><th>3 days</th><th>4 days</th></tr></thead>
+          <tbody>
+            <tr><th>Adult</th><td class="price">¥3,500</td><td class="price">¥6,000</td><td class="price">¥8,000</td><td class="price">¥10,000</td></tr>
+            <tr><th>Kids</th><td class="price">¥2,500</td><td class="price">¥4,000</td><td class="price">¥5,000</td><td class="price">¥6,000</td></tr>
+          </tbody>
+        </table>
+        <div class="set-add">From the 5th day, an additional daily fee applies: Adult +¥2,500/day, Kids +¥2,000/day (Kids = elementary school age and under).</div>
+      </div>
+
+      <div class="pr-h">Single Items</div>
+      <table class="item-table">
+        <thead><tr><th style="text-align:left">Item</th><th>Price</th></tr></thead>
+        <tbody>
+          <tr><td class="it-name">Board<small>Ski (90–175cm) / Snowboard (80–165cm)</small></td><td class="it-price">¥3,000</td></tr>
+          <tr><td class="it-name">Boots<small>Ski (15–31cm) / Snowboard (15–31cm)</small></td><td class="it-price">¥2,500</td></tr>
+          <tr><td class="it-name">Poles<small>(70–130cm)</small></td><td class="it-price">¥500</td></tr>
+          <tr><td class="it-name">Clothing<small>Adult unisex (SS–3L) / Kids (90–140cm)</small></td><td class="it-price">top/bottom each ¥2,000</td></tr>
+          <tr><td class="it-name">Helmet<small>Kids sizes available (S–XL)</small></td><td class="it-price">¥1,000</td></tr>
+          <tr><td class="it-name">Goggles<small>Kids sizes available (S–XL)</small></td><td class="it-price">¥1,000</td></tr>
+          <tr><td class="it-name">Sled</td><td class="it-price">¥500</td></tr>
+          <tr><td class="it-name">Snowshoes</td><td class="it-price">¥2,000</td></tr>
+          <tr><td class="it-name">Kids' harness</td><td class="it-price">¥1,500</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pr-note">
+        ・Payment is <b>cash only</b> (credit cards and e-payments are not accepted).<br>
+        ・Equipment can be picked up from <b>2:00 PM the day before</b> your rental date.<br>
+        ・Open 8:00–17:00 (irregular holidays) / Tel 070-2472-3633
+      </div>
+
+      <div class="wizard-actions" style="margin-top:18px">
+        <a class="btn-nav primary btn-block" href="../reserve.html">Book online</a>
+      </div>
+    </div>
+
   </div>
 </div>
+<script>
+(function(){
+  var sw = document.getElementById("lang-switch");
+  if (!sw) return;
+  sw.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-lang]");
+    if (!b) return;
+    var lang = b.dataset.lang;
+    sw.querySelectorAll("button").forEach(function(x){ x.classList.toggle("active", x === b); });
+    document.querySelectorAll("[data-langblock]").forEach(function(el){
+      el.style.display = (el.getAttribute("data-langblock") === lang) ? "" : "none";
+    });
+    window.scrollTo(0,0);
+  });
+})();
+</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="pricing";</script>
