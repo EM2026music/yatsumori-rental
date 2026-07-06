@@ -14,10 +14,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
 <style id="ym-css">
-.ym-hero{position:relative;background:linear-gradient(135deg,#15314f 0%,#1c4f3a 100%);border-radius:16px;padding:20px;color:#fff;margin:44px 0 20px;min-height:200px;overflow:visible}
-.ym-hero-text{max-width:56%}
-.ym-char{position:absolute;right:4px;bottom:0;height:282px;width:auto;filter:drop-shadow(0 8px 14px rgba(0,0,0,.4));pointer-events:none}
-@media(max-width:430px){.ym-char{height:230px}.ym-hero-text{max-width:60%}}
+.ym-hero{position:relative;background:linear-gradient(135deg,#15314f 0%,#1c4f3a 100%);border-radius:16px;padding:18px;color:#fff;margin:40px 0 20px;min-height:210px;overflow:visible}
+.ym-char{position:absolute;left:4px;bottom:0;height:230px;width:auto;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));pointer-events:none}
+.ym-hero-text{margin-left:255px}
+@media(max-width:430px){.ym-char{height:200px}.ym-hero-text{margin-left:220px}}
 .ym-name{font-size:26px;font-weight:800;font-family:"Zen Maru Gothic",sans-serif;letter-spacing:.02em}
 .ym-name small{display:block;font-size:12px;letter-spacing:.18em;color:#b6e3a0;font-weight:700;margin-top:2px}
 .ym-tag{font-size:13px;line-height:1.8;margin-top:10px;color:rgba(255,255,255,.92)}
@@ -37,8 +37,8 @@
 @media(max-width:520px){.ym-two{grid-template-columns:1fr}}
 .goods-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .goods-card{border:1px solid var(--border,#dde2e8);border-radius:12px;overflow:hidden;background:#fff}
-.goods-img{height:130px;background:#f2f6f1;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;color:#9aa7b4;position:relative}
-.goods-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.goods-img{height:150px;background:#f4f7f3;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;color:#9aa7b4;position:relative;overflow:hidden}
+.goods-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:8px}
 .goods-body{padding:10px 12px}
 .goods-name{font-size:13.5px;font-weight:800;color:#15314f}
 .goods-price{font-size:12.5px;font-weight:800;color:#d0342c;margin-top:3px}
@@ -61,7 +61,7 @@
         <div class="ym-name">やつもりん<small>YATSUMORIN</small></div>
         <div class="ym-tag">8つ森レンタルの看板娘。森と雪山をこよなく愛するツンデレなスノーボーダー。今日もゲレンデでみんなを見守ってくれているよ！</div>
       </div>
-      <img class="ym-char" src="../assets/img/yatsumorin-char.png" alt="やつもりん立ち絵">
+      <img class="ym-char" src="../assets/img/yatsumorin-face.png" alt="やつもりん">
     </div>
 
     <div class="ym-h">基本プロフィール</div>
