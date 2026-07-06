@@ -6,26 +6,73 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>板カタログ | 8つ森レンタル</title>
+<title>ギャラリー | 8つ森レンタル</title>
 <link rel="stylesheet" href="../assets/css/style.css?v=12">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="gallery-css">
+.gallery-intro{font-size:14px;color:#5b6774;line-height:1.85;margin:2px 0 16px}
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.gallery-grid a{display:block;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(20,40,60,.16);line-height:0;cursor:zoom-in}
+.gallery-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;transition:transform .35s ease}
+.gallery-grid a:hover img{transform:scale(1.05)}
+@media(max-width:480px){.gallery-grid{grid-template-columns:1fr;gap:12px}}
+/* 軽量ライトボックス（タップで拡大） */
+.gl-lb{position:fixed;inset:0;background:rgba(8,16,28,.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;cursor:zoom-out}
+.gl-lb.open{display:flex}
+.gl-lb img{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 12px 44px rgba(0,0,0,.55)}
+</style>
 </head>
 <body>
 <div class="page" id="page-root">
   <header class="subpage-header">
     <a class="back-link" href="../index.html">&#8249;</a>
-    <span class="subpage-title">板カタログ</span>
+    <span class="subpage-title">ギャラリー</span>
   </header>
-  <div class="container">
-    <div class="alert alert-info">このページは準備中です。内容は後日掲載します。</div>
-    <p class="help-text">初心者〜上級者まで、豊富なスキー・スノーボードを取り揃えています。</p>
-    <div class="wizard-actions" style="margin-top:18px">
-      <a class="btn-nav primary btn-block" href="../reserve.html">今すぐ予約する</a>
-    </div>
-  </div>
+  <div class="container"></div>
 </div>
+<script>
+// ギャラリーを描画する自己修復関数。
+// 公開版(site_pages key=catalog)は「準備中」プレースホルダで、anonキーでは書き換え
+// られない。pageRendererが保存版を差し込んだ直後に“同じ実行フレーム内で”この関数を
+// 呼ぶ（=準備中のちらつき無し）ので、ここでギャラリーを組み直して表示する。
+window.__yatsumoriRebind = function () {
+  var root = document.getElementById("page-root");
+  if (!root) return;
+  var container = root.querySelector(".container") || root;
+  if (!container.querySelector(".gallery-grid")) {   // 二重描画防止
+    var N = 15, cells = "";
+    for (var i = 1; i <= N; i++) {
+      var src = "../assets/img/gallery/gallery-" + i + ".jpg";
+      cells += '<a href="' + src + '"><img src="' + src + '" loading="lazy" alt="8つ森レンタル 店内・道具・ゲレンデの様子 ' + i + '"></a>';
+    }
+    container.innerHTML =
+        '<p class="gallery-intro">8つ森レンタルの店内・レンタル道具・ゲレンデの様子をご紹介します。写真をタップすると大きく表示できます。</p>'
+      + '<div class="gallery-grid">' + cells + '</div>'
+      + '<div class="wizard-actions" style="margin-top:20px"><a class="btn-nav primary btn-block" href="../reserve.html">今すぐ予約する</a></div>';
+  }
+  // ライトボックスは一度だけ用意（#page-root外＝body直下なので差し替えでも生き残る）
+  if (!window.__glBound) {
+    window.__glBound = true;
+    var lb = document.createElement("div");
+    lb.className = "gl-lb";
+    lb.innerHTML = '<img alt="拡大画像">';
+    document.body.appendChild(lb);
+    var close = function () { lb.classList.remove("open"); };
+    lb.addEventListener("click", close);
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest(".gallery-grid a") : null;
+      if (!a) return;
+      e.preventDefault();
+      lb.firstChild.src = a.getAttribute("href");
+      lb.classList.add("open");
+    });
+  }
+};
+window.__yatsumoriRebind();
+</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="catalog";</script>
