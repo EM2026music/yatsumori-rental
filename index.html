@@ -438,17 +438,42 @@ window.__yatsumoriRebind = function () {
     var t2 = c.querySelector(".rec-title"); if (t2) t2.textContent = "蔵王のスキー場情報";
     var s2 = c.querySelector(".rec-sub"); if (s2) s2.textContent = "ゲレンデ・積雪・天気をチェック";
   }
-  // TOP中央の空白（お客様の声を消した跡）にやつもりんプロモカードを入れる
-  var infoRow = document.querySelector(".info-row");
-  if (infoRow && !infoRow.querySelector(".reviews-sec") && !infoRow.querySelector(".ym-promo-card")) {
-    var pa = document.createElement("a");
-    pa.className = "ym-promo-card";
-    pa.href = "pages/yatsumorin.html";
-    pa.style.cssText = "position:absolute;left:640px;top:0;width:484px;height:230px;border-radius:14px;overflow:hidden;display:block;box-shadow:0 4px 14px rgba(20,40,60,.14);text-decoration:none";
-    pa.innerHTML = '<img src="assets/img/yatsumorin-promo.jpg" alt="やつもりん" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">' +
-      '<span style="position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(8,18,46,.9));color:#fff;padding:16px 16px 14px;font-weight:800;font-size:15px">やつもりん（公式キャラ）を見る &rsaquo;</span>';
-    infoRow.appendChild(pa);
+  // 公開版（エディタで絶対配置化された）レイアウトのときだけ、おすすめ情報を
+  // アクセスの手前まで広げて4枚を均等サイズに整える（やつもりんを4枚目に）。
+  // 大きすぎたプロモバナーはやめて、他のカードと同じサイズに揃える。
+  // 静的フォールバック（flexレイアウト）は位置がstaticなので発動しない。
+  var infoSec = document.querySelector(".info-sec");
+  var recScroll = document.querySelector(".rec-scroll");
+  var accessSec = document.querySelector(".access-sec");
+  if (infoSec && recScroll && accessSec && getComputedStyle(infoSec).position === "absolute") {
+    infoSec.style.width = "1060px";
+    recScroll.style.width = "1060px";
+    recScroll.style.height = "185px";
+    var pickHref = function (sub) {
+      return Array.prototype.slice.call(recScroll.querySelectorAll(".rec-card"))
+        .filter(function (a) { return (a.getAttribute("href") || "").indexOf(sub) >= 0; })[0];
+    };
+    var W = 252, GAP = 16, IMGH = 140;
+    var place = function (card, idx, title, sub, img, alt, objPos) {
+      if (!card) return;
+      card.style.cssText = "position:absolute;left:" + (idx * (W + GAP)) + "px;top:0;width:" + W + "px;height:auto;margin:0;right:auto;";
+      var im = card.querySelector("img");
+      if (im) {
+        im.style.cssText = "width:100%;height:" + IMGH + "px;border-radius:8px;object-fit:cover;margin-bottom:6px;" + (objPos ? "object-position:" + objPos + ";" : "");
+        if (img) im.setAttribute("src", img);
+        if (alt) im.setAttribute("alt", alt);
+      }
+      var t = card.querySelector(".rec-title"); if (t && title) t.textContent = title;
+      var s = card.querySelector(".rec-sub"); if (s && sub) s.textContent = sub;
+    };
+    place(pickHref("onsen"), 0);
+    place(pickHref("gourmet"), 1);
+    place(pickHref("zao-ski"), 2);
+    place(pickHref("yatsumorin"), 3, "やつもりん（公式キャラ）", "八つ森レンタルの公式キャラを見る", "assets/img/yatsumorin-promo.jpg", "やつもりん", "center 30%");
   }
+  // アクセスの写真が薄すぎる（42px）ので見やすい高さに広げる
+  var accessPhoto = document.querySelector(".access-photo");
+  if (accessPhoto) accessPhoto.style.height = "100px";
 };
 window.__yatsumoriRebind();
 </script>
