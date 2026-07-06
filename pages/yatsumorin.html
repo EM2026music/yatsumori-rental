@@ -14,10 +14,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
 <style id="ym-css">
-.ym-hero{position:relative;background:linear-gradient(135deg,#15314f 0%,#1c4f3a 100%);border-radius:16px;padding:18px;color:#fff;margin:40px 0 20px;min-height:210px;overflow:visible}
-.ym-char{position:absolute;left:4px;bottom:0;height:230px;width:auto;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));pointer-events:none}
-.ym-hero-text{margin-left:255px}
-@media(max-width:430px){.ym-char{height:200px}.ym-hero-text{margin-left:220px}}
+.ym-hero{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,#15314f 0%,#1c4f3a 100%);border-radius:16px;padding:20px;color:#fff;margin:6px 0 22px}
+.ym-avatar{flex:0 0 108px;width:108px;height:108px;border-radius:50%;overflow:hidden;background:#0e2237;border:3px solid #a6ce39;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.ym-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.ym-hero-text{flex:1;min-width:0}
+/* 基本プロフィール横のイラスト */
+.profile-row{display:flex;gap:14px;align-items:flex-end}
+.profile-row .ym-profile{flex:1;min-width:0}
+.profile-char{flex:0 0 180px;width:180px;filter:drop-shadow(0 8px 14px rgba(20,40,60,.22))}
+@media(max-width:560px){.profile-char{flex-basis:130px;width:130px}}
 .ym-name{font-size:26px;font-weight:800;font-family:"Zen Maru Gothic",sans-serif;letter-spacing:.02em}
 .ym-name small{display:block;font-size:12px;letter-spacing:.18em;color:#b6e3a0;font-weight:700;margin-top:2px}
 .ym-tag{font-size:13px;line-height:1.8;margin-top:10px;color:rgba(255,255,255,.92)}
@@ -55,24 +60,27 @@
   </header>
   <div class="container">
 
-    <!-- キャラクター紹介（透過立ち絵が枠から飛び出す立体配置） -->
+    <!-- キャラクター紹介（丸枠の顔アバター） -->
     <div class="ym-hero">
+      <div class="ym-avatar"><img src="../assets/img/yatsumorin-avatar.png" alt="やつもりん"></div>
       <div class="ym-hero-text">
         <div class="ym-name">やつもりん<small>YATSUMORIN</small></div>
         <div class="ym-tag">8つ森レンタルの看板娘。森と雪山をこよなく愛するツンデレなスノーボーダー。今日もゲレンデでみんなを見守ってくれているよ！</div>
       </div>
-      <img class="ym-char" src="../assets/img/yatsumorin-face.png" alt="やつもりん">
     </div>
 
     <div class="ym-h">基本プロフィール</div>
-    <div class="ym-profile">
-      <div class="row"><span class="k">名前</span><span class="v">やつもりん（八ツ森ン）／ YATSUMORIN</span></div>
-      <div class="row"><span class="k">役割</span><span class="v">8つ森レンタルの案内役・公式キャラクター（看板娘）</span></div>
-      <div class="row"><span class="k">誕生日</span><span class="v">12月8日</span></div>
-      <div class="row"><span class="k">身長</span><span class="v">158cm・細身でアクティブ</span></div>
-      <div class="row"><span class="k">一人称</span><span class="v">わたし（口調は少しツン、でも親切）</span></div>
-      <div class="row"><span class="k">イメージカラー</span><span class="v">リーフグリーン</span></div>
-      <div class="row"><span class="k">モチーフ</span><span class="v">雪山・森・数字の8・スノーボード</span></div>
+    <div class="profile-row">
+      <div class="ym-profile">
+        <div class="row"><span class="k">名前</span><span class="v">やつもりん（八ツ森ン）／ YATSUMORIN</span></div>
+        <div class="row"><span class="k">役割</span><span class="v">8つ森レンタルの案内役・公式キャラクター（看板娘）</span></div>
+        <div class="row"><span class="k">誕生日</span><span class="v">12月8日</span></div>
+        <div class="row"><span class="k">身長</span><span class="v">158cm・細身でアクティブ</span></div>
+        <div class="row"><span class="k">一人称</span><span class="v">わたし（口調は少しツン、でも親切）</span></div>
+        <div class="row"><span class="k">イメージカラー</span><span class="v">リーフグリーン</span></div>
+        <div class="row"><span class="k">モチーフ</span><span class="v">雪山・森・数字の8・スノーボード</span></div>
+      </div>
+      <img class="profile-char" src="../assets/img/yatsumorin-char.png" alt="やつもりん立ち絵">
     </div>
 
     <div class="ym-h">性格</div>
