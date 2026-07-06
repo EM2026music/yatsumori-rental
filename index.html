@@ -470,10 +470,21 @@ window.__yatsumoriRebind = function () {
     place(pickHref("gourmet"), 1);
     place(pickHref("zao-ski"), 2);
     place(pickHref("yatsumorin"), 3, "やつもりん（公式キャラ）", "八つ森レンタルの公式キャラを見る", "assets/img/yatsumorin-promo.jpg", "やつもりん", "center 30%");
+
+    // アクセスカードが枠(info-row 242px)を突き抜けてフッターに約26px重なっていた
+    // （写真を42→100pxにした副作用で右カラムだけ縦に伸びた）。写真を88pxに戻し、
+    // 余白を詰め、枠を254pxへ広げて、左のおすすめ4枚と底を揃えつつフッターに
+    // 被らないよう調整（headless実測: 左底971 / 右底972 / フッター980 で確定）。
+    var infoRow = document.querySelector(".info-row");
+    if (infoRow) infoRow.style.height = "254px";
+    var accessPhoto = document.querySelector(".access-photo");
+    if (accessPhoto) accessPhoto.style.height = "88px";
+    var accessInner = document.querySelector(".access-inner");
+    if (accessInner) accessInner.style.padding = "8px";
+    document.querySelectorAll(".access-row").forEach(function (r) { r.style.marginBottom = "1px"; });
+    var accessBtn = document.querySelector(".access-btn");
+    if (accessBtn) { accessBtn.style.marginTop = "5px"; accessBtn.style.padding = "6px"; }
   }
-  // アクセスの写真が薄すぎる（42px）ので見やすい高さに広げる
-  var accessPhoto = document.querySelector(".access-photo");
-  if (accessPhoto) accessPhoto.style.height = "100px";
 };
 window.__yatsumoriRebind();
 </script>
