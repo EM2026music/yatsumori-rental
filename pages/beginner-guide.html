@@ -64,35 +64,10 @@
     <!-- やつもりん予約案内マンガ（タブで話を切り替え） -->
     <div class="bg-h">やつもりんの予約案内マンガ</div>
     <p class="help-text" style="margin-top:0;margin-bottom:12px">看板娘やつもりんが、WEB予約のコツを漫画でご案内します。読みたい話を選んでください。</p>
-    <div class="manga-tabs" id="manga-tabs">
-      <button data-ep="1" class="active"><span class="ep-no">第1話</span><span class="ep-ttl">予約でスムーズ</span></button>
-      <button data-ep="2"><span class="ep-no">第2話</span><span class="ep-ttl">入力してほしい情報</span></button>
-      <button data-ep="3"><span class="ep-no">第3話</span><span class="ep-ttl">スキー？スノボ？</span></button>
-    </div>
-    <div class="manga-ep active" data-ep="1">
-      <div class="manga-cap">第1話：予約しておくと当日スムーズ！</div>
-      <img class="manga-img" src="../assets/img/manga-1.jpg" alt="やつもりんの予約案内マンガ 第1話 予約しておくと当日スムーズ">
-      <div class="manga-nav">
-        <span></span>
-        <button class="manga-next" data-goto="2">次の話へ ▸<br><small>第2話 入力してほしい情報</small></button>
-      </div>
-    </div>
-    <div class="manga-ep" data-ep="2">
-      <div class="manga-cap">第2話：予約で入力してほしいこと</div>
-      <img class="manga-img" src="../assets/img/manga-2.jpg" alt="やつもりんの予約案内マンガ 第2話 入力してほしいこと">
-      <div class="manga-nav">
-        <button class="manga-prev" data-goto="1">◂ 前の話へ<br><small>第1話 予約でスムーズ</small></button>
-        <button class="manga-next" data-goto="3">次の話へ ▸<br><small>第3話 スキー？スノボ？</small></button>
-      </div>
-    </div>
-    <div class="manga-ep" data-ep="3">
-      <div class="manga-cap">第3話：スキー？スノーボード？予約前にチェック！</div>
-      <img class="manga-img" src="../assets/img/manga-3.jpg" alt="やつもりんの予約案内マンガ 第3話 スキーかスノーボードか">
-      <div class="manga-nav">
-        <button class="manga-prev" data-goto="2">◂ 前の話へ<br><small>第2話 入力してほしい情報</small></button>
-        <span class="manga-end">つづきをお楽しみに！</span>
-      </div>
-    </div>
+    <div class="manga-tabs" id="manga-tabs"></div>
+    <div class="manga-cap" id="manga-cap"></div>
+    <img class="manga-img" id="manga-img" alt="やつもりんの予約案内マンガ">
+    <div class="manga-nav" id="manga-nav"></div>
     <div class="wizard-actions" style="margin:10px 0 6px">
       <a class="btn-nav primary btn-block" href="../reserve.html">さっそくWEBで予約する</a>
     </div>
@@ -142,24 +117,60 @@
 </div>
 <script>
 (function(){
-  var tabs = document.getElementById("manga-tabs");
-  if (!tabs) return;
-  function showEp(ep, scroll){
-    tabs.querySelectorAll("button").forEach(function(x){ x.classList.toggle("active", x.dataset.ep === ep); });
-    document.querySelectorAll(".manga-ep").forEach(function(el){
-      el.classList.toggle("active", el.getAttribute("data-ep") === ep);
-    });
-    if (scroll) { var t = tabs.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
+  // 話が増えたらここに1行足すだけ（img は assets/img/ 内のファイル名）
+  var EPISODES = [
+    { no:"第1話",   ttl:"予約でスムーズ",    cap:"第1話：予約しておくと当日スムーズ！",              img:"manga-1.jpg" },
+    { no:"第2話",   ttl:"入力してほしい情報", cap:"第2話：予約で入力してほしいこと",                 img:"manga-2.jpg" },
+    { no:"第3話",   ttl:"スキー？スノボ？",   cap:"第3話：スキー？スノーボード？予約前にチェック！",  img:"manga-3.jpg" },
+    { no:"第4話",   ttl:"年齢・性別",         cap:"第4話：年齢・性別は何に使うの？",                 img:"manga-4.jpg" },
+    { no:"第5・6話", ttl:"身長・靴のサイズ",   cap:"第5・6話：身長・靴のサイズは何に使うの？",         img:"manga-56.jpg" },
+    { no:"第7話",   ttl:"スタンス",           cap:"第7話：スタンスって何？",                         img:"manga-7.jpg" },
+    { no:"第8話",   ttl:"複数人の予約",       cap:"第8話：複数人で予約するときのポイント",           img:"manga-8.jpg" },
+    { no:"第9話",   ttl:"受け取りまでの流れ", cap:"第9話：予約から受け取りまでの流れ",               img:"manga-9.jpg" },
+    { no:"第10話",  ttl:"ブーツの履き方",     cap:"第10話：ブーツの履き方",                         img:"manga-10.jpg" }
+  ];
+  var tabsEl = document.getElementById("manga-tabs");
+  var capEl  = document.getElementById("manga-cap");
+  var imgEl  = document.getElementById("manga-img");
+  var navEl  = document.getElementById("manga-nav");
+  if (!tabsEl || !imgEl) return;
+
+  // タブを生成
+  EPISODES.forEach(function(ep, i){
+    var b = document.createElement("button");
+    b.innerHTML = '<span class="ep-no">' + ep.no + '</span><span class="ep-ttl">' + ep.ttl + '</span>';
+    b.addEventListener("click", function(){ show(i, false); });
+    tabsEl.appendChild(b);
+  });
+
+  function show(i, scroll){
+    var ep = EPISODES[i];
+    capEl.textContent = ep.cap;
+    imgEl.src = "../assets/img/" + ep.img;
+    imgEl.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
+    Array.prototype.forEach.call(tabsEl.children, function(btn, idx){ btn.classList.toggle("active", idx === i); });
+    // 前へ／次へ
+    navEl.innerHTML = "";
+    if (i > 0) {
+      var p = EPISODES[i-1];
+      var pb = document.createElement("button"); pb.className = "manga-prev";
+      pb.innerHTML = "◂ 前の話へ<br><small>" + p.no + " " + p.ttl + "</small>";
+      pb.addEventListener("click", function(){ show(i-1, true); });
+      navEl.appendChild(pb);
+    } else { navEl.appendChild(document.createElement("span")); }
+    if (i < EPISODES.length - 1) {
+      var n = EPISODES[i+1];
+      var nb = document.createElement("button"); nb.className = "manga-next";
+      nb.innerHTML = "次の話へ ▸<br><small>" + n.no + " " + n.ttl + "</small>";
+      nb.addEventListener("click", function(){ show(i+1, true); });
+      navEl.appendChild(nb);
+    } else {
+      var e = document.createElement("span"); e.className = "manga-end"; e.textContent = "最終話までありがとう！";
+      navEl.appendChild(e);
+    }
+    if (scroll) { var t = tabsEl.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
   }
-  // タブのボタン
-  tabs.addEventListener("click", function(e){
-    var b = e.target.closest("button[data-ep]");
-    if (b) showEp(b.dataset.ep, false);
-  });
-  // 各話の下の「次の話へ／前の話へ」
-  document.querySelectorAll(".manga-nav button[data-goto]").forEach(function(btn){
-    btn.addEventListener("click", function(){ showEp(btn.dataset.goto, true); });
-  });
+  show(0, false);
 })();
 </script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
