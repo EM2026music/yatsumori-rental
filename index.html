@@ -185,7 +185,13 @@ img{display:block}
 .utility-ig{display:flex;align-items:center;gap:9px;font-weight:700}
 .utility-links{display:flex;gap:24px;opacity:.85}
 .utility-links a{display:flex;align-items:center}
+
+/* 公開版(site_pages)への差し替えが終わるまで中身を隠し、古い静的版のチラ見えを防ぐ。
+   差し替え完了(__yatsumoriPageReady)でフェードイン表示する。 */
+#page-root{opacity:0;transition:opacity .28s ease}
+#page-root.yr-ready{opacity:1}
 </style>
+<noscript><style>#page-root{opacity:1 !important}</style></noscript>
 <meta name="description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。WEB予約でスムーズ受取、ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -489,6 +495,22 @@ window.__yatsumoriRebind = function () {
 window.__yatsumoriRebind();
 </script>
 <script>window.YATSUMORI_PAGE_KEY="home";</script>
+<script>
+// トップのちらつき対策：pageRendererが公開版に差し替え終わるまで #page-root を隠し、
+// 準備完了でフェードイン。Supabaseが遅い/失敗しても保険タイマーで必ず表示する。
+(function () {
+  var root = document.getElementById("page-root");
+  if (!root) return;
+  var shown = false;
+  function reveal() { if (shown) return; shown = true; root.classList.add("yr-ready"); }
+  var t0 = Date.now();
+  var iv = setInterval(function () {
+    if (window.__yatsumoriPageReady) { clearInterval(iv); reveal(); }
+    else if (Date.now() - t0 > 1500) { clearInterval(iv); reveal(); } // 1.5秒で必ず表示（保険）
+  }, 30);
+  window.addEventListener("load", function () { setTimeout(reveal, 2500); }); // 最終保険
+})();
+</script>
 <script src="assets/js/pageRenderer.js?v=3"></script>
 </body>
 </html>
