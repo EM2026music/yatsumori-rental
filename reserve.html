@@ -33,7 +33,16 @@
 .opt-tag { font-size:10px; font-weight:700; color:var(--text-mute); margin-left:6px; }
 .opt-sec { margin-top:4px; padding:10px 12px 4px; background:rgba(28,79,130,.05); border:1px solid var(--border); border-radius:10px; }
 .opt-sec-title { font-size:11.5px; font-weight:800; color:#1c4f82; margin-bottom:8px; }
-.age-field { flex:0 0 96px; }
+.age-field { flex:0 0 108px; }
+.pill-note { display:block; font-size:10px; font-weight:600; color:var(--text-mute); margin-top:2px; line-height:1.3; }
+.radio-pill input:checked + span .pill-note { color:var(--text); }
+.price-line { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding:9px 13px; background:rgba(240,180,41,.12); border:1px solid rgba(240,180,41,.4); border-radius:9px; }
+.price-line-label { font-size:12px; font-weight:700; color:var(--text-mute); }
+.price-line .m-price { font-size:16px; font-weight:800; color:var(--text); }
+.member-total { display:flex; justify-content:space-between; align-items:center; margin:0 0 16px; padding:13px 16px; background:var(--panel); border:1.5px solid var(--gold); border-radius:11px; }
+.member-total .mt-label { font-size:13px; font-weight:800; }
+.member-total .mt-label small { display:block; font-size:10px; font-weight:600; color:var(--text-mute); margin-top:2px; }
+.member-total .mt-val { font-size:19px; font-weight:800; color:var(--gold); }
 .avail-hint { font-size:12px; color:var(--text-mute); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:16px; }
 .confirm-sec { margin-bottom:18px; }
 .confirm-sec-title { font-size:12px; font-weight:800; color:var(--gold); margin-bottom:6px; letter-spacing:.04em; }
@@ -110,10 +119,11 @@
     <!-- ステップ2: 利用者ごとの情報 -->
     <section class="step-panel" id="step2">
       <div class="avail-hint" id="avail-hint"></div>
-      <p class="help-text" style="margin-top:0;margin-bottom:14px">
-        板の長さはご来店時にスタッフが身長を見て最適なものをお選びします。ご希望があれば当日お伝えください。
-      </p>
       <div id="members-container"></div>
+      <div class="member-total">
+        <span class="mt-label">お支払い目安（現金）<small>来店時に現金でお支払いください</small></span>
+        <span class="mt-val" id="member-total-val">—</span>
+      </div>
       <div class="wizard-actions">
         <button class="btn-nav ghost" id="back-step1">戻る</button>
         <button class="btn-nav primary" id="to-step3">次へ（代表者の入力）</button>
@@ -198,6 +208,49 @@
 <script src="assets/js/booking.js?v=6"></script>
 <script>
 const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
+const SET_LABEL = { gliding: "滑走セット", full: "フルセット（ウェア付き）" };
+
+// 料金表（pricing.html と一致）。配列は 1/2/3/4日、addA/addC は5日目以降の1日追加。
+const PRICE = {
+  full:    { adult: [6500, 12000, 17000, 22000], child: [4000, 7000, 9500, 12000], addA: 5500, addC: 3000 },
+  gliding: { adult: [3500, 6000, 8000, 10000],   child: [2500, 4000, 5000, 6000],  addA: 2500, addC: 2000 },
+};
+function rentalDays() {
+  if (!state.start || !state.end) return 0;
+  const ms = new Date(state.end + "T00:00:00") - new Date(state.start + "T00:00:00");
+  return Math.floor(ms / 86400000) + 1; // 開始日・返却日を含む日数
+}
+function memberPrice(m, days) {
+  const p = PRICE[m.setType];
+  if (!p || !days || days < 1) return null;
+  const base = m.isChild ? p.child : p.adult;
+  const add = m.isChild ? p.addC : p.addA;
+  return days <= 4 ? base[days - 1] : base[3] + (days - 4) * add;
+}
+function yen(n) { return "¥" + Number(n).toLocaleString("ja-JP"); }
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+// n刻みの数値<option>群。cur は現在値（文字列）、dec=true で0.5刻み等の小数表示。
+function numOptions(min, max, step, cur, dec) {
+  let out = "";
+  for (let v = min; v <= max + 1e-9; v += step) {
+    const val = dec ? v.toFixed(1) : String(Math.round(v));
+    out += `<option value="${val}"${val === String(cur) ? " selected" : ""}>${val}</option>`;
+  }
+  return out;
+}
+// 各カードの料金と合計（目安）を再計算してDOMに反映
+function refreshPrices() {
+  const days = rentalDays();
+  let total = 0, allSet = true;
+  state.members.forEach((m, i) => {
+    const pr = memberPrice(m, days);
+    const el = document.querySelector(`.member-card[data-i="${i}"] .m-price`);
+    if (el) el.textContent = pr != null ? yen(pr) : "セットを選択してください";
+    if (pr != null) total += pr; else allSet = false;
+  });
+  const tv = document.getElementById("member-total-val");
+  if (tv) tv.textContent = allSet ? yen(total) : "—";
+}
 
 const state = {
   start: null, end: null,
@@ -293,7 +346,7 @@ function buildMembers() {
     state.members = [];
     for (let i = 0; i < total; i++) {
       const isChild = i >= state.adults;
-      state.members.push({ isChild, height: "", shoe: "", board: "", age: "", gender: "", stance: "" });
+      state.members.push({ isChild, nickname: "", setType: "", height: "", shoe: "", board: "", age: "", gender: "", stance: "" });
     }
   }
   const container = document.getElementById("members-container");
@@ -306,14 +359,35 @@ function buildMembers() {
     html += `
       <div class="member-card" data-i="${i}">
         <div class="member-head">${who}<span class="mh-badge">${isChild ? "子供料金" : "大人料金"}</span></div>
+
+        <div class="field">
+          <label class="field-label">お名前・ニックネーム<span class="opt-tag">（任意・借りた方が分かるように）</span></label>
+          <input type="text" class="field-input m-nickname" maxlength="30" placeholder="例：たろう / Taro" value="${esc(m.nickname)}">
+        </div>
+
+        <div class="field">
+          <label class="field-label">レンタルセット<span class="req">必須</span></label>
+          <div class="radio-row">
+            <label class="radio-pill"><input type="radio" name="set-${i}" value="gliding" ${m.setType === "gliding" ? "checked" : ""}><span class="small">滑走セット<small class="pill-note">板・ブーツ・ストック</small></span></label>
+            <label class="radio-pill"><input type="radio" name="set-${i}" value="full" ${m.setType === "full" ? "checked" : ""}><span class="small">フルセット<small class="pill-note">滑走＋ウェア上下</small></span></label>
+          </div>
+          <div class="price-line"><span class="price-line-label">料金の目安（${rentalDays() || "―"}日間・${isChild ? "子供" : "大人"}）</span><span class="m-price">${memberPrice(m, rentalDays()) != null ? yen(memberPrice(m, rentalDays())) : "セットを選択してください"}</span></div>
+        </div>
+
         <div class="two-col">
           <div class="field">
             <label class="field-label">身長 (cm)<span class="req">必須</span></label>
-            <input type="number" class="field-input m-height" inputmode="numeric" min="80" max="220" placeholder="${isChild ? "120" : "170"}" value="${m.height}">
+            <select class="field-select m-height">
+              <option value="" disabled ${m.height === "" ? "selected" : ""} hidden>選択してください</option>
+              ${numOptions(80, 210, 1, m.height, false)}
+            </select>
           </div>
           <div class="field">
             <label class="field-label">靴のサイズ (cm)<span class="req">必須</span></label>
-            <input type="number" class="field-input m-shoe" inputmode="decimal" step="0.5" min="14" max="33" placeholder="${isChild ? "20.0" : "26.0"}" value="${m.shoe}">
+            <select class="field-select m-shoe">
+              <option value="" disabled ${m.shoe === "" ? "selected" : ""} hidden>選択してください</option>
+              ${numOptions(14, 33, 0.5, m.shoe, true)}
+            </select>
           </div>
         </div>
         <div class="field">
@@ -336,7 +410,10 @@ function buildMembers() {
             </div>
             <div class="field age-field" style="margin-bottom:10px">
               <label class="field-label">年齢</label>
-              <input type="number" class="field-input m-age" inputmode="numeric" min="1" max="120" placeholder="歳" value="${m.age}">
+              <select class="field-select m-age">
+                <option value=""${m.age === "" ? " selected" : ""}>—</option>
+                ${numOptions(1, 99, 1, m.age, false)}
+              </select>
             </div>
           </div>
           <div class="field m-stance-wrap" style="margin-bottom:10px;${showStance ? "" : "display:none"}">
@@ -351,13 +428,18 @@ function buildMembers() {
       </div>`;
   });
   container.innerHTML = html;
+  refreshPrices();
 
   // 入力値をstateに反映
   container.querySelectorAll(".member-card").forEach((card) => {
     const i = parseInt(card.dataset.i, 10);
-    card.querySelector(".m-height").addEventListener("input", (e) => { state.members[i].height = e.target.value; });
-    card.querySelector(".m-shoe").addEventListener("input", (e) => { state.members[i].shoe = e.target.value; });
-    card.querySelector(".m-age").addEventListener("input", (e) => { state.members[i].age = e.target.value; });
+    card.querySelector(".m-nickname").addEventListener("input", (e) => { state.members[i].nickname = e.target.value; });
+    card.querySelector(".m-height").addEventListener("change", (e) => { state.members[i].height = e.target.value; });
+    card.querySelector(".m-shoe").addEventListener("change", (e) => { state.members[i].shoe = e.target.value; });
+    card.querySelector(".m-age").addEventListener("change", (e) => { state.members[i].age = e.target.value; });
+    card.querySelectorAll(`input[name="set-${i}"]`).forEach((r) => {
+      r.addEventListener("change", (e) => { state.members[i].setType = e.target.value; refreshPrices(); });
+    });
     card.querySelectorAll(`input[name="gender-${i}"]`).forEach((r) => {
       r.addEventListener("change", (e) => { state.members[i].gender = e.target.value; });
     });
@@ -389,9 +471,10 @@ function handleToStep3() {
     const who = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
     const h = parseInt(m.height, 10);
     const s = parseFloat(m.shoe);
-    if (!h || h < 80 || h > 220) { showError(`${who}の身長を正しく入力してください（80〜220cm）。`); return; }
-    if (!s || s < 14 || s > 33) { showError(`${who}の靴のサイズを正しく入力してください（14〜33cm）。`); return; }
+    if (!h || h < 80 || h > 220) { showError(`${who}の身長を選択してください。`); return; }
+    if (!s || s < 14 || s > 33) { showError(`${who}の靴のサイズを選択してください。`); return; }
     if (m.board !== "ski" && m.board !== "snowboard") { showError(`${who}の用具（スキー / スノーボード）を選んでください。`); return; }
+    if (m.setType !== "gliding" && m.setType !== "full") { showError(`${who}のレンタルセット（滑走セット / フルセット）を選んでください。`); return; }
   }
   gotoStep(3);
 }
@@ -422,15 +505,22 @@ const GENDER_LABEL = { male: "男性", female: "女性" };
 const STANCE_LABEL = { regular: "レギュラー", goofy: "グーフィー", unknown: "スタンス未定" };
 
 function renderConfirm() {
+  const days = rentalDays();
+  let total = 0, allSet = true;
   const memberRows = state.members.map((m, i) => {
-    const who = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
+    const base = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
+    const who = base + (m.nickname ? `（${esc(m.nickname)}）` : "");
     const extra = [];
     if (m.gender) extra.push(GENDER_LABEL[m.gender]);
     if (m.age) extra.push(m.age + "歳");
     if (m.board === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance]);
     const extraStr = extra.length ? `<br><span style="color:var(--text-mute);font-size:11px">${extra.join(" / ")}</span>` : "";
-    return `<div class="summary-row"><span class="k">${who}</span><span class="v">${m.height}cm / ${m.shoe}cm / ${BOARD_LABEL[m.board]}${extraStr}</span></div>`;
+    const pr = memberPrice(m, days);
+    if (pr != null) total += pr; else allSet = false;
+    const priceStr = pr != null ? ` ・ <b>${yen(pr)}</b>` : "";
+    return `<div class="summary-row"><span class="k">${who}</span><span class="v">${m.height}cm / ${m.shoe}cm / ${BOARD_LABEL[m.board]} / ${SET_LABEL[m.setType] || "-"}${priceStr}${extraStr}</span></div>`;
   }).join("");
+  const totalRow = `<div class="summary-row" style="border-top:1.5px solid var(--gold);margin-top:6px;padding-top:8px"><span class="k" style="font-weight:800">お支払い目安（現金）</span><span class="v" style="font-weight:800;color:var(--gold);font-size:16px">${allSet ? yen(total) : "—"}</span></div>`;
 
   document.getElementById("confirm-body").innerHTML = `
     <div class="confirm-sec">
@@ -442,7 +532,7 @@ function renderConfirm() {
     </div>
     <div class="confirm-sec">
       <div class="confirm-sec-title">ご利用者</div>
-      <div class="summary-list">${memberRows}</div>
+      <div class="summary-list">${memberRows}${totalRow}</div>
     </div>
     <div class="confirm-sec">
       <div class="confirm-sec-title">代表者</div>
@@ -460,6 +550,8 @@ async function handleSubmit() {
   if (window.__YATSUMORI_EDITOR__) { alert("編集モードのため送信は無効です"); return; }
   showError("");
   const members = state.members.map((m) => ({
+    nickname: (m.nickname || "").trim() || null,
+    set_type: m.setType,
     height_cm: parseInt(m.height, 10),
     shoe_cm: parseFloat(m.shoe),
     board_type: m.board,

@@ -52,6 +52,20 @@ const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "�
 const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
 const GENDER_LABEL = { male: "男性", female: "女性" };
 const STANCE_LABEL = { regular: "レギュラー(左足前)", goofy: "グーフィー(右足前)", unknown: "スタンス未定" };
+const SET_LABEL = { gliding: "滑走セット", full: "フルセット(ウェア付)" };
+// 料金表（pricing.html と一致）。配列=1/2/3/4日、addA/addC=5日目以降の1日追加。
+const PRICE = {
+  full:    { adult: [6500, 12000, 17000, 22000], child: [4000, 7000, 9500, 12000], addA: 5500, addC: 3000 },
+  gliding: { adult: [3500, 6000, 8000, 10000],   child: [2500, 4000, 5000, 6000],  addA: 2500, addC: 2000 },
+};
+function memberPrice(m, days) {
+  const p = PRICE[m.set_type];
+  if (!p || !days || days < 1) return null;
+  const base = m.is_child ? p.child : p.adult;
+  const add = m.is_child ? p.addC : p.addA;
+  return days <= 4 ? base[days - 1] : base[3] + (days - 4) * add;
+}
+function yen(n) { return "¥" + Number(n).toLocaleString("ja-JP"); }
 
 function periodText(r) {
   const start = r.rental_date;
@@ -71,7 +85,7 @@ async function loadReservations() {
 
   let q = sb
     .from("reservations")
-    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance), reservation_items(quantity, equipment_items(category, size_label))")
+    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance, nickname, set_type), reservation_items(quantity, equipment_items(category, size_label))")
     .order("rental_date", { ascending: false })
     .order("created_at", { ascending: false });
 
@@ -94,19 +108,26 @@ function renderCard(r) {
   // 新形式（ウィザード予約）：利用者ごとに身長/靴/種別を表示（道具準備用）
   let detail;
   if (members.length) {
+    const days = Math.round((new Date(r.return_date || r.rental_date) - new Date(r.rental_date)) / 86400000) + 1;
+    let total = 0, allSet = true;
     const rows = members
       .slice()
       .sort((a, b) => a.member_no - b.member_no)
       .map((m) => {
-        const who = m.is_child ? "子供" : "大人";
+        const who = (m.is_child ? "子供" : "大人") + (m.nickname ? `・${m.nickname}` : "");
         const extra = [];
+        if (m.set_type) extra.push(SET_LABEL[m.set_type] || m.set_type);
         if (m.gender) extra.push(GENDER_LABEL[m.gender] || m.gender);
         if (m.age != null) extra.push(m.age + "歳");
         if (m.board_type === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance] || m.stance);
         const extraStr = extra.length ? `｜${extra.join("｜")}` : "";
-        return `<div class="data-card-meta" style="padding-left:6px">・${who}｜身長 ${m.height_cm}cm｜靴 ${m.shoe_cm}cm｜<b>${BOARD_LABEL[m.board_type] || m.board_type}</b>${extraStr}</div>`;
+        const pr = memberPrice(m, days);
+        if (pr != null) total += pr; else allSet = false;
+        const prStr = pr != null ? `｜<b>${yen(pr)}</b>` : "";
+        return `<div class="data-card-meta" style="padding-left:6px">・<b>${who}</b>｜身長 ${m.height_cm}cm｜靴 ${m.shoe_cm}cm｜${BOARD_LABEL[m.board_type] || m.board_type}${extraStr}${prStr}</div>`;
       }).join("");
-    detail = `<div class="data-card-meta" style="margin-top:4px;font-weight:700">ご利用者（${members.length}名）</div>${rows}`;
+    const totalStr = `<div class="data-card-meta" style="padding-left:6px;margin-top:2px;font-weight:800">合計（目安・現金）：${allSet ? yen(total) : "—"}</div>`;
+    detail = `<div class="data-card-meta" style="margin-top:4px;font-weight:700">ご利用者（${members.length}名）</div>${rows}${totalStr}`;
   } else {
     // 旧形式（サイズ選択）フォールバック
     const items = (r.reservation_items || []).map((ri) => {
