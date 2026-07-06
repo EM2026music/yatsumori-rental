@@ -465,7 +465,9 @@ window.__yatsumoriRebind = function () {
       card.style.cssText = "position:absolute;left:" + (idx * (W + GAP)) + "px;top:0;width:" + W + "px;height:auto;margin:0;right:auto;";
       var im = card.querySelector("img");
       if (im) {
-        im.style.cssText = "width:100%;height:" + IMGH + "px;border-radius:8px;object-fit:cover;margin-bottom:6px;" + (objPos ? "object-position:" + objPos + ";" : "");
+        // 切り取り位置(object-position)はエディタで設定した値を尊重し上書きしない
+        var pos = objPos || im.style.objectPosition || "";
+        im.style.cssText = "width:100%;height:" + IMGH + "px;border-radius:8px;object-fit:cover;margin-bottom:6px;" + (pos ? "object-position:" + pos + ";" : "");
         if (img) im.setAttribute("src", img);
         if (alt) im.setAttribute("alt", alt);
       }
@@ -475,7 +477,7 @@ window.__yatsumoriRebind = function () {
     place(pickHref("onsen"), 0);
     place(pickHref("gourmet"), 1);
     place(pickHref("zao-ski"), 2);
-    place(pickHref("yatsumorin"), 3, "やつもりん（公式キャラ）", "八つ森レンタルの公式キャラを見る", "assets/img/yatsumorin-promo.jpg", "やつもりん", "center 30%");
+    place(pickHref("yatsumorin"), 3, "やつもりん（公式キャラ）", "八つ森レンタルの公式キャラを見る", "assets/img/yatsumorin-promo.jpg", "やつもりん");
 
     // アクセスカードが枠(info-row 242px)を突き抜けてフッターに約26px重なっていた
     // （写真を42→100pxにした副作用で右カラムだけ縦に伸びた）。写真を88pxに戻し、
