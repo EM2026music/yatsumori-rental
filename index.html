@@ -347,6 +347,11 @@ img{display:block}
         <p class="rec-title">蔵王のスキー場情報</p>
         <p class="rec-sub">ゲレンデ・積雪・天気をチェック</p>
       </a>
+      <a class="rec-card" href="pages/yatsumorin.html">
+        <img class="rec-photo" src="assets/img/yatsumorin-avatar.png" alt="やつもりん">
+        <p class="rec-title">やつもりん</p>
+        <p class="rec-sub">公式キャラ・グッズ・使い方マンガ</p>
+      </a>
     </div>
   </div>
 
@@ -409,12 +414,30 @@ img{display:block}
 // でも、正しいページへ繋ぎ直す自己修復（pageRendererが差し替え後にこれを呼ぶ）。
 // ページ差し替えが無い場合は静的HTML側が既に正しいので影響なし。
 window.__yatsumoriRebind = function () {
+  // フッターの死にリンク補修
   document.querySelectorAll(".utility-links a").forEach(function (a) {
     var t = a.textContent || "";
     if (/よくある|質問/.test(t)) a.setAttribute("href", "pages/faq.html");
     else if (/問い合わせ/.test(t)) a.setAttribute("href", "tel:07024723633");
     else if (/プライバシー/.test(t)) a.setAttribute("href", "pages/privacy.html");
   });
+  // 初心者ガイドのサービスカードは漫画のあるページへ
+  document.querySelectorAll(".content-card").forEach(function (a) {
+    var ttl = a.querySelector(".content-card-title");
+    if (ttl && /初心者/.test(ttl.textContent)) a.setAttribute("href", "pages/beginner-guide.html");
+  });
+  // おすすめ情報：重複した「周辺グルメ」を1つ「蔵王のスキー場情報」に置き換える
+  // （編集時に誤って複製された分を、まだ無いスキー場カードに振り替える）
+  var recs = Array.prototype.slice.call(document.querySelectorAll(".rec-card"));
+  var gourmet = recs.filter(function (a) { return /gourmet/.test(a.getAttribute("href") || ""); });
+  var hasSki = recs.some(function (a) { return /zao-ski-info/.test(a.getAttribute("href") || ""); });
+  if (gourmet.length > 1 && !hasSki) {
+    var c = gourmet[gourmet.length - 1];
+    c.setAttribute("href", "pages/zao-ski-info.html");
+    var img = c.querySelector("img"); if (img) { img.setAttribute("src", "assets/img/zao-ski.jpg"); img.setAttribute("alt", "蔵王のスキー場情報"); }
+    var t2 = c.querySelector(".rec-title"); if (t2) t2.textContent = "蔵王のスキー場情報";
+    var s2 = c.querySelector(".rec-sub"); if (s2) s2.textContent = "ゲレンデ・積雪・天気をチェック";
+  }
 };
 window.__yatsumoriRebind();
 </script>
