@@ -25,6 +25,8 @@
 .member-head .mh-badge { font-size:11px; font-weight:800; color:#15314f; background:#fff; border:none; border-radius:999px; padding:3px 12px; margin-left:auto; }
 .member-card .field { margin-bottom:15px; }
 .member-card .field-label { font-size:13.5px; }
+/* 値を選んだ身長・靴・年齢は「選択済み」を青系で明示（他の選択と統一） */
+.member-card .field-select:not(:has(option:checked[value=""])) { border-color:#2f6fb0; background:#e4eff9; color:#15314f; font-weight:700; }
 .two-col { display:flex; gap:10px; }
 .two-col .field { flex:1; min-width:0; }
 .radio-row { display:flex; gap:10px; }
