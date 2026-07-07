@@ -36,6 +36,9 @@
 .radio-pill input:checked + span { border-color:#2f6fb0; background:#e4eff9; color:#15314f; font-weight:800; box-shadow:0 0 0 1px #2f6fb0 inset; }
 .radio-pill span.small { padding:9px 4px; font-size:12px; }
 .opt-tag { font-size:10px; font-weight:700; color:var(--text-mute); margin-left:6px; }
+/* 身長・靴・性別・年齢を1つの枠にまとめる（本人情報グループ） */
+.member-group { border:1.5px solid #dbe2ea; border-radius:12px; padding:14px 14px 8px; background:#fbfcfe; margin-bottom:16px; }
+.mg-sub { font-size:12px; font-weight:800; color:#5b6b7f; margin:0 0 10px; padding-top:10px; border-top:1px dashed #ccd6e0; }
 .opt-sec { margin-top:6px; padding:12px 13px 6px; background:#f6f8fa; border:1px solid #e5e9ef; border-radius:10px; }
 .opt-sec-title { font-size:12.5px; font-weight:800; color:#15314f; margin-bottom:9px; }
 .age-field { flex:0 0 108px; }
@@ -394,34 +397,33 @@ function buildMembers() {
           <input type="text" class="field-input m-nickname" maxlength="30" placeholder="例：たろう / Taro" value="${esc(m.nickname)}">
         </div>
 
-        <div class="two-col">
-          <div class="field">
-            <label class="field-label">身長 (cm)<span class="req">必須</span></label>
-            <select class="field-select m-height" data-mid="${isChild ? 120 : 165}">
-              <option value="" disabled ${m.height === "" ? "selected" : ""} hidden>選択してください</option>
-              ${numOptions(80, 210, 1, m.height, false)}
-            </select>
+        <div class="member-group">
+          <div class="two-col">
+            <div class="field" style="margin-bottom:12px">
+              <label class="field-label">身長 (cm)<span class="req">必須</span></label>
+              <select class="field-select m-height" data-mid="${isChild ? 120 : 165}">
+                <option value="" disabled ${m.height === "" ? "selected" : ""} hidden>選択してください</option>
+                ${numOptions(80, 210, 1, m.height, false)}
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:12px">
+              <label class="field-label">靴のサイズ (cm)<span class="req">必須</span></label>
+              <select class="field-select m-shoe" data-mid="${isChild ? "20.0" : "25.0"}">
+                <option value="" disabled ${m.shoe === "" ? "selected" : ""} hidden>選択してください</option>
+                ${numOptions(14, 33, 0.5, m.shoe, true)}
+              </select>
+            </div>
           </div>
-          <div class="field">
-            <label class="field-label">靴のサイズ (cm)<span class="req">必須</span></label>
-            <select class="field-select m-shoe" data-mid="${isChild ? "20.0" : "25.0"}">
-              <option value="" disabled ${m.shoe === "" ? "selected" : ""} hidden>選択してください</option>
-              ${numOptions(14, 33, 0.5, m.shoe, true)}
-            </select>
-          </div>
-        </div>
-
-        <div class="opt-sec">
-          <div class="opt-sec-title">性別・年齢<span class="opt-tag">（任意・分かる範囲でOK）</span></div>
+          <div class="mg-sub">性別・年齢<span class="opt-tag">（任意・分かる範囲でOK）</span></div>
           <div class="two-col" style="align-items:flex-end">
-            <div class="field" style="margin-bottom:10px">
+            <div class="field" style="margin-bottom:6px">
               <label class="field-label">性別</label>
               <div class="radio-row">
                 <label class="radio-pill"><input type="radio" name="gender-${i}" value="male" ${m.gender === "male" ? "checked" : ""}><span class="small">男性</span></label>
                 <label class="radio-pill"><input type="radio" name="gender-${i}" value="female" ${m.gender === "female" ? "checked" : ""}><span class="small">女性</span></label>
               </div>
             </div>
-            <div class="field age-field" style="margin-bottom:10px">
+            <div class="field age-field" style="margin-bottom:6px">
               <label class="field-label">年齢</label>
               <select class="field-select m-age">
                 <option value=""${m.age === "" ? " selected" : ""}>—</option>
