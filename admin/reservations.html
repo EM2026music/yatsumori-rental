@@ -53,6 +53,14 @@ const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
 const GENDER_LABEL = { male: "男性", female: "女性" };
 const STANCE_LABEL = { regular: "レギュラー(左足前)", goofy: "グーフィー(右足前)", unknown: "スタンス未定" };
 const SET_LABEL = { gliding: "滑走セット", full: "フルセット(ウェア付)" };
+const ADDONS = {
+  helmet:   { label: "ヘルメット",       price: 1000 },
+  goggle:   { label: "ゴーグル",         price: 1000 },
+  sled:     { label: "ソリ",             price: 500 },
+  snowshoe: { label: "スノーシュー",     price: 2000 },
+  harness:  { label: "キッズ用ハーネス", price: 1500 },
+};
+function addonsTotal(m) { return (m.addons || []).reduce(function (s, k) { return s + (ADDONS[k] ? ADDONS[k].price : 0); }, 0); }
 // 料金表（pricing.html と一致）。配列=1/2/3/4日、addA/addC=5日目以降の1日追加。
 const PRICE = {
   full:    { adult: [6500, 12000, 17000, 22000], child: [4000, 7000, 9500, 12000], addA: 5500, addC: 3000 },
@@ -63,7 +71,8 @@ function memberPrice(m, days) {
   if (!p || !days || days < 1) return null;
   const base = m.is_child ? p.child : p.adult;
   const add = m.is_child ? p.addC : p.addA;
-  return days <= 4 ? base[days - 1] : base[3] + (days - 4) * add;
+  const setPrice = days <= 4 ? base[days - 1] : base[3] + (days - 4) * add;
+  return setPrice + addonsTotal(m) * days; // 単品（追加レンタル）は1日ごと
 }
 function yen(n) { return "¥" + Number(n).toLocaleString("ja-JP"); }
 
@@ -85,7 +94,7 @@ async function loadReservations() {
 
   let q = sb
     .from("reservations")
-    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance, nickname, set_type), reservation_items(quantity, equipment_items(category, size_label))")
+    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance, nickname, set_type, addons), reservation_items(quantity, equipment_items(category, size_label))")
     .order("rental_date", { ascending: false })
     .order("created_at", { ascending: false });
 
@@ -117,6 +126,7 @@ function renderCard(r) {
         const who = (m.is_child ? "子供" : "大人") + (m.nickname ? `・${m.nickname}` : "");
         const extra = [];
         if (m.set_type) extra.push(SET_LABEL[m.set_type] || m.set_type);
+        if (m.addons && m.addons.length) extra.push("追加:" + m.addons.map(function (k) { return ADDONS[k] ? ADDONS[k].label : k; }).join("・"));
         if (m.gender) extra.push(GENDER_LABEL[m.gender] || m.gender);
         if (m.age != null) extra.push(m.age + "歳");
         if (m.board_type === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance] || m.stance);
