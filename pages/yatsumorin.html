@@ -48,6 +48,15 @@
 .goods-price{font-size:12.5px;font-weight:800;color:#d0342c;margin-top:3px}
 .goods-price.soon{color:#9aa7b4;font-weight:700}
 .ym-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:14px}
+/* 日常のやつもりん ギャラリー */
+.ym-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ym-gallery a{display:block;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(20,40,60,.14);line-height:0;cursor:zoom-in}
+.ym-gallery img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;transition:transform .3s ease}
+.ym-gallery a:hover img{transform:scale(1.05)}
+@media(max-width:480px){.ym-gallery{grid-template-columns:1fr 1fr}}
+.gl-lb{position:fixed;inset:0;background:rgba(8,16,28,.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;cursor:zoom-out}
+.gl-lb.open{display:flex}
+.gl-lb img{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 12px 44px rgba(0,0,0,.55)}
 .video-box{height:200px;border:2px dashed #cfd8e2;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;color:#9aa7b4;font-size:12.5px;line-height:1.8;background:#fafbfc}
 </style>
 </head>
@@ -105,6 +114,15 @@
       <p>「別にあんたのためじゃないし。」<br>「ちゃんと準備しておくの、大事なんだから。」<br>「迷ったら聞いて。教えてあげる。」</p>
     </div>
 
+    <!-- 日常のやつもりん ギャラリー -->
+    <div class="ym-h">日常のやつもりん</div>
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">ゲレンデや街での、やつもりんのふだんの様子です。（写真をタップで拡大）</p>
+    <div class="ym-gallery">
+      <a href="../assets/img/yatsumorin-daily/daily-1.jpg"><img src="../assets/img/yatsumorin-daily/daily-1.jpg" loading="lazy" alt="日常のやつもりん 1"></a>
+      <a href="../assets/img/yatsumorin-daily/daily-2.jpg"><img src="../assets/img/yatsumorin-daily/daily-2.jpg" loading="lazy" alt="日常のやつもりん 2"></a>
+      <a href="../assets/img/yatsumorin-daily/daily-3.jpg"><img src="../assets/img/yatsumorin-daily/daily-3.jpg" loading="lazy" alt="日常のやつもりん 3"></a>
+    </div>
+
     <!-- 使い方講座（8コマ漫画）→ 初心者ガイドへ -->
     <div class="ym-h">やつもりんの予約案内マンガ</div>
     <p class="help-text" style="margin-top:0">やつもりんがWEB予約のコツを漫画でご案内！（初心者ガイドで公開中）</p>
@@ -147,6 +165,25 @@
     </div>
   </div>
 </div>
+<script>
+// 日常ギャラリーのタップ拡大ライトボックス（軽量）
+(function () {
+  var lb = document.createElement("div");
+  lb.className = "gl-lb";
+  lb.innerHTML = '<img alt="拡大画像">';
+  document.body.appendChild(lb);
+  var close = function () { lb.classList.remove("open"); };
+  lb.addEventListener("click", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest(".ym-gallery a") : null;
+    if (!a) return;
+    e.preventDefault();
+    lb.firstChild.src = a.getAttribute("href");
+    lb.classList.add("open");
+  });
+})();
+</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="yatsumorin";</script>
