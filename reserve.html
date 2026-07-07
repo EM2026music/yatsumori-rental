@@ -21,7 +21,7 @@
 .count-row .count-sub { font-size:11px; color:var(--text-mute); font-weight:500; margin-left:6px; }
 .member-card { border:1.5px solid #dbe2ea; border-radius:14px; padding:0 16px 10px; margin-bottom:20px; background:#fff; box-shadow:0 3px 12px rgba(20,40,60,.06); }
 .member-head { font-size:15px; font-weight:800; color:#fff; margin:0 -16px 16px; padding:14px 16px; background:linear-gradient(135deg,#204570 0%,#15314f 100%); border-radius:12px 12px 0 0; display:flex; align-items:center; gap:10px; }
-.member-head::before { content:""; width:6px; height:19px; border-radius:3px; background:var(--gold); flex:0 0 auto; box-shadow:0 0 0 2px rgba(240,180,41,.25); }
+.mh-letter { display:inline-flex; align-items:center; justify-content:center; width:27px; height:27px; border-radius:50%; background:var(--gold); color:#15314f; font-size:14px; font-weight:800; flex:0 0 auto; box-shadow:0 0 0 3px rgba(240,180,41,.22); }
 .member-head .mh-badge { font-size:11px; font-weight:800; color:#15314f; background:#fff; border:none; border-radius:999px; padding:3px 12px; margin-left:auto; }
 .member-card .field { margin-bottom:15px; }
 .member-card .field-label { font-size:13.5px; }
@@ -375,7 +375,8 @@ function buildMembers() {
     state.members = [];
     for (let i = 0; i < total; i++) {
       const isChild = i >= state.adults;
-      state.members.push({ isChild, nickname: "", setType: "", height: "", shoe: "", board: "", age: "", gender: "", stance: "", addons: [] });
+      // 身長・靴は中央値を初期選択（プルダウンが中央付近から開き、選びやすい）
+      state.members.push({ isChild, nickname: "", setType: "", height: isChild ? "120" : "165", shoe: isChild ? "20.0" : "25.0", board: "", age: "", gender: "", stance: "", addons: [] });
     }
   }
   const container = document.getElementById("members-container");
@@ -387,20 +388,11 @@ function buildMembers() {
     const showStance = m.board === "snowboard";
     html += `
       <div class="member-card" data-i="${i}">
-        <div class="member-head">${who}<span class="mh-badge">${isChild ? "子供料金" : "大人料金"}</span></div>
+        <div class="member-head"><span class="mh-letter">${String.fromCharCode(65 + i)}</span>${who}<span class="mh-badge">${isChild ? "子供料金" : "大人料金"}</span></div>
 
         <div class="field">
           <label class="field-label">お名前・ニックネーム<span class="opt-tag">（任意・借りた方が分かるように）</span></label>
           <input type="text" class="field-input m-nickname" maxlength="30" placeholder="例：たろう / Taro" value="${esc(m.nickname)}">
-        </div>
-
-        <div class="field">
-          <label class="field-label">レンタルセット<span class="req">必須</span></label>
-          <div class="radio-row">
-            <label class="radio-pill"><input type="radio" name="set-${i}" value="gliding" ${m.setType === "gliding" ? "checked" : ""}><span class="small">滑走セット<small class="pill-note">板・ブーツ・ストック</small></span></label>
-            <label class="radio-pill"><input type="radio" name="set-${i}" value="full" ${m.setType === "full" ? "checked" : ""}><span class="small">フルセット<small class="pill-note">滑走＋ウェア上下</small></span></label>
-          </div>
-          <div class="price-line"><span class="price-line-label">料金の目安（${rentalDays() || "―"}日間・${isChild ? "子供" : "大人"}）</span><span class="m-price">${memberPrice(m, rentalDays()) != null ? yen(memberPrice(m, rentalDays())) : "セットを選択してください"}</span></div>
         </div>
 
         <div class="two-col">
@@ -424,6 +416,14 @@ function buildMembers() {
           <div class="radio-row">
             <label class="radio-pill"><input type="radio" name="board-${i}" value="ski" ${m.board === "ski" ? "checked" : ""}><span>スキー</span></label>
             <label class="radio-pill"><input type="radio" name="board-${i}" value="snowboard" ${m.board === "snowboard" ? "checked" : ""}><span>スノーボード</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">レンタルセット<span class="req">必須</span></label>
+          <div class="radio-row">
+            <label class="radio-pill"><input type="radio" name="set-${i}" value="gliding" ${m.setType === "gliding" ? "checked" : ""}><span class="small">滑走セット<small class="pill-note">板・ブーツ・ストック</small></span></label>
+            <label class="radio-pill"><input type="radio" name="set-${i}" value="full" ${m.setType === "full" ? "checked" : ""}><span class="small">フルセット<small class="pill-note">滑走＋ウェア上下</small></span></label>
           </div>
         </div>
 
@@ -459,6 +459,8 @@ function buildMembers() {
             </div>
           </div>
         </div>
+
+        <div class="price-line" style="margin-top:2px"><span class="price-line-label">この方の料金（${rentalDays() || "―"}日間・${isChild ? "子供" : "大人"}）</span><span class="m-price">${memberPrice(m, rentalDays()) != null ? yen(memberPrice(m, rentalDays())) : "セットを選択してください"}</span></div>
       </div>`;
   });
   container.innerHTML = html;
@@ -553,7 +555,7 @@ function renderConfirm() {
   let total = 0, allSet = true;
   const memberRows = state.members.map((m, i) => {
     const base = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
-    const who = base + (m.nickname ? `（${esc(m.nickname)}）` : "");
+    const who = String.fromCharCode(65 + i) + "　" + base + (m.nickname ? `（${esc(m.nickname)}）` : "");
     const extra = [];
     if (m.addons && m.addons.length) extra.push("追加: " + m.addons.map(function (k) { return ADDONS[k] ? ADDONS[k].label : k; }).join("・"));
     if (m.gender) extra.push(GENDER_LABEL[m.gender]);
