@@ -17,11 +17,8 @@
 .bg-lead{font-size:16px;line-height:1.95;color:#33495f;margin:6px 0 22px}
 .help-text{font-size:14px;color:#5b6774}
 .bg-h{font-size:19px;font-weight:800;color:#15314f;margin:32px 0 14px;padding-left:11px;border-left:4px solid #f0b429}
-.manga-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
-.manga-tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 15px;border-radius:12px;border:1.5px solid #d5e6cd;background:#fff;color:#1c4f3a;cursor:pointer;text-align:left}
-.manga-tabs button .ep-no{font-size:11.5px;font-weight:800;opacity:.8}
-.manga-tabs button .ep-ttl{font-size:14px;font-weight:800;line-height:1.3}
-.manga-tabs button.active{background:#1c4f3a;color:#fff;border-color:#1c4f3a}
+.manga-select{display:block;width:100%;max-width:440px;padding:13px 15px;font-size:15px;font-weight:800;color:#1c4f3a;font-family:inherit;border:1.5px solid #d5e6cd;border-radius:12px;background:#fff;cursor:pointer;margin:0 0 14px;box-shadow:0 2px 8px rgba(20,40,60,.05)}
+.manga-select:focus{outline:none;border-color:#1c4f3a}
 .manga-cap{font-size:14.5px;font-weight:800;color:#1c4f3a;background:#eef5ea;border:1px solid #d5e6cd;border-radius:8px;padding:8px 13px;margin:0 0 8px}
 .manga-img{width:100%;border-radius:12px;display:block;margin:0 0 8px;box-shadow:0 6px 18px rgba(20,40,60,.14)}
 .manga-ep{display:none}
@@ -65,7 +62,7 @@
     <!-- やつもりん予約案内マンガ（タブで話を切り替え） -->
     <div class="bg-h">やつもりんの予約案内マンガ</div>
     <p class="help-text" style="margin-top:0;margin-bottom:12px">看板娘やつもりんが、WEB予約のコツを漫画でご案内します。読みたい話を選んでください。</p>
-    <div class="manga-tabs" id="manga-tabs"></div>
+    <select class="manga-select" id="manga-select" aria-label="読みたい話を選ぶ"></select>
     <div class="manga-cap" id="manga-cap"></div>
     <img class="manga-img" id="manga-img" alt="やつもりんの予約案内マンガ">
     <div class="manga-nav" id="manga-nav"></div>
@@ -132,26 +129,27 @@
     { no:"第10話", ttl:"受け取りの流れ",     cap:"第10話：予約から受け取りまでの流れ",              img:"manga-10.jpg" },
     { no:"第11話", ttl:"ブーツの履き方",     cap:"第11話：ブーツの履き方＆困ったときは",            img:"manga-11.jpg" }
   ];
-  var tabsEl = document.getElementById("manga-tabs");
+  var selEl  = document.getElementById("manga-select");
   var capEl  = document.getElementById("manga-cap");
   var imgEl  = document.getElementById("manga-img");
   var navEl  = document.getElementById("manga-nav");
-  if (!tabsEl || !imgEl) return;
+  if (!selEl || !imgEl) return;
 
-  // タブを生成
+  // プルダウンを生成
   EPISODES.forEach(function(ep, i){
-    var b = document.createElement("button");
-    b.innerHTML = '<span class="ep-no">' + ep.no + '</span><span class="ep-ttl">' + ep.ttl + '</span>';
-    b.addEventListener("click", function(){ show(i, false); });
-    tabsEl.appendChild(b);
+    var o = document.createElement("option");
+    o.value = i;
+    o.textContent = ep.no + "　" + ep.ttl;
+    selEl.appendChild(o);
   });
+  selEl.addEventListener("change", function(){ show(parseInt(selEl.value, 10), false); });
 
   function show(i, scroll){
     var ep = EPISODES[i];
     capEl.textContent = ep.cap;
     imgEl.src = "../assets/img/" + ep.img;
     imgEl.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
-    Array.prototype.forEach.call(tabsEl.children, function(btn, idx){ btn.classList.toggle("active", idx === i); });
+    selEl.value = i;
     // 前へ／次へ
     navEl.innerHTML = "";
     if (i > 0) {
@@ -171,7 +169,7 @@
       var e = document.createElement("span"); e.className = "manga-end"; e.textContent = "最終話までありがとう！";
       navEl.appendChild(e);
     }
-    if (scroll) { var t = tabsEl.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
+    if (scroll) { var t = selEl.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
   }
   show(0, false);
 })();
