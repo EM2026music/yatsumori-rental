@@ -47,6 +47,9 @@
 .goods-name{font-size:14px;font-weight:800;color:#15314f}
 .goods-price{font-size:13px;font-weight:800;color:#d0342c;margin-top:3px}
 .goods-price.soon{color:#9aa7b4;font-weight:700}
+a.goods-card{text-decoration:none;color:inherit;display:block;transition:transform .15s ease,box-shadow .15s ease}
+a.goods-card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(20,40,60,.14)}
+.goods-more{color:#1c4f82;font-weight:800;font-size:12px;float:right}
 .ym-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:14px}
 /* 日常のやつもりん ギャラリー */
 .ym-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -121,6 +124,8 @@
       <a href="../assets/img/yatsumorin-daily/daily-1.jpg"><img src="../assets/img/yatsumorin-daily/daily-1.jpg" loading="lazy" alt="日常のやつもりん 1"></a>
       <a href="../assets/img/yatsumorin-daily/daily-2.jpg"><img src="../assets/img/yatsumorin-daily/daily-2.jpg" loading="lazy" alt="日常のやつもりん 2"></a>
       <a href="../assets/img/yatsumorin-daily/daily-3.jpg"><img src="../assets/img/yatsumorin-daily/daily-3.jpg" loading="lazy" alt="日常のやつもりん 3"></a>
+      <a href="../assets/img/yatsumorin-daily/daily-4.jpg"><img src="../assets/img/yatsumorin-daily/daily-4.jpg" loading="lazy" alt="日常のやつもりん 4"></a>
+      <a href="../assets/img/yatsumorin-daily/daily-5.jpg"><img src="../assets/img/yatsumorin-daily/daily-5.jpg" loading="lazy" alt="日常のやつもりん 5"></a>
     </div>
 
     <!-- 使い方講座（8コマ漫画）→ 初心者ガイドへ -->
@@ -135,22 +140,16 @@
 
     <!-- グッズ -->
     <div class="ym-h">やつもりん公式グッズ</div>
-    <p class="help-text" style="margin-top:0;margin-bottom:12px">8つ森レンタルの公式グッズ一覧です。店頭でも販売予定です。</p>
-    <img src="../assets/img/goods-lineup.jpg" alt="やつもりん公式グッズ一覧" style="width:100%;border-radius:14px;display:block;margin-bottom:18px;box-shadow:0 6px 18px rgba(20,40,60,.14)">
-    <p class="help-text" style="margin-top:0;margin-bottom:12px">▼ 各グッズ（写真はイメージ・価格は目安です）</p>
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">8つ森レンタルの公式グッズ一覧です（店頭でも販売予定）。各カテゴリをタップすると<b>全4種のデザイン</b>が見られます。写真はイメージ・価格は目安です。</p>
     <div class="goods-grid">
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/keychain.jpg" alt="アクリルキーホルダー"></div><div class="goods-body"><div class="goods-name">アクリルキーホルダー</div><div class="goods-price">¥1,000前後</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/sticker.jpg" alt="ステッカーセット"></div><div class="goods-body"><div class="goods-name">ステッカーセット</div><div class="goods-price">¥500〜700</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/can-badge.jpg" alt="缶バッジ"></div><div class="goods-body"><div class="goods-name">缶バッジ</div><div class="goods-price">¥400〜500</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/acryl-stand.jpg" alt="アクリルスタンド"></div><div class="goods-body"><div class="goods-name">アクリルスタンド</div><div class="goods-price">¥1,200〜1,800</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/towel.jpg" alt="タオル"></div><div class="goods-body"><div class="goods-name">タオル</div><div class="goods-price">¥1,500〜2,500</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/tshirt.jpg" alt="Tシャツ"></div><div class="goods-body"><div class="goods-name">Tシャツ</div><div class="goods-price soon">価格準備中</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/hoodie.jpg" alt="パーカー"></div><div class="goods-body"><div class="goods-name">パーカー</div><div class="goods-price soon">価格準備中</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/plush.jpg" alt="ぬいぐるみ"></div><div class="goods-body"><div class="goods-name">ぬいぐるみ</div><div class="goods-price soon">価格準備中</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/mug.jpg" alt="マグカップ"></div><div class="goods-body"><div class="goods-name">マグカップ</div><div class="goods-price soon">価格準備中</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/tote.jpg" alt="トートバッグ"></div><div class="goods-body"><div class="goods-name">トートバッグ</div><div class="goods-price soon">価格準備中</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/knitcap.jpg" alt="ニットキャップ"></div><div class="goods-body"><div class="goods-name">ニットキャップ</div><div class="goods-price soon">価格準備中</div></div></div>
-      <div class="goods-card"><div class="goods-img"><img src="../assets/img/goods/clearfile.jpg" alt="クリアファイル"></div><div class="goods-body"><div class="goods-name">クリアファイル</div><div class="goods-price soon">価格準備中</div></div></div>
+      <a class="goods-card" href="goods.html?cat=plush"><div class="goods-img"><img src="../assets/img/goods/plush/1.jpg" loading="lazy" alt="ぬいぐるみ"></div><div class="goods-body"><div class="goods-name">ぬいぐるみ</div><div class="goods-price">¥3,500〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=acryl"><div class="goods-img"><img src="../assets/img/goods/acryl/1.jpg" loading="lazy" alt="アクリルスタンド"></div><div class="goods-body"><div class="goods-name">アクリルスタンド</div><div class="goods-price">¥1,500〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=diorama"><div class="goods-img"><img src="../assets/img/goods/diorama/1.jpg" loading="lazy" alt="情景アクリルスタンド"></div><div class="goods-body"><div class="goods-name">情景アクリルスタンド</div><div class="goods-price">¥2,200〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=keychain"><div class="goods-img"><img src="../assets/img/goods/keychain/1.jpg" loading="lazy" alt="アクリルキーホルダー"></div><div class="goods-body"><div class="goods-name">アクリルキーホルダー</div><div class="goods-price">¥800〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=badge"><div class="goods-img"><img src="../assets/img/goods/badge/1.jpg" loading="lazy" alt="缶バッジ"></div><div class="goods-body"><div class="goods-name">缶バッジ</div><div class="goods-price">¥400〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=cap"><div class="goods-img"><img src="../assets/img/goods/cap/2.jpg" loading="lazy" alt="帽子（キャップ・ニット）"></div><div class="goods-body"><div class="goods-name">帽子（キャップ・ニット）</div><div class="goods-price">¥2,800〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=tote"><div class="goods-img"><img src="../assets/img/goods/tote/4.jpg" loading="lazy" alt="トートバッグ"></div><div class="goods-body"><div class="goods-name">トートバッグ</div><div class="goods-price">¥1,800〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=clearfile"><div class="goods-img"><img src="../assets/img/goods/clearfile/1.jpg" loading="lazy" alt="クリアファイル"></div><div class="goods-body"><div class="goods-name">クリアファイル</div><div class="goods-price">¥400〜<span class="goods-more">全4種 ›</span></div></div></a>
     </div>
 
     <div class="ym-note">

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>やつもりん公式グッズ | 8つ森レンタル</title>
+<meta name="description" content="やつもりん公式グッズの詳細。各カテゴリごとに全4種のデザインをご紹介します。">
+<link rel="stylesheet" href="../assets/css/style.css?v=13">
+<style id="gd-css">
+.gd-head{margin:6px 0 6px}
+.gd-name{font-size:22px;font-weight:800;color:#15314f;font-family:"Zen Maru Gothic",sans-serif}
+.gd-price{font-size:16px;font-weight:800;color:#d0342c;margin-top:4px}
+.gd-price small{color:#9aa7b4;font-weight:700;font-size:12px;margin-left:6px}
+.gd-desc{font-size:13.5px;line-height:1.85;color:#5a6b7b;margin:10px 0 4px}
+.gd-count{display:inline-block;font-size:12px;font-weight:800;color:#1c4f3a;background:#eef5ea;border:1px solid #d5e6cd;border-radius:999px;padding:4px 12px;margin-bottom:6px}
+.goods-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.goods-card{border:1px solid var(--border,#dde2e8);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(20,40,60,.06)}
+.goods-img{aspect-ratio:1/1;background:#f4f7f4;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:14px;cursor:zoom-in}
+.goods-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 3px 8px rgba(20,40,60,.10))}
+.goods-body{padding:11px 13px}
+.goods-name{font-size:13.5px;font-weight:800;color:#15314f}
+.goods-price{font-size:13px;font-weight:800;color:#d0342c;margin-top:3px}
+.ym-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:16px}
+.gl-lb{position:fixed;inset:0;background:rgba(8,16,28,.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;cursor:zoom-out}
+.gl-lb.open{display:flex}
+.gl-lb img{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 12px 44px rgba(0,0,0,.55)}
+.gd-other{margin-top:26px}
+.gd-other-h{font-size:14px;font-weight:800;color:#15314f;margin-bottom:10px;padding-left:9px;border-left:4px solid #6aa84f}
+.gd-chips{display:flex;flex-wrap:wrap;gap:8px}
+.gd-chips a{font-size:12.5px;font-weight:700;color:#1c4f82;text-decoration:none;background:#fff;border:1px solid var(--border,#dde2e8);border-radius:999px;padding:6px 13px}
+.gd-chips a.on{color:#fff;background:#1c4f3a;border-color:#1c4f3a}
+</style>
+</head>
+<body>
+<div class="page" id="page-root">
+  <header class="subpage-header">
+    <a class="back-link" href="yatsumorin.html">&#8249;</a>
+    <span class="subpage-title" id="cat-title">やつもりん公式グッズ</span>
+  </header>
+  <div class="container">
+    <div class="gd-head">
+      <span class="gd-count" id="gd-count">全4種</span>
+      <div class="gd-name" id="gd-name">グッズ</div>
+      <div class="gd-price" id="gd-price"></div>
+      <div class="gd-desc" id="gd-desc"></div>
+    </div>
+
+    <div class="goods-grid" id="variant-grid"></div>
+
+    <div class="ym-note">
+      <b>ご注文について（準備中）</b><br>
+      写真はイメージ、価格は目安です。デザインは変更になる場合があります。<br>
+      ご注文は当面お電話またはInstagramのDMで承ります。<br>
+      ・お電話 070-2472-3633（営業 8:00〜17:00）<br>
+      ・Instagram <a href="https://www.instagram.com/yatsumorirental/" target="_blank" rel="noopener" style="color:#1c4f82;font-weight:700">@yatsumorirental</a>
+    </div>
+
+    <div class="gd-other">
+      <div class="gd-other-h">ほかのグッズも見る</div>
+      <div class="gd-chips" id="gd-chips"></div>
+    </div>
+
+    <div class="wizard-actions" style="margin-top:18px">
+      <a class="btn-nav ghost btn-block" href="yatsumorin.html" style="margin-bottom:8px">&#8249; やつもりんのページへ戻る</a>
+      <a class="btn-nav primary btn-block" href="../reserve.html">レンタルを予約する</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var CATS = {
+  plush:     {name:"やつもりん ぬいぐるみ",           price:"¥3,500", desc:"もふもふのやつもりん。お部屋のお供にも、スノーバッグのアクセントにも。ころんとしたフォルムがかわいい全4デザイン。", variants:["デザインA","デザインB","デザインC","デザインD"]},
+  acryl:     {name:"アクリルスタンド",               price:"¥1,500", desc:"やつもりんを机や棚に飾れる自立式のアクリルスタンド。すきなポーズを選べる全4種。", variants:["ポーズA","ポーズB","ポーズC","ポーズD"]},
+  diorama:   {name:"情景アクリルスタンド（ジオラマ）", price:"¥2,200", desc:"雪山の情景ごと楽しめる、背景付きのアクリルジオラマスタンド。飾るだけでゲレンデ気分の全4シーン。", variants:["シーンA","シーンB","シーンC","シーンD"]},
+  keychain:  {name:"アクリルキーホルダー",           price:"¥800",   desc:"バッグやリフト券ケースのアクセントに。丈夫で軽いアクリルキーホルダー全4デザイン。", variants:["デザインA","デザインB","デザインC","デザインD"]},
+  badge:     {name:"缶バッジ",                       price:"¥400",   desc:"集めたくなる、やつもりんの缶バッジ。バッグや帽子につけて。全4デザイン。", variants:["デザインA","デザインB","デザインC","デザインD"]},
+  cap:       {name:"帽子（キャップ・ニット）",         price:"¥2,800", desc:"ゲレンデでも街でも使える、やつもりんロゴ入りの帽子。かぶり心地で選べる4タイプ。", variants:["ニットキャップ","ベースボールキャップ","バケットハット","メッシュキャップ"]},
+  tote:      {name:"トートバッグ",                   price:"¥1,800", desc:"普段使いしやすい、やつもりんトートバッグ。お買い物にもレジャーにも。全4デザイン。", variants:["デザインA","デザインB","デザインC","デザインD"]},
+  clearfile: {name:"クリアファイル",                 price:"¥400",   desc:"A4対応のやつもりんクリアファイル。集めても、使ってもうれしい全4デザイン。", variants:["ヒーローネイビー","ミニマル・アウトドア","イラストブラック","フォレストパターン"]}
+};
+var ORDER = ["plush","acryl","diorama","keychain","badge","cap","tote","clearfile"];
+
+function param(k){ var m = new RegExp("[?&]"+k+"=([^&]*)").exec(location.search); return m ? decodeURIComponent(m[1]) : ""; }
+
+var cat = param("cat");
+if (!CATS[cat]) cat = "plush";
+var c = CATS[cat];
+
+document.getElementById("cat-title").textContent = c.name;
+document.getElementById("gd-name").textContent = c.name;
+document.getElementById("gd-price").innerHTML = c.price + "〜 <small>（税込・予定価格）</small>";
+document.getElementById("gd-desc").textContent = c.desc;
+document.title = c.name + " | やつもりん公式グッズ";
+
+var grid = document.getElementById("variant-grid");
+var html = "";
+for (var i = 1; i <= 4; i++) {
+  var img = "../assets/img/goods/" + cat + "/" + i + ".jpg";
+  html += '<div class="goods-card">'
+    + '<div class="goods-img"><img src="' + img + '" loading="lazy" alt="' + c.name + ' ' + c.variants[i-1] + '"></div>'
+    + '<div class="goods-body"><div class="goods-name">' + c.variants[i-1] + '</div>'
+    + '<div class="goods-price">' + c.price + '</div></div></div>';
+}
+grid.innerHTML = html;
+
+var chips = document.getElementById("gd-chips");
+var ch = "";
+ORDER.forEach(function(k){
+  ch += '<a href="goods.html?cat=' + k + '"' + (k === cat ? ' class="on"' : '') + '>' + CATS[k].name + '</a>';
+});
+chips.innerHTML = ch;
+
+// タップで拡大
+(function () {
+  var lb = document.createElement("div");
+  lb.className = "gl-lb";
+  lb.innerHTML = '<img alt="拡大画像">';
+  document.body.appendChild(lb);
+  var close = function () { lb.classList.remove("open"); };
+  lb.addEventListener("click", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  document.addEventListener("click", function (e) {
+    var im = e.target.closest ? e.target.closest(".goods-img img") : null;
+    if (!im) return;
+    lb.firstChild.src = im.getAttribute("src");
+    lb.classList.add("open");
+  });
+})();
+</script>
+</body>
+</html>
