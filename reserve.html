@@ -84,7 +84,7 @@
 .mm-title { flex:1; font-size:13px; font-weight:800; }
 .mm-close { flex:0 0 auto; width:30px; height:30px; border:none; border-radius:50%; background:rgba(255,255,255,.18); color:#fff; font-size:15px; font-weight:700; cursor:pointer; line-height:1; }
 .mm-body { overflow-y:auto; -webkit-overflow-scrolling:touch; background:#edf1f0; }
-.mm-body img { width:100%; display:block; min-height:180px; }
+.mm-body img { width:100%; display:block; min-height:180px; cursor:pointer; }
 .mm-foot { display:block; text-align:center; padding:11px; font-size:12.5px; font-weight:800; color:#1c4f3a; background:#eef5ea; border-top:1px solid #d5e6cd; text-decoration:none; }
 .manga-after { display:flex; flex-wrap:wrap; gap:2px 16px; justify-content:center; margin-top:10px; }
 </style>
@@ -339,6 +339,7 @@ function ensureMangaModal() {
   const close = () => { div.classList.remove("open"); document.body.style.overflow = ""; };
   div.querySelector(".mm-back").addEventListener("click", close);
   div.querySelector("#mm-close").addEventListener("click", close);
+  div.querySelector(".mm-body").addEventListener("click", close); // マンガ自体をタップしても閉じる
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 }
 function openManga(ep) {
