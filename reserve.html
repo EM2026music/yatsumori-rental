@@ -72,6 +72,21 @@
 .sm-detail { font-size:13px; color:#39506a; line-height:1.6; }
 .sm-extra { font-size:11.5px; color:var(--text-mute); line-height:1.5; margin-top:2px; }
 .plan-note { font-size:12px; line-height:1.7; color:var(--text-mute); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-top:14px; }
+/* マンガヘルプ：入力欄の下の控えめリンク＋その場で読めるモーダル（ページ遷移なし＝入力は消えない） */
+.manga-q { display:inline-flex; align-items:center; gap:6px; margin:5px 0 0; padding:2px 0; border:none; background:none; font-family:inherit; font-size:11.5px; font-weight:700; color:#6b7d72; cursor:pointer; text-align:left; line-height:1.4; }
+.manga-q img { width:19px; height:19px; border-radius:50%; flex:0 0 auto; }
+.manga-q .mq-link { margin-left:5px; color:#1c6b46; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:2px; }
+.manga-modal { position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; padding:16px; }
+.manga-modal.open { display:flex; }
+.mm-back { position:absolute; inset:0; background:rgba(12,26,40,.6); }
+.mm-panel { position:relative; width:100%; max-width:500px; max-height:90vh; display:flex; flex-direction:column; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 16px 48px rgba(0,0,0,.35); }
+.mm-head { display:flex; align-items:center; gap:8px; padding:10px 10px 10px 14px; background:#1c4f3a; color:#fff; }
+.mm-title { flex:1; font-size:13px; font-weight:800; }
+.mm-close { flex:0 0 auto; width:30px; height:30px; border:none; border-radius:50%; background:rgba(255,255,255,.18); color:#fff; font-size:15px; font-weight:700; cursor:pointer; line-height:1; }
+.mm-body { overflow-y:auto; -webkit-overflow-scrolling:touch; background:#edf1f0; }
+.mm-body img { width:100%; display:block; min-height:180px; }
+.mm-foot { display:block; text-align:center; padding:11px; font-size:12.5px; font-weight:800; color:#1c4f3a; background:#eef5ea; border-top:1px solid #d5e6cd; text-decoration:none; }
+.manga-after { display:flex; flex-wrap:wrap; gap:2px 16px; justify-content:center; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -301,6 +316,46 @@ function refreshPrices() {
   if (tv) tv.textContent = allSet ? yen(total) : "—";
 }
 
+// ── マンガヘルプ（入力欄と初心者ガイドのマンガを紐づけ。モーダルはbody直下に生成するのでpageRendererの差し替え後も残る） ──
+const MANGA_EP = {
+  3:  { t: "第3話：スキー？スノーボード？",             img: "assets/img/manga-3.jpg" },
+  4:  { t: "第4話：身長・靴のサイズは何に使うの？",     img: "assets/img/manga-4.jpg" },
+  5:  { t: "第5話：年齢・性別は何に使うの？",           img: "assets/img/manga-5.jpg" },
+  7:  { t: "第7話：スタンスって何？",                   img: "assets/img/manga-7.jpg" },
+  8:  { t: "第8話：家族・グループで予約するとき",       img: "assets/img/manga-8.jpg" },
+  9:  { t: "第9話：当日の服装・持ち物は？",             img: "assets/img/manga-9.jpg" },
+  10: { t: "第10話：予約から受け取りまでの流れ",        img: "assets/img/manga-10.jpg" },
+};
+function mangaQ(ep, text) {
+  return `<button type="button" class="manga-q" data-ep="${ep}"><img src="assets/img/yatsumorin-face.png" alt=""><span>${text}<span class="mq-link">マンガで見る</span></span></button>`;
+}
+function ensureMangaModal() {
+  if (document.getElementById("manga-modal")) return;
+  const div = document.createElement("div");
+  div.className = "manga-modal";
+  div.id = "manga-modal";
+  div.innerHTML = `<div class="mm-back"></div><div class="mm-panel" role="dialog" aria-modal="true"><div class="mm-head"><span class="mm-title" id="mm-title"></span><button type="button" class="mm-close" id="mm-close" aria-label="閉じる">✕</button></div><div class="mm-body"><img id="mm-img" alt="やつもりんの予約案内マンガ"></div><a class="mm-foot" href="pages/beginner-guide.html" target="_blank" rel="noopener">やつもりんのマンガを全話読む ›</a></div>`;
+  document.body.appendChild(div);
+  const close = () => { div.classList.remove("open"); document.body.style.overflow = ""; };
+  div.querySelector(".mm-back").addEventListener("click", close);
+  div.querySelector("#mm-close").addEventListener("click", close);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+}
+function openManga(ep) {
+  const d = MANGA_EP[ep];
+  if (!d) return;
+  ensureMangaModal();
+  document.getElementById("mm-title").textContent = d.t;
+  const img = document.getElementById("mm-img");
+  if (img.getAttribute("src") !== d.img) img.src = d.img; // 開いたときだけ読み込む（フォーム表示を重くしない）
+  document.getElementById("manga-modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+document.addEventListener("click", (e) => {
+  const q = e.target.closest(".manga-q");
+  if (q) openManga(q.dataset.ep);
+});
+
 const state = {
   start: null, end: null,
   adults: 1, children: 0,
@@ -400,6 +455,7 @@ function buildMembers() {
   }
   const container = document.getElementById("members-container");
   let html = "";
+  if (total >= 2) html += `<div style="margin:-6px 0 12px">${mangaQ(8, "複数人で予約するときのコツ")}</div>`;
   state.members.forEach((m, i) => {
     const isChild = i >= state.adults;
     m.isChild = isChild;
@@ -431,6 +487,7 @@ function buildMembers() {
               </select>
             </div>
           </div>
+          ${mangaQ(4, "身長・靴のサイズは何に使うの？")}
           <div class="mg-sub">性別・年齢<span class="opt-tag">（任意・分かる範囲でOK）</span></div>
           <div class="two-col mg-optional" style="align-items:flex-end">
             <div class="field" style="margin-bottom:6px">
@@ -448,6 +505,7 @@ function buildMembers() {
               </select>
             </div>
           </div>
+          ${mangaQ(5, "年齢・性別は何に使うの？")}
         </div>
 
         <div class="member-group">
@@ -458,6 +516,7 @@ function buildMembers() {
             <label class="radio-pill"><input type="radio" name="board-${i}" value="ski" ${m.board === "ski" ? "checked" : ""}><span>スキー</span></label>
             <label class="radio-pill"><input type="radio" name="board-${i}" value="snowboard" ${m.board === "snowboard" ? "checked" : ""}><span>スノーボード</span></label>
           </div>
+          ${mangaQ(3, "どっちにするか迷ったら")}
         </div>
 
         <div class="field">
@@ -475,6 +534,7 @@ function buildMembers() {
             <label class="radio-pill"><input type="radio" name="stance-${i}" value="goofy" ${m.stance === "goofy" ? "checked" : ""}><span class="small">グーフィー<br>（右足が前）</span></label>
             <label class="radio-pill"><input type="radio" name="stance-${i}" value="unknown" ${m.stance === "unknown" ? "checked" : ""}><span class="small">わからない</span></label>
           </div>
+          ${mangaQ(7, "スタンスがわからないときは")}
         </div>
         </div>
 
@@ -667,7 +727,8 @@ function showResult(res) {
     <div class="summary-row"><span class="k">期間</span><span class="v">${periodLabel()}</span></div>
     <div class="summary-row"><span class="k">お名前</span><span class="v">${state.name} 様</span></div>
     <div class="summary-row"><span class="k">人数</span><span class="v">大人 ${state.adults}名${state.children ? ` / 子供 ${state.children}名` : ""}</span></div>
-    <div class="summary-row"><span class="k">用具</span><span class="v">${boardText}</span></div>`;
+    <div class="summary-row"><span class="k">用具</span><span class="v">${boardText}</span></div>
+    <div class="manga-after">${mangaQ(10, "当日の受け取りの流れ")}${mangaQ(9, "服装・持ち物のチェック")}</div>`;
   document.getElementById("email-note").textContent =
     state.email ? "ご入力のメールアドレスに確認メールをお送りします。" :
     "予約番号は控えておいてください（確認・変更に必要です）。";
