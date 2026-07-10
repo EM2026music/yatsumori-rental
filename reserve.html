@@ -82,6 +82,7 @@
 .mm-panel { position:relative; width:100%; max-width:500px; max-height:90vh; display:flex; flex-direction:column; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 16px 48px rgba(0,0,0,.35); }
 .mm-head { display:flex; align-items:center; gap:8px; padding:10px 10px 10px 14px; background:#1c4f3a; color:#fff; }
 .mm-title { flex:1; font-size:13px; font-weight:800; }
+.mm-hint { flex:0 0 auto; font-size:10.5px; font-weight:700; color:rgba(255,255,255,.75); }
 .mm-close { flex:0 0 auto; width:30px; height:30px; border:none; border-radius:50%; background:rgba(255,255,255,.18); color:#fff; font-size:15px; font-weight:700; cursor:pointer; line-height:1; }
 .mm-body { overflow-y:auto; -webkit-overflow-scrolling:touch; background:#edf1f0; }
 .mm-body img { width:100%; display:block; min-height:180px; cursor:pointer; }
@@ -334,12 +335,20 @@ function ensureMangaModal() {
   const div = document.createElement("div");
   div.className = "manga-modal";
   div.id = "manga-modal";
-  div.innerHTML = `<div class="mm-back"></div><div class="mm-panel" role="dialog" aria-modal="true"><div class="mm-head"><span class="mm-title" id="mm-title"></span><button type="button" class="mm-close" id="mm-close" aria-label="閉じる">✕</button></div><div class="mm-body"><img id="mm-img" alt="やつもりんの予約案内マンガ"></div><a class="mm-foot" href="pages/beginner-guide.html" target="_blank" rel="noopener">やつもりんのマンガを全話読む ›</a></div>`;
+  div.innerHTML = `<div class="mm-back"></div><div class="mm-panel" role="dialog" aria-modal="true"><div class="mm-head"><span class="mm-title" id="mm-title"></span><span class="mm-hint">タップで閉じる</span><button type="button" class="mm-close" id="mm-close" aria-label="閉じる">✕</button></div><div class="mm-body"><img id="mm-img" alt="やつもりんの予約案内マンガ"></div><a class="mm-foot" href="pages/beginner-guide.html" target="_blank" rel="noopener">やつもりんのマンガを全話読む ›</a></div>`;
   document.body.appendChild(div);
   const close = () => { div.classList.remove("open"); document.body.style.overflow = ""; };
-  div.querySelector(".mm-back").addEventListener("click", close);
-  div.querySelector("#mm-close").addEventListener("click", close);
-  div.querySelector(".mm-body").addEventListener("click", close); // マンガ自体をタップしても閉じる
+  // タップで閉じる：スクロール（指を動かす）は閉じない、単純なタップはどこでも閉じる。
+  // 縦長マンガは指で少し動くと click が発火しないため、pointerで判定する。
+  let dx = 0, dy = 0, moved = false;
+  div.addEventListener("pointerdown", (e) => { dx = e.clientX; dy = e.clientY; moved = false; });
+  div.addEventListener("pointermove", (e) => { if (Math.abs(e.clientX - dx) > 10 || Math.abs(e.clientY - dy) > 10) moved = true; });
+  div.addEventListener("pointerup", (e) => {
+    if (moved) return;                       // スクロール操作は閉じない
+    if (e.target.closest(".mm-foot")) return; // 「全話読む」リンクは動かす
+    close();
+  });
+  div.querySelector("#mm-close").addEventListener("click", close); // 保険（✕）
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 }
 function openManga(ep) {
