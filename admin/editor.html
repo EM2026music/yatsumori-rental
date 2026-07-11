@@ -143,17 +143,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 #drag-shield { position: fixed; inset: 0; z-index: 10004; display: none; cursor: nwse-resize; }
 #drag-shield.show { display: block; }
 
-/* ホバー削除ボタン：行・箱にマウスを乗せると右上に出る */
-#hover-del {
-  position: fixed; z-index: 10002; display: none;
-  width: 26px; height: 26px; padding: 0; line-height: 1;
-  background: #ef4444; color: #fff; border: 2px solid #fff;
-  border-radius: 7px; cursor: pointer; font-size: 13px;
-  box-shadow: 0 3px 12px rgba(0,0,0,.4);
-}
-#hover-del.show { display: block; }
-#hover-del:hover { background: #dc2626; }
-
 /* ── ＋追加 ボタン＆パネル ── */
 #add-btn {
   background: #fff; color: #0f172a; border: none; border-radius: 8px;
@@ -291,9 +280,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <div id="rs-e" title="横幅を調整"></div>
 <div id="rs-s" title="高さを調整"></div>
 <div id="drag-shield"></div>
-
-<!-- ホバー削除ボタン（マウスを乗せた行・箱の右上に出る。1クリックでそのかたまりを削除） -->
-<button id="hover-del" title="このかたまりを削除">🗑</button>
 
 <!-- ＋追加 パネル -->
 <div id="add-panel">
@@ -963,9 +949,15 @@ function attachEditHandlers() {
   if (iframeDoc._ed_global_attached) return;
   iframeDoc._ed_global_attached = true;
 
-  // ホバー削除ボタン：マウスを乗せた「かたまり」を追いかけて右上に🗑を出す
-  iframeDoc.addEventListener("mousemove", updateHoverDel);
-  iframeDoc.addEventListener("mouseleave", () => hideHoverDel());
+  // 貼り付けは常にプレーンテキスト（ページ全体で1本のフック。どの要素の編集でも
+  // 必ず効く＝コピペで黒い下地・色が紛れ込む事故を根本から止める）
+  iframeDoc.addEventListener("paste", (e) => {
+    if (!activeTextEl) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const text = (e.clipboardData || iframeWin.clipboardData).getData("text/plain");
+    iframeDoc.execCommand("insertText", false, text);
+  }, true);
 
   // ページ上にマウスがあってもCtrl+ホイールでズームできるように
   iframeDoc.addEventListener("wheel", handleCtrlWheel, { passive: false });
@@ -1013,7 +1005,8 @@ function attachEditHandlers() {
   // カーソル直下の文字の行を掴んで編集）。1回クリックの当たり判定に左右されない保険。
   iframeDoc.addEventListener("dblclick", (e) => {
     if (e.target.closest("img")) return;
-    const line = hoverDeletable(e.target);
+    if (activeTextEl) return; // 既に編集中（単語選択のダブルクリック）はそのまま
+    const line = findTextLineAt(e.target);
     if (line) { e.preventDefault(); e.stopPropagation(); handleTextClick(line); }
   });
 }
@@ -1037,15 +1030,6 @@ function handleTextClick(el) {
   // Place cursor at click position
   activeTextEl = el;
   el._snap = el.innerHTML; // for undo
-
-  // 他サイト・アプリからの貼り付けで背景色等の書式が紛れ込まないよう、常にプレーンテキストで貼る
-  if (el._pasteHandler) el.removeEventListener("paste", el._pasteHandler);
-  el._pasteHandler = (e) => {
-    e.preventDefault();
-    const text = (e.clipboardData || iframeWin.clipboardData).getData("text/plain");
-    iframeDoc.execCommand("insertText", false, text);
-  };
-  el.addEventListener("paste", el._pasteHandler);
 
   // 段数が増えて下の項目と重ならないよう、編集前の高さを記録しておく
   activeGrowBlock = findGrowBlock(el);
@@ -1123,6 +1107,17 @@ function reflowAfterGrow(block, oldHeight) {
   resizeIframe();
 }
 
+// 貼り付けで紛れ込んだ書式（下地・文字色・影）を要素の中身から取り除く。
+// 要素自身に付けた色（右パネルの文字色等）は残す。
+function stripPastedStyles(el) {
+  el.querySelectorAll("[style]").forEach(s => {
+    s.style.background = ""; s.style.backgroundColor = "";
+    s.style.color = ""; s.style.textShadow = "";
+    if (!s.getAttribute("style")) s.removeAttribute("style");
+  });
+  el.querySelectorAll("font").forEach(f => { f.removeAttribute("color"); });
+}
+
 function commitText() {
   if (!activeTextEl) return;
   if (activeTextEl._growInputHandler) {
@@ -1133,12 +1128,9 @@ function commitText() {
     activeTextEl.removeEventListener("keydown", activeTextEl._delEmptyHandler);
     activeTextEl._delEmptyHandler = null;
   }
-  if (activeTextEl._pasteHandler) {
-    activeTextEl.removeEventListener("paste", activeTextEl._pasteHandler);
-    activeTextEl._pasteHandler = null;
-  }
   const changed = activeTextEl.innerHTML !== activeTextEl._snap;
   if (changed) {
+    stripPastedStyles(activeTextEl); // 貼り付け由来の下地・色を確定時に必ず除去
     if (activeGrowBlock) reflowAfterGrow(activeGrowBlock, activeGrowHeight);
     snapshotForUndo();
   }
@@ -1481,17 +1473,19 @@ function attachBlockDrag() {
       selectBlock(block);
       return;
     }
-    // ルール統一：1回目のクリック＝項目を選択／選択済みの項目をもう1回クリック＝中の文字・画像を編集
-    if (activeBlockEl === block && t0) {
-      // TEXT_SELだけでなく、汎用検出で data-ed が付いた文字（flow-title等）も編集対象にする
-      const txt = t0.closest ? t0.closest('[data-ed="text"]') : null;
-      if (txt && block.contains(txt)) {
-        handleTextClick(txt);
+    // ルール：動かさずクリック＝文字の上なら1回で即編集／画像は画像編集／
+    // 文字も画像も無い所（余白）なら項目を選択。
+    // （「1回目は選択、2回目で編集」の2段階と、編集後にできた行が選択不能に
+    //   なる問題を廃止。毎クリックその場でDOMを辿って行を見つける）
+    if (t0) {
+      if (t0.tagName === "IMG" && t0.hasAttribute("data-ed-img")) {
+        handleImgClick(t0);
         suppressClickUntil = Date.now() + 400;
         return;
       }
-      if (t0.tagName === "IMG" && t0.hasAttribute("data-ed-img")) {
-        handleImgClick(t0);
+      const line = findTextLineAt(t0);
+      if (line && block.contains(line)) {
+        handleTextClick(line);
         suppressClickUntil = Date.now() + 400;
         return;
       }
@@ -1644,28 +1638,22 @@ function positionFloatBar() {
   positionRsHandle();
 }
 
-// ── ホバー削除ボタン（マウスを乗せた行・箱の右上に🗑を出す） ──
-const hoverDelBtn = document.getElementById("hover-del");
-let hoverDelTarget = null;
-
-// カーソル直下の「消せる一番小さいかたまり」を返す。
-// data-ed が付いていない要素（貼り付けで出来た行など）でも確実に拾えるよう、
-// 目印に頼らず DOM を実際に辿って一番内側の「文字の行」を見つける。
-function hoverDeletable(target) {
+// ── クリック位置から「編集すべき文字の行」を見つける共通判定 ──
+// data-ed の目印が無い要素（貼り付け・改行・裸のテキスト）でも確実に拾えるよう、
+// 目印に頼らず DOM を実際に辿る。クリック編集・ダブルクリック・右クリックで共用。
+function findTextLineAt(target) {
   if (!target || !target.closest) return null;
   const root = iframeDoc && iframeDoc.getElementById("page-root");
   if (!root || !root.contains(target)) return null;
   const bad = (el) => !el || el === root || el.tagName === "TD" || el.tagName === "TH" ||
     el.id === "page-root" || (el.querySelector && el.querySelector("img"));
 
-  // 1) 編集用の目印があればそれを優先（従来通り）
+  // 1) 編集用の目印があればそれを優先
   const txt = target.closest('[data-ed="text"]');
   if (txt && !bad(txt)) return txt;
 
-  // 2) 目印が無くても、カーソル直下から上へ辿って
-  //    「文字の行（ブロック表示で、中に別の箱を含まない要素）」を対象にする。
-  //    <b>等のインラインは飛ばして、その行のブロックを掴む。
   const dispOf = (el) => { try { return iframeWin.getComputedStyle(el).display; } catch (e) { return "block"; } };
+  // 2) カーソル直下から上へ辿り「中に別の箱を含まない文字の行」を探す
   let el = target;
   while (el && el !== root) {
     if (!bad(el) && dispOf(el) !== "inline" && el.textContent && el.textContent.trim()) {
@@ -1677,49 +1665,19 @@ function hoverDeletable(target) {
     }
     el = el.parentElement;
   }
-  // 見出しや複数行を含む「箱全体」は対象にしない（箱ごと消える事故を防ぐ）。
-  // 文字の行が見つからなければ null。
+  // 3) 行として特定できない混在構造（裸のテキストと箱が同居する等）では、
+  //    「自分自身が直接テキストを持つ一番近い要素」を編集対象にする。
+  //    （「道具がそろっているので…」等の裸のテキスト行が選択不能になる問題の対策）
+  el = target;
+  while (el && el !== root) {
+    if (!bad(el)) {
+      const ownText = Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim());
+      if (ownText) return el;
+    }
+    el = el.parentElement;
+  }
   return null;
 }
-
-function updateHoverDel(e) {
-  if (activeTextEl) return hideHoverDel();       // 文字編集中はテキストバーの🗑を使う
-  if (dragState || panState || marqueeState) return hideHoverDel();
-  const el = hoverDeletable(e.target);
-  if (!el) {
-    // 文字の無い所（項目の余白など）を通過中。
-    // ここで対象を消すと、行→🗑ボタンへ移動する途中で対象が入れ替わり
-    // 「箱ごと消える」事故になる。ボタン表示中は対象を維持して素通りする。
-    return;
-  }
-  hoverDelTarget = el;
-  const ifr = iframe.getBoundingClientRect();
-  const r = el.getBoundingClientRect();
-  // Xは行の右端。Yは「今マウスを乗せている高さ」に合わせる＝2行以上に
-  // 折り返した段落でも、乗せている行のすぐ横に🗑が付いてくる。
-  const x = ifr.left + r.right * zoomScale;
-  const y = ifr.top + e.clientY * zoomScale;
-  // 右サイドバー(約260px)の下に隠れないよう、編集エリア内にクランプ
-  const maxX = window.innerWidth - 260 - 34;
-  hoverDelBtn.style.left = Math.round(Math.max(266, Math.min(x - 30, maxX))) + "px";
-  hoverDelBtn.style.top = Math.round(Math.max(y - 13, 54)) + "px";
-  hoverDelBtn.classList.add("show");
-}
-
-function hideHoverDel() {
-  // ボタン自体にマウスが乗っている時は消さない（クリックできるように）
-  if (hoverDelBtn.matches(":hover")) return;
-  hoverDelBtn.classList.remove("show");
-  hoverDelTarget = null;
-}
-
-hoverDelBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  if (hoverDelTarget && hoverDelTarget.isConnected) deleteElement(hoverDelTarget);
-  hoverDelBtn.classList.remove("show");
-  hoverDelTarget = null;
-});
-hoverDelBtn.addEventListener("mouseleave", () => hoverDelBtn.classList.remove("show"));
 
 // ── 大きさ調整ハンドル（右下角＝両方向／右辺＝幅／下辺＝高さ） ──
 const rsHandle = document.getElementById("rs-handle");
@@ -1844,7 +1802,6 @@ document.getElementById("fb-txt-del").addEventListener("mousedown", (e) => {
   if (activeTextEl === t) {
     if (t._growInputHandler) t.removeEventListener("input", t._growInputHandler);
     if (t._delEmptyHandler) t.removeEventListener("keydown", t._delEmptyHandler);
-    if (t._pasteHandler) t.removeEventListener("paste", t._pasteHandler);
     t.contentEditable = "false";
     activeTextEl = null; activeGrowBlock = null; activeGrowHeight = null;
   }
@@ -2570,8 +2527,8 @@ function openCtxMenu(e) {
 
   const img = e.target.tagName === "IMG" ? e.target : null;
   const block = e.target.closest(DRAG_SEL);
-  // クリック位置の一番内側の「文字」要素（TEXT_SEL だけでなく自動検出の data-ed も拾う）
-  const txt = e.target.closest ? (e.target.closest('[data-ed="text"]') || e.target.closest(TEXT_SEL)) : null;
+  // クリック位置の一番内側の「文字の行」（目印の有無に関係なくDOMを辿って拾う）
+  const txt = findTextLineAt(e.target) || (e.target.closest ? e.target.closest(TEXT_SEL) : null);
   // 「この行/箱だけ削除」の対象＝カーソル直下の一番内側の編集単位。
   // 文字の行があればそれ、なければブロック。文字行がブロックと同じなら重複させない。
   const lineTarget = (txt && (!block || txt !== block)) ? txt : null;
