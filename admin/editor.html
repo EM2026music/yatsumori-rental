@@ -258,6 +258,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
     <button class="fb-btn" id="fb-bigger" title="文字を大きく">A＋</button>
     <button class="fb-btn" id="fb-smaller" title="文字を小さく">A－</button>
     <input type="color" class="fb-color" id="fb-color" title="文字色">
+    <button class="fb-btn" id="fb-txt-clear" title="下地・色などの書式を消す">🧹</button>
+    <button class="fb-btn" id="fb-txt-del" title="この行を削除" style="display:none">🗑 この行を削除</button>
   </span>
   <span id="fb-img-tools" style="display:none">
     <button class="fb-btn" id="fb-replace">🖼 差し替え</button>
@@ -1587,6 +1589,9 @@ function showFloatBar(el, type) {
   document.getElementById("fb-block-tools").style.display = type === "block" ? "inline" : "none";
   if (type === "text") {
     try { document.getElementById("fb-color").value = rgbToHex(iframeWin.getComputedStyle(el).color); } catch (e) {}
+    // 見出し等の主要要素は誤削除防止で「この行を削除」を隠す。自動検出の本文行だけ出す。
+    const deletable = !el.matches(TEXT_SEL) && el.tagName !== "TD" && el.tagName !== "TH";
+    document.getElementById("fb-txt-del").style.display = deletable ? "" : "none";
   }
   floatBar.classList.add("show");
   positionFloatBar();
@@ -1722,6 +1727,25 @@ document.getElementById("fb-color").addEventListener("input", (e) => {
 document.getElementById("fb-color").addEventListener("change", () => snapshotForUndo());
 document.getElementById("fb-replace").addEventListener("click", () => {
   document.getElementById("img-file-inp").click();
+});
+// テキストバー：書式を消す（下地・色リセット）
+document.getElementById("fb-txt-clear").addEventListener("mousedown", (e) => {
+  e.preventDefault(); e.stopPropagation();
+  const t = fbTextTarget(); if (t) clearFormatting(t);
+});
+// テキストバー：この行を削除
+document.getElementById("fb-txt-del").addEventListener("mousedown", (e) => {
+  e.preventDefault(); e.stopPropagation();
+  const t = fbTextTarget(); if (!t) return;
+  // 編集中の状態を綺麗に閉じてから、その行ごと削除する
+  if (activeTextEl === t) {
+    if (t._growInputHandler) t.removeEventListener("input", t._growInputHandler);
+    if (t._delEmptyHandler) t.removeEventListener("keydown", t._delEmptyHandler);
+    if (t._pasteHandler) t.removeEventListener("paste", t._pasteHandler);
+    t.contentEditable = "false";
+    activeTextEl = null; activeGrowBlock = null; activeGrowHeight = null;
+  }
+  deleteElement(t);
 });
 document.getElementById("fb-done").addEventListener("click", () => deselect());
 
