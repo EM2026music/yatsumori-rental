@@ -143,6 +143,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 #drag-shield { position: fixed; inset: 0; z-index: 10004; display: none; cursor: nwse-resize; }
 #drag-shield.show { display: block; }
 
+/* ホバー削除ボタン：行・箱にマウスを乗せると右上に出る */
+#hover-del {
+  position: fixed; z-index: 10002; display: none;
+  width: 26px; height: 26px; padding: 0; line-height: 1;
+  background: #ef4444; color: #fff; border: 2px solid #fff;
+  border-radius: 7px; cursor: pointer; font-size: 13px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.4);
+}
+#hover-del.show { display: block; }
+#hover-del:hover { background: #dc2626; }
+
 /* ── ＋追加 ボタン＆パネル ── */
 #add-btn {
   background: #fff; color: #0f172a; border: none; border-radius: 8px;
@@ -280,6 +291,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Goth
 <div id="rs-e" title="横幅を調整"></div>
 <div id="rs-s" title="高さを調整"></div>
 <div id="drag-shield"></div>
+
+<!-- ホバー削除ボタン（マウスを乗せた行・箱の右上に出る。1クリックでそのかたまりを削除） -->
+<button id="hover-del" title="このかたまりを削除">🗑</button>
 
 <!-- ＋追加 パネル -->
 <div id="add-panel">
@@ -949,6 +963,10 @@ function attachEditHandlers() {
   if (iframeDoc._ed_global_attached) return;
   iframeDoc._ed_global_attached = true;
 
+  // ホバー削除ボタン：マウスを乗せた「かたまり」を追いかけて右上に🗑を出す
+  iframeDoc.addEventListener("mousemove", updateHoverDel);
+  iframeDoc.addEventListener("mouseleave", () => hideHoverDel());
+
   // ページ上にマウスがあってもCtrl+ホイールでズームできるように
   iframeDoc.addEventListener("wheel", handleCtrlWheel, { passive: false });
 
@@ -1617,6 +1635,51 @@ function positionFloatBar() {
   floatBar.style.top = Math.round(y) + "px";
   positionRsHandle();
 }
+
+// ── ホバー削除ボタン（マウスを乗せた行・箱の右上に🗑を出す） ──
+const hoverDelBtn = document.getElementById("hover-del");
+let hoverDelTarget = null;
+
+// カーソル直下の「消せる一番小さいかたまり」を返す。
+// 文字の行を優先し、無ければブロック（項目）を対象にする。
+function hoverDeletable(target) {
+  if (!target || !target.closest) return null;
+  const txt = target.closest('[data-ed="text"]');
+  if (txt && txt.tagName !== "TD" && txt.tagName !== "TH") return txt; // 一番内側の文字行
+  const block = target.closest("[data-ed-block]");
+  if (block) return block; // 文字行でなければ項目（箱）を対象に
+  return null;
+}
+
+function updateHoverDel(e) {
+  if (activeTextEl) return hideHoverDel();       // 文字編集中はテキストバーの🗑を使う
+  if (dragState || panState || marqueeState) return hideHoverDel();
+  const el = hoverDeletable(e.target);
+  if (!el) return hideHoverDel();
+  hoverDelTarget = el;
+  const ifr = iframe.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  const x = ifr.left + r.right * zoomScale;
+  const y = ifr.top + r.top * zoomScale;
+  hoverDelBtn.style.left = Math.round(Math.min(x - 26, window.innerWidth - 34)) + "px";
+  hoverDelBtn.style.top = Math.round(Math.max(y - 8, 54)) + "px";
+  hoverDelBtn.classList.add("show");
+}
+
+function hideHoverDel() {
+  // ボタン自体にマウスが乗っている時は消さない（クリックできるように）
+  if (hoverDelBtn.matches(":hover")) return;
+  hoverDelBtn.classList.remove("show");
+  hoverDelTarget = null;
+}
+
+hoverDelBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (hoverDelTarget && hoverDelTarget.isConnected) deleteElement(hoverDelTarget);
+  hoverDelBtn.classList.remove("show");
+  hoverDelTarget = null;
+});
+hoverDelBtn.addEventListener("mouseleave", () => hoverDelBtn.classList.remove("show"));
 
 // ── 大きさ調整ハンドル（右下角＝両方向／右辺＝幅／下辺＝高さ） ──
 const rsHandle = document.getElementById("rs-handle");
