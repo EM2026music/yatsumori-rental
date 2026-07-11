@@ -136,6 +136,7 @@
           <input type="date" id="end-date" class="field-input">
         </div>
         <p class="help-text">日帰りの場合は開始日と返却日を同じ日にしてください。</p>
+        <button type="button" class="manga-q" data-ep="1"><img src="assets/img/yatsumorin-face.png" alt=""><span>予約しておくと当日スムーズ！<span class="mq-link">マンガで見る</span></span></button>
       </div>
 
       <p class="field-label" style="margin-top:6px">ご利用人数<span class="req">必須</span></p>
@@ -263,7 +264,10 @@ const PRICE = {
   gliding: { adult: [3500, 6000, 8000, 10000],   child: [2500, 4000, 5000, 6000],  addA: 2500, addC: 2000 },
 };
 // 追加レンタル（単品・1日ごと）。pricing.html の単品と一致。
+// ※ウェアは「滑走セット＋ウェアだけ足したい」用（フルセットには元から含まれる）
 const ADDONS = {
+  wear_top: { label: "ウェア（上）",     price: 2000 },
+  wear_btm: { label: "ウェア（下）",     price: 2000 },
   helmet:   { label: "ヘルメット",       price: 1000 },
   goggle:   { label: "ゴーグル",         price: 1000 },
   sled:     { label: "ソリ",             price: 500 },
@@ -319,6 +323,8 @@ function refreshPrices() {
 
 // ── マンガヘルプ（入力欄と初心者ガイドのマンガを紐づけ。モーダルはbody直下に生成するのでpageRendererの差し替え後も残る） ──
 const MANGA_EP = {
+  1:  { t: "第1話：予約しておくと当日スムーズ！",       img: "assets/img/manga-1.jpg" },
+  2:  { t: "第2話：予約で入力してほしいこと",           img: "assets/img/manga-2.jpg" },
   3:  { t: "第3話：スキー？スノーボード？",             img: "assets/img/manga-3.jpg" },
   4:  { t: "第4話：身長・靴のサイズは何に使うの？",     img: "assets/img/manga-4.jpg" },
   5:  { t: "第5話：年齢・性別は何に使うの？",           img: "assets/img/manga-5.jpg" },
@@ -465,7 +471,8 @@ function buildMembers() {
   }
   const container = document.getElementById("members-container");
   let html = "";
-  if (total >= 2) html += `<div style="margin:-6px 0 12px">${mangaQ(8, "複数人で予約するときのコツ")}</div>`;
+  // 冒頭のマンガ案内は常に1つだけ：複数人ならグループ予約のコツ、1人なら入力項目の説明
+  html += `<div style="margin:-6px 0 12px">${total >= 2 ? mangaQ(8, "複数人で予約するときのコツ") : mangaQ(2, "予約で入力してほしいこと")}</div>`;
   state.members.forEach((m, i) => {
     const isChild = i >= state.adults;
     m.isChild = isChild;
@@ -497,7 +504,7 @@ function buildMembers() {
               </select>
             </div>
           </div>
-          ${mangaQ(4, "身長・靴のサイズは何に使うの？")}
+          ${i === 0 ? mangaQ(4, "身長・靴のサイズは何に使うの？") : ""}
           <div class="mg-sub">性別・年齢<span class="opt-tag">（任意・分かる範囲でOK）</span></div>
           <div class="two-col mg-optional" style="align-items:flex-end">
             <div class="field" style="margin-bottom:6px">
@@ -515,7 +522,7 @@ function buildMembers() {
               </select>
             </div>
           </div>
-          ${mangaQ(5, "年齢・性別は何に使うの？")}
+          ${i === 0 ? mangaQ(5, "年齢・性別は何に使うの？") : ""}
         </div>
 
         <div class="member-group">
@@ -526,7 +533,7 @@ function buildMembers() {
             <label class="radio-pill"><input type="radio" name="board-${i}" value="ski" ${m.board === "ski" ? "checked" : ""}><span>スキー</span></label>
             <label class="radio-pill"><input type="radio" name="board-${i}" value="snowboard" ${m.board === "snowboard" ? "checked" : ""}><span>スノーボード</span></label>
           </div>
-          ${mangaQ(3, "どっちにするか迷ったら")}
+          ${i === 0 ? mangaQ(3, "どっちにするか迷ったら") : ""}
         </div>
 
         <div class="field">
