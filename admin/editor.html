@@ -1010,6 +1010,15 @@ function handleTextClick(el) {
   activeTextEl = el;
   el._snap = el.innerHTML; // for undo
 
+  // 他サイト・アプリからの貼り付けで背景色等の書式が紛れ込まないよう、常にプレーンテキストで貼る
+  if (el._pasteHandler) el.removeEventListener("paste", el._pasteHandler);
+  el._pasteHandler = (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || iframeWin.clipboardData).getData("text/plain");
+    iframeDoc.execCommand("insertText", false, text);
+  };
+  el.addEventListener("paste", el._pasteHandler);
+
   // 段数が増えて下の項目と重ならないよう、編集前の高さを記録しておく
   activeGrowBlock = findGrowBlock(el);
   activeGrowHeight = activeGrowBlock ? activeGrowBlock.getBoundingClientRect().height : null;
@@ -1096,11 +1105,19 @@ function commitText() {
     activeTextEl.removeEventListener("keydown", activeTextEl._delEmptyHandler);
     activeTextEl._delEmptyHandler = null;
   }
-  if (activeTextEl.innerHTML !== activeTextEl._snap) {
+  if (activeTextEl._pasteHandler) {
+    activeTextEl.removeEventListener("paste", activeTextEl._pasteHandler);
+    activeTextEl._pasteHandler = null;
+  }
+  const changed = activeTextEl.innerHTML !== activeTextEl._snap;
+  if (changed) {
     if (activeGrowBlock) reflowAfterGrow(activeGrowBlock, activeGrowHeight);
     snapshotForUndo();
   }
   activeTextEl.contentEditable = "false";
+  // 編集中にペースト・改行等で新しくできた要素にも、クリックで編集できる
+  // 仕組みを付け直す（新要素は付いていないため、そのままだとクリックしても反応しない）
+  if (changed) attachEditHandlers();
   activeTextEl.classList.remove("ed-sel");
   activeTextEl = null;
   activeGrowBlock = null;
