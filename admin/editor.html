@@ -1641,14 +1641,38 @@ const hoverDelBtn = document.getElementById("hover-del");
 let hoverDelTarget = null;
 
 // カーソル直下の「消せる一番小さいかたまり」を返す。
-// 文字の行を優先し、無ければブロック（項目）を対象にする。
+// data-ed が付いていない要素（貼り付けで出来た行など）でも確実に拾えるよう、
+// 目印に頼らず DOM を実際に辿って一番内側の「文字の行」を見つける。
 function hoverDeletable(target) {
   if (!target || !target.closest) return null;
+  const root = iframeDoc && iframeDoc.getElementById("page-root");
+  if (!root || !root.contains(target)) return null;
+  const bad = (el) => !el || el === root || el.tagName === "TD" || el.tagName === "TH" ||
+    el.id === "page-root" || (el.querySelector && el.querySelector("img"));
+
+  // 1) 編集用の目印があればそれを優先（従来通り）
   const txt = target.closest('[data-ed="text"]');
-  if (txt && txt.tagName !== "TD" && txt.tagName !== "TH") return txt; // 一番内側の文字行
+  if (txt && !bad(txt)) return txt;
+
+  // 2) 目印が無くても、カーソル直下から上へ辿って
+  //    「文字の行（ブロック表示で、中に別の箱を含まない要素）」を対象にする。
+  //    <b>等のインラインは飛ばして、その行のブロックを掴む。
+  const dispOf = (el) => { try { return iframeWin.getComputedStyle(el).display; } catch (e) { return "block"; } };
+  let el = target;
+  while (el && el !== root) {
+    if (!bad(el) && dispOf(el) !== "inline" && el.textContent && el.textContent.trim()) {
+      const hasBlockChild = Array.from(el.children).some(c => {
+        const d = dispOf(c);
+        return c.tagName !== "BR" && d !== "inline" && d !== "inline-block";
+      });
+      if (!hasBlockChild) return el; // これ以上分けられない文字の行
+    }
+    el = el.parentElement;
+  }
+
+  // 3) 最後の保険：自由配置ブロック
   const block = target.closest("[data-ed-block]");
-  if (block) return block; // 文字行でなければ項目（箱）を対象に
-  return null;
+  return (block && !bad(block)) ? block : null;
 }
 
 function updateHoverDel(e) {
@@ -1661,8 +1685,10 @@ function updateHoverDel(e) {
   const r = el.getBoundingClientRect();
   const x = ifr.left + r.right * zoomScale;
   const y = ifr.top + r.top * zoomScale;
-  hoverDelBtn.style.left = Math.round(Math.min(x - 26, window.innerWidth - 34)) + "px";
-  hoverDelBtn.style.top = Math.round(Math.max(y - 8, 54)) + "px";
+  // 右サイドバー(約260px)の下に隠れないよう、編集エリア内にクランプ
+  const maxX = window.innerWidth - 260 - 34;
+  hoverDelBtn.style.left = Math.round(Math.max(266, Math.min(x - 30, maxX))) + "px";
+  hoverDelBtn.style.top = Math.round(Math.max(y - 6, 54)) + "px";
   hoverDelBtn.classList.add("show");
 }
 
