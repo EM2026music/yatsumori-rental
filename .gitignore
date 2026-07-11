@@ -6,3 +6,10 @@ ChatGPT Image*.png
 
 # 引き継ぎメモ（ローカル専用・公開サイトには載せない）
 _HANDOFF.md
+
+.env
+.env.*
+node_modules/
+
+やつもりん/
+ギャラリー/
