@@ -1683,12 +1683,14 @@ function updateHoverDel(e) {
   hoverDelTarget = el;
   const ifr = iframe.getBoundingClientRect();
   const r = el.getBoundingClientRect();
+  // Xは行の右端。Yは「今マウスを乗せている高さ」に合わせる＝2行以上に
+  // 折り返した段落でも、乗せている行のすぐ横に🗑が付いてくる。
   const x = ifr.left + r.right * zoomScale;
-  const y = ifr.top + r.top * zoomScale;
+  const y = ifr.top + e.clientY * zoomScale;
   // 右サイドバー(約260px)の下に隠れないよう、編集エリア内にクランプ
   const maxX = window.innerWidth - 260 - 34;
   hoverDelBtn.style.left = Math.round(Math.max(266, Math.min(x - 30, maxX))) + "px";
-  hoverDelBtn.style.top = Math.round(Math.max(y - 6, 54)) + "px";
+  hoverDelBtn.style.top = Math.round(Math.max(y - 13, 54)) + "px";
   hoverDelBtn.classList.add("show");
 }
 
