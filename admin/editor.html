@@ -514,6 +514,8 @@ let iframeWin = null;
 let selectedEl = null;
 let activeTextEl = null;
 let activeImgEl = null;
+let activeGrowBlock = null;   // 編集中のテキストを含む「サブページ本文の項目」（段数が増えたら下の項目をずらす対象）
+let activeGrowHeight = null;  // 編集開始時点の高さ
 let isDirty = false;
 let undoStack = [];
 let redoStack = [];
@@ -1002,14 +1004,69 @@ function handleTextClick(el) {
   // Place cursor at click position
   activeTextEl = el;
   el._snap = el.innerHTML; // for undo
+
+  // 段数が増えて下の項目と重ならないよう、編集前の高さを記録しておく
+  activeGrowBlock = findGrowBlock(el);
+  activeGrowHeight = activeGrowBlock ? activeGrowBlock.getBoundingClientRect().height : null;
+
+  // 入力中も（確定を待たず）その場でずらす
+  if (el._growInputHandler) el.removeEventListener("input", el._growInputHandler);
+  el._growInputHandler = () => {
+    if (!activeGrowBlock) return;
+    reflowAfterGrow(activeGrowBlock, activeGrowHeight);
+    activeGrowHeight = activeGrowBlock.getBoundingClientRect().height; // 次の入力用に基準を更新
+  };
+  el.addEventListener("input", el._growInputHandler);
+}
+
+// サブページ本文（.container 直下）で、自由配置されている「項目」を辿って探す。
+// 見つかれば、文字が増えて背が高くなったときに下の項目をずらす対象になる。
+function findGrowBlock(el) {
+  const root = iframeDoc.getElementById("page-root");
+  if (!root || isReservePage()) return null;
+  const container = root.querySelector(".container");
+  if (!container) return null;
+  let node = el;
+  while (node && node.parentElement !== container) node = node.parentElement;
+  return (node && node.style.position === "absolute") ? node : null;
+}
+
+// 項目の背が伸び縮みした分だけ、その下にある項目を押し下げ／詰める。
+// 横に並ぶ項目（同じ高さ位置）は動かさない。
+function reflowAfterGrow(block, oldHeight) {
+  if (!block || oldHeight == null) return;
+  const container = block.parentElement;
+  if (!container) return;
+  const newHeight = block.getBoundingClientRect().height;
+  const delta = newHeight - oldHeight;
+  if (Math.abs(delta) < 1) return;
+  const blockTop = parseFloat(block.style.top) || 0;
+  const blockBottom = blockTop + oldHeight;
+  Array.from(container.children).forEach(sib => {
+    if (sib === block || sib.style.position !== "absolute") return;
+    const top = parseFloat(sib.style.top) || 0;
+    if (top >= blockBottom - 4) sib.style.top = Math.round(top + delta) + "px";
+  });
+  const curH = parseFloat(container.style.height) || container.getBoundingClientRect().height;
+  container.style.height = Math.round(curH + delta) + "px";
+  resizeIframe();
 }
 
 function commitText() {
   if (!activeTextEl) return;
-  if (activeTextEl.innerHTML !== activeTextEl._snap) snapshotForUndo();
+  if (activeTextEl._growInputHandler) {
+    activeTextEl.removeEventListener("input", activeTextEl._growInputHandler);
+    activeTextEl._growInputHandler = null;
+  }
+  if (activeTextEl.innerHTML !== activeTextEl._snap) {
+    if (activeGrowBlock) reflowAfterGrow(activeGrowBlock, activeGrowHeight);
+    snapshotForUndo();
+  }
   activeTextEl.contentEditable = "false";
   activeTextEl.classList.remove("ed-sel");
   activeTextEl = null;
+  activeGrowBlock = null;
+  activeGrowHeight = null;
   deselect();
 }
 
