@@ -1851,6 +1851,36 @@ function deleteSelected() {
   toast("削除しました（Ctrl+Zで元に戻せます）", "info");
 }
 
+// 指定した要素そのものを削除する（行・箱・項目、粒度を問わない）。
+// 下の項目があれば詰める。表のセルは中身だけ空にする（表が崩れないように）。
+function deleteElement(el) {
+  if (!el) return;
+  if (el.tagName === "TD" || el.tagName === "TH") {
+    el.innerHTML = ""; snapshotForUndo(); toast("中身を消しました", "success"); return;
+  }
+  const growBlock = findGrowBlock(el);
+  const growHeight = growBlock && growBlock !== el ? growBlock.getBoundingClientRect().height : null;
+  deselect();
+  el.remove();
+  if (growBlock && growBlock !== el && growBlock.isConnected) reflowAfterGrow(growBlock, growHeight);
+  snapshotForUndo();
+  buildSectionList();
+  toast("削除しました（Ctrl+Zで元に戻せます）", "success");
+}
+
+// 貼り付け等で付いた下地・文字色・影などの書式をリセットする（黒い反転行を元に戻す）
+function clearFormatting(el) {
+  if (!el) return;
+  ["background", "backgroundColor", "color", "textShadow", "padding", "borderRadius"].forEach(p => { el.style[p] = ""; });
+  if (el.dataset) delete el.dataset.legibility;
+  // 中に貼り付けで入り込んだ span 等の書式も消す
+  el.querySelectorAll("[style]").forEach(s => {
+    ["background", "backgroundColor", "color", "textShadow"].forEach(p => { s.style[p] = ""; });
+  });
+  snapshotForUndo();
+  toast("書式を消しました", "success");
+}
+
 // ── リンク設定（画像や項目をクリックしたときの遷移先） ──
 function linkAnchorOf(el) {
   if (!el) return null;
@@ -2413,10 +2443,14 @@ function openCtxMenu(e) {
 
   const img = e.target.tagName === "IMG" ? e.target : null;
   const block = e.target.closest(DRAG_SEL);
+  // クリック位置の一番内側の「文字」要素（TEXT_SEL だけでなく自動検出の data-ed も拾う）
+  const txt = e.target.closest ? (e.target.closest('[data-ed="text"]') || e.target.closest(TEXT_SEL)) : null;
+  // 「この行/箱だけ削除」の対象＝カーソル直下の一番内側の編集単位。
+  // 文字の行があればそれ、なければブロック。文字行がブロックと同じなら重複させない。
+  const lineTarget = (txt && (!block || txt !== block)) ? txt : null;
 
   if (block) {
     selectBlock(block);
-    const txt = e.target.closest ? e.target.closest(TEXT_SEL) : null;
     const textTarget = (txt && block.contains(txt)) ? txt : block; // 文字の上なら文字だけ、そうでなければ項目全体
     const entries = [];
     if (txt && block.contains(txt)) entries.push({ icon: "✏️", label: "文字を編集", fn: () => handleTextClick(txt) });
@@ -2426,10 +2460,14 @@ function openCtxMenu(e) {
     entries.push(
       { icon: "🔠", label: "フォントを変える…", fn: () => ctxFontMenu(textTarget, ox, oy) },
       { icon: "✨", label: "読みやすさ（白フチ/下地）…", fn: () => ctxLegibilityMenu(textTarget, ox, oy) },
+      { icon: "🧹", label: "書式を消す（下地・色をリセット）", fn: () => clearFormatting(textTarget) },
       { icon: "⧉", label: "複製", fn: () => duplicateItem(block) },
       { icon: "🔗", label: "リンク先を設定…", fn: () => promptLink(block) },
     );
-    entries.push("---", { icon: "🗑", label: "削除", danger: true, fn: () => deleteSelected() });
+    entries.push("---");
+    // 内側の行/箱がある時は「この行だけ削除」と「箱ごと削除」を両方出す＝狙った粒度で消せる
+    if (lineTarget) entries.push({ icon: "✂️", label: "この行だけ削除", danger: true, fn: () => deleteElement(lineTarget) });
+    entries.push({ icon: "🗑", label: lineTarget ? "この箱ごと削除" : "削除", danger: true, fn: () => deleteSelected() });
     showCtxEntries(entries, ox, oy);
     return;
   }
@@ -2438,17 +2476,22 @@ function openCtxMenu(e) {
     showCtxEntries([
       { icon: "🖼", label: "画像を差し替え", fn: () => document.getElementById("img-file-inp").click() },
       { icon: "🔗", label: "リンク先を設定…", fn: () => promptLink(img) },
+      "---",
+      { icon: "🗑", label: "この画像を削除", danger: true, fn: () => deleteElement(img) },
     ], ox, oy);
     return;
   }
-  // 画像でも項目でもない文字（ヘッダー等）→ フォント/読みやすさだけ出す
-  const soloTxt = e.target.closest ? e.target.closest(TEXT_SEL) : null;
-  if (soloTxt) {
-    showCtxEntries([
-      { icon: "✏️", label: "文字を編集", fn: () => handleTextClick(soloTxt) },
-      { icon: "🔠", label: "フォントを変える…", fn: () => ctxFontMenu(soloTxt, ox, oy) },
-      { icon: "✨", label: "読みやすさ（白フチ/下地）…", fn: () => ctxLegibilityMenu(soloTxt, ox, oy) },
-    ], ox, oy);
+  // 画像でも項目でもない文字（ヘッダー等）→ 編集・書式・削除
+  if (txt) {
+    const entries = [
+      { icon: "✏️", label: "文字を編集", fn: () => handleTextClick(txt) },
+      { icon: "🔠", label: "フォントを変える…", fn: () => ctxFontMenu(txt, ox, oy) },
+      { icon: "✨", label: "読みやすさ（白フチ/下地）…", fn: () => ctxLegibilityMenu(txt, ox, oy) },
+      { icon: "🧹", label: "書式を消す（下地・色をリセット）", fn: () => clearFormatting(txt) },
+    ];
+    // 見出し等の主要要素以外（自動検出の行）は「この行を削除」も出す
+    if (!txt.matches(TEXT_SEL)) entries.push("---", { icon: "🗑", label: "この行を削除", danger: true, fn: () => deleteElement(txt) });
+    showCtxEntries(entries, ox, oy);
     return;
   }
   // 何もない場所 → 追加メニュー
