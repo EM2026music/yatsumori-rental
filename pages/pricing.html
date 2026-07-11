@@ -237,20 +237,18 @@
   </div>
 </div>
 <script>
-(function(){
-  var sw = document.getElementById("lang-switch");
-  if (!sw) return;
-  sw.addEventListener("click", function(e){
-    var b = e.target.closest("button[data-lang]");
-    if (!b) return;
-    var lang = b.dataset.lang;
-    sw.querySelectorAll("button").forEach(function(x){ x.classList.toggle("active", x === b); });
-    document.querySelectorAll("[data-langblock]").forEach(function(el){
-      el.style.display = (el.getAttribute("data-langblock") === lang) ? "" : "none";
-    });
-    window.scrollTo(0,0);
+// 言語切替。公開版ではSupabase保存版がページ中身を丸ごと差し替えるため、
+// ボタン要素に直接ではなく document に委譲で付ける（差し替え後もボタンが効き続ける）。
+document.addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("#lang-switch button[data-lang]") : null;
+  if (!b) return;
+  var lang = b.dataset.lang;
+  document.querySelectorAll("#lang-switch button").forEach(function(x){ x.classList.toggle("active", x === b); });
+  document.querySelectorAll("[data-langblock]").forEach(function(el){
+    el.style.display = (el.getAttribute("data-langblock") === lang) ? "" : "none";
   });
-})();
+  window.scrollTo(0,0);
+});
 </script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabaseClient.js?v=6"></script>

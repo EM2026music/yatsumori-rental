@@ -129,48 +129,78 @@
     { no:"第10話", ttl:"受け取りの流れ",     cap:"第10話：予約から受け取りまでの流れ",              img:"manga-10.jpg" },
     { no:"第11話", ttl:"ブーツの履き方",     cap:"第11話：ブーツの履き方＆困ったときは",            img:"manga-11.jpg" }
   ];
-  var selEl  = document.getElementById("manga-select");
-  var capEl  = document.getElementById("manga-cap");
-  var imgEl  = document.getElementById("manga-img");
-  var navEl  = document.getElementById("manga-nav");
-  if (!selEl || !imgEl) return;
+  // 公開版ではSupabase保存版がページ中身を丸ごと差し替えるため、要素は毎回
+  // 引き直し、イベントは document への委譲で付ける（差し替え後も操作が効き続ける）。
+  function els(){
+    return {
+      sel: document.getElementById("manga-select"),
+      cap: document.getElementById("manga-cap"),
+      img: document.getElementById("manga-img"),
+      nav: document.getElementById("manga-nav")
+    };
+  }
 
-  // プルダウンを生成
-  EPISODES.forEach(function(ep, i){
-    var o = document.createElement("option");
-    o.value = i;
-    o.textContent = ep.no + "　" + ep.ttl;
-    selEl.appendChild(o);
-  });
-  selEl.addEventListener("change", function(){ show(parseInt(selEl.value, 10), false); });
+  // プルダウンを生成（保存版には生成済みで入っているので二重生成しない）
+  function populate(){
+    var sel = els().sel;
+    if (!sel || sel.options.length) return;
+    EPISODES.forEach(function(ep, i){
+      var o = document.createElement("option");
+      o.value = i;
+      o.textContent = ep.no + "　" + ep.ttl;
+      sel.appendChild(o);
+    });
+  }
 
   function show(i, scroll){
+    var d = els();
     var ep = EPISODES[i];
-    capEl.textContent = ep.cap;
-    imgEl.src = "../assets/img/" + ep.img;
-    imgEl.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
-    selEl.value = i;
+    if (!d.sel || !d.img || !ep) return;
+    d.cap.textContent = ep.cap;
+    d.img.src = "../assets/img/" + ep.img;
+    d.img.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
+    d.sel.value = i;
     // 前へ／次へ
-    navEl.innerHTML = "";
+    d.nav.innerHTML = "";
     if (i > 0) {
       var p = EPISODES[i-1];
       var pb = document.createElement("button"); pb.className = "manga-prev";
+      pb.setAttribute("data-ep", i-1);
       pb.innerHTML = "◂ 前の話へ<br><small>" + p.no + " " + p.ttl + "</small>";
-      pb.addEventListener("click", function(){ show(i-1, true); });
-      navEl.appendChild(pb);
-    } else { navEl.appendChild(document.createElement("span")); }
+      d.nav.appendChild(pb);
+    } else { d.nav.appendChild(document.createElement("span")); }
     if (i < EPISODES.length - 1) {
       var n = EPISODES[i+1];
       var nb = document.createElement("button"); nb.className = "manga-next";
+      nb.setAttribute("data-ep", i+1);
       nb.innerHTML = "次の話へ ▸<br><small>" + n.no + " " + n.ttl + "</small>";
-      nb.addEventListener("click", function(){ show(i+1, true); });
-      navEl.appendChild(nb);
+      d.nav.appendChild(nb);
     } else {
       var e = document.createElement("span"); e.className = "manga-end"; e.textContent = "最終話までありがとう！";
-      navEl.appendChild(e);
+      d.nav.appendChild(e);
     }
-    if (scroll) { var t = selEl.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
+    if (scroll) { var t = d.sel.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
   }
+
+  document.addEventListener("change", function(e){
+    if (e.target && e.target.id === "manga-select") show(parseInt(e.target.value, 10), false);
+  });
+  document.addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest("#manga-nav button") : null;
+    if (!b) return;
+    var d = els();
+    var cur = d.sel ? (parseInt(d.sel.value, 10) || 0) : 0;
+    // 旧保存データのボタン（data-ep無し）でも前後が判定できるようにする
+    var i = b.hasAttribute("data-ep") ? parseInt(b.getAttribute("data-ep"), 10)
+          : (b.className.indexOf("manga-next") !== -1 ? cur + 1 : cur - 1);
+    show(i, true);
+  });
+
+  // 差し替え後にもプルダウンの中身を保証する（pageRendererが呼んでくれるフック）
+  window.__yatsumoriRebind = function(){ populate(); };
+
+  if (!els().sel || !els().img) return;
+  populate();
   show(0, false);
 })();
 </script>
