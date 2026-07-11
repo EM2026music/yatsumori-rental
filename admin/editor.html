@@ -2498,6 +2498,8 @@ function selectEl(el, type) {
 
 function deselect() {
   if (activeTextEl) commitText(); // commitText calls deselect again, guard:
+  // 文字をドラッグ選択したまま他の場所を触った時、黒いハイライトが残らないように必ず消す
+  try { iframeWin.getSelection().removeAllRanges(); } catch (err) {}
   if (!selectedEl && !activeTextEl && !activeImgEl && !activeBlockEl) return;
   if (selectedEl) {
     selectedEl.classList.remove("ed-sel");
