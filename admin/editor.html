@@ -884,11 +884,36 @@ function canvasizeItems() {
   }
 }
 
+// 中身が「テキスト＋インライン装飾だけ」の末端要素を判定するためのインラインタグ集合
+const INLINE_TAGS = new Set(["B","I","U","EM","STRONG","SMALL","SPAN","BR","A","SUP","SUB","MARK","WBR","S","CODE"]);
+
+// サブページ本文（.container）内の、文字だけを含む末端要素を拾う。
+// 独自クラス（.flow-title/.flow-desc/.tip-title/.bg-h/.faq-q…）を1つずつ登録しなくても
+// 直接編集できるようにするための汎用検出。予約系ページはフォーム保護のため対象外。
+function collectTextLeaves() {
+  const root = iframeDoc.getElementById("page-root");
+  if (!root || isReservePage()) return [];
+  const scope = root.querySelector(".container");
+  if (!scope) return []; // .container を持つサブページのみ対象（TOPは従来のTEXT_SELに委ねる）
+  const out = [];
+  scope.querySelectorAll("div,li,dt,dd,figcaption,th,td,blockquote").forEach(el => {
+    if (el.querySelector("img")) return;                       // 画像を含む容器は除外
+    if (Array.from(el.children).some(c => !INLINE_TAGS.has(c.tagName))) return; // ブロック子を持つ＝容器なので除外
+    if (!el.textContent.trim()) return;                        // 空要素は除外
+    out.push(el);
+  });
+  return out;
+}
+
 function attachEditHandlers() {
   if (!iframeDoc) return;
 
   // Text: 自由配置ブロック内はダブルクリックで編集（シングルクリックはブロック選択）
-  iframeDoc.querySelectorAll(TEXT_SEL).forEach(el => {
+  // TEXT_SEL（決め打ちの要素）に加え、サブページ本文の「文字だけの末端要素」も
+  // 自動で編集対象にする（flow-title/flow-desc/tip-title/bg-h 等、独自クラスに対応）。
+  const textEls = new Set(iframeDoc.querySelectorAll(TEXT_SEL));
+  collectTextLeaves().forEach(el => textEls.add(el));
+  textEls.forEach(el => {
     if (el.closest("[data-ed-img]")) return;
     el.setAttribute("data-ed", "text");
     const inDragBlock = !!el.closest(DRAG_SEL);
@@ -1314,7 +1339,8 @@ function attachBlockDrag() {
     }
     // ルール統一：1回目のクリック＝項目を選択／選択済みの項目をもう1回クリック＝中の文字・画像を編集
     if (activeBlockEl === block && t0) {
-      const txt = t0.closest ? t0.closest(TEXT_SEL) : null;
+      // TEXT_SELだけでなく、汎用検出で data-ed が付いた文字（flow-title等）も編集対象にする
+      const txt = t0.closest ? t0.closest('[data-ed="text"]') : null;
       if (txt && block.contains(txt)) {
         handleTextClick(txt);
         suppressClickUntil = Date.now() + 400;
