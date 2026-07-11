@@ -913,18 +913,23 @@ function attachEditHandlers() {
   // Text: 自由配置ブロック内はダブルクリックで編集（シングルクリックはブロック選択）
   // TEXT_SEL（決め打ちの要素）に加え、サブページ本文の「文字だけの末端要素」も
   // 自動で編集対象にする（flow-title/flow-desc/tip-title/bg-h 等、独自クラスに対応）。
-  const textEls = new Set(iframeDoc.querySelectorAll(TEXT_SEL));
-  collectTextLeaves().forEach(el => textEls.add(el));
+  // サブページ本文の行（自動検出分）は、ブロック選択を挟まず1回クリックで即編集にする
+  // （「1回目は選択、2回目で編集」の2段階操作がわかりにくいという声への対応）。
+  const fixedTextEls = new Set(iframeDoc.querySelectorAll(TEXT_SEL));
+  const leafTextEls = collectTextLeaves();
+  const textEls = new Set(fixedTextEls);
+  leafTextEls.forEach(el => textEls.add(el));
   textEls.forEach(el => {
     if (el.closest("[data-ed-img]")) return;
     el.setAttribute("data-ed", "text");
+    const isAutoLeaf = !fixedTextEls.has(el);
     const inDragBlock = !!el.closest(DRAG_SEL);
     if (el._ed_handler) {
       el.removeEventListener("click", el._ed_handler);
       el.removeEventListener("dblclick", el._ed_handler);
     }
     el._ed_handler = (e) => { e.stopPropagation(); handleTextClick(el); };
-    el.addEventListener(inDragBlock ? "dblclick" : "click", el._ed_handler);
+    el.addEventListener(isAutoLeaf ? "click" : (inDragBlock ? "dblclick" : "click"), el._ed_handler);
   });
 
   // Images
