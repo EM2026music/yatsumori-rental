@@ -1250,6 +1250,10 @@ function attachBlockDrag() {
     hideCtxMenu(); // ページ内のどこかを押したら右クリックメニューを閉じる
     if (e.target.isContentEditable) return;
 
+    // これから e.preventDefault() する（=ブラウザの「他をクリックしたら選択解除」が働かない）ため、
+    // 前の文字選択（ドラッグでハイライトした範囲）が黒く残り続けるのを防ぐために先に消す
+    try { iframeWin.getSelection().removeAllRanges(); } catch (err) {}
+
     // 選択済みの画像の中をドラッグ → 項目の移動ではなく「写真の見える場所」を調整
     // （縦横比を変えてトリミングされた写真の、見せたい部分を選べる）
     if (e.target.tagName === "IMG" && e.target === activeImgEl) {
