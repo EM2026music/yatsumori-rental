@@ -59,9 +59,10 @@ img{display:block}
 /* はみ出した項目で横スクロールが発生しないように（スマホ版は390px固定） */
 html,body{overflow-x:hidden}
 
-/* バッジ（※詳細度高め＝公開済みデータ内の旧CSSコピーに勝って元デザインを保つ） */
-.badges{display:flex;justify-content:space-between;padding:18px 16px 6px}
-.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:86px}
+/* バッジ（※詳細度高め＝公開済みデータ内の旧CSSコピーに勝って元デザインを保つ）
+   PC版と同じ5個構成のため、3個＋2個の2段で折り返す */
+.badges{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 2px;padding:18px 8px 6px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;width:122px}
 .page .badges .badge .badge-icon{width:56px;height:56px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(20,40,60,.08);font-size:22px}
 .page .badges .badge .badge-icon img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .page .badges .badge .badge-label{font-size:11px;font-weight:800;color:inherit;background:none;padding:0}
@@ -82,8 +83,9 @@ html,body{overflow-x:hidden}
 .sec-head-title{font-size:15px;font-weight:800}
 .sec-head-more{font-size:12px;color:var(--text-gray);font-weight:700}
 .info-sec{padding:4px 14px 0}
-.rec-scroll{display:flex;gap:10px;padding-bottom:20px}
-.rec-card{width:114px;color:var(--navy)}
+/* 4枚で画面幅を超えるため横スワイプで見られるように（無いと4枚目に届かない） */
+.rec-scroll{display:flex;gap:10px;padding-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.rec-card{width:114px;color:var(--navy);flex-shrink:0}
 .rec-photo{width:114px;height:82px;border-radius:10px;object-fit:cover;margin-bottom:6px;background:var(--bg)}
 .rec-title{font-size:11.5px;font-weight:800}
 .rec-sub{font-size:9.5px;color:var(--text-gray);line-height:1.4}
@@ -128,11 +130,11 @@ html,body{overflow-x:hidden}
 </nav>
 
 <section class="hero">
-  <img class="hero-photo" src="assets/img/hero-ski.jpg" alt="蔵王の雪山でスキーを持つ人">
+  <img class="hero-photo" src="https://kmefuzynadoayvcmknxp.supabase.co/storage/v1/object/public/site-assets/home/1783345301360-image7.jpg" alt="蔵王の雪山でスキーを持つ人" style="object-position:50% 46.6%">
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <h1 class="hero-title">蔵王の雪をもっと自由に。<br>手ぶらでOK！最高の1日を。</h1>
-    <p class="hero-desc">8つ森レンタルは、蔵王・遠刈田温泉の<br>スキー・スノーボードレンタル専門店です。</p>
+    <p class="hero-desc">8つ森レンタルは、宮城蔵王・遠刈田温泉の<br>スキー・スノーボードレンタル専門店です。</p>
   </div>
 </section>
 
@@ -150,24 +152,25 @@ html,body{overflow-x:hidden}
 </div>
 
 <div class="badges">
-  <div class="badge"><div class="badge-icon">🎿</div><div class="badge-label">手ぶらでOK</div><div class="badge-sub">ウェアも充実</div></div>
-  <div class="badge"><div class="badge-icon">📅</div><div class="badge-label">WEB予約で</div><div class="badge-sub">スムーズ受取</div></div>
-  <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">高品質な板</div><div class="badge-sub">メンテ済み</div></div>
-  <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街すぐ</div><div class="badge-sub">帰りに温泉も</div></div>
+  <div class="badge"><div class="badge-icon">🎿</div><div class="badge-label">手ぶらでOK</div><div class="badge-sub">小物も充実‼</div></div>
+  <div class="badge"><div class="badge-icon">📅</div><div class="badge-label">前日貸し出しOK‼</div></div>
+  <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">板は</div><div class="badge-sub">ワクシング済み‼</div></div>
+  <div class="badge"><div class="badge-icon">🚻</div><div class="badge-label">男女別</div><div class="badge-sub">更衣室完備・ロッカー有</div></div>
+  <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街の中に立地‼</div></div>
 </div>
 
 <section class="content-grid">
-  <a class="content-card" style="background-image:url('assets/img/catalog.jpg')" href="pages/catalog.html">
-    <h3 class="content-card-title">板カタログ</h3><p class="content-card-desc">豊富なラインナップ</p><span class="pill-btn">一覧を見る ›</span>
+  <a class="content-card" style="background-image:url('https://kmefuzynadoayvcmknxp.supabase.co/storage/v1/object/public/site-assets/home/1783177383179-RIMG2873.jpg')" href="pages/catalog.html">
+    <h3 class="content-card-title">ギャラリー</h3><p class="content-card-desc">初心者〜上級者まで<br>豊富なラインナップ</p><span class="pill-btn">一覧を見る ›</span>
   </a>
-  <a class="content-card" style="background-image:url('assets/img/beginner.jpg')" href="pages/beginner-guide.html">
-    <h3 class="content-card-title">初心者ガイド</h3><p class="content-card-desc">はじめてでも安心！</p><span class="pill-btn">詳しく見る ›</span>
+  <a class="content-card" style="background-image:url('https://kmefuzynadoayvcmknxp.supabase.co/storage/v1/object/public/site-assets/home/1783203332409-__________2-1024x640.jpg')" href="pages/beginner-guide.html">
+    <h3 class="content-card-title">初心者ガイド</h3><p class="content-card-desc">はじめての方も安心！<br>蔵王を楽しむコツをご紹介</p><span class="pill-btn">詳しく見る ›</span>
   </a>
   <a class="content-card" style="background-image:url('assets/img/pricing.jpg')" href="pages/pricing.html">
     <h3 class="content-card-title">レンタル料金</h3><p class="content-card-desc">わかりやすい料金プラン</p><span class="pill-btn">料金表を見る ›</span>
   </a>
   <a class="content-card" style="background-image:url('assets/img/waxing.jpg')" href="pages/waxing.html">
-    <h3 class="content-card-title">ワクシング</h3><p class="content-card-desc">滑りが変わる！</p><span class="pill-btn">詳しく見る ›</span>
+    <h3 class="content-card-title">ワクシングサービス</h3><p class="content-card-desc">滑りが変わる！<br>板をベストコンディションに</p><span class="pill-btn">詳しく見る ›</span>
   </a>
 </section>
 
@@ -177,10 +180,10 @@ html,body{overflow-x:hidden}
     <div class="sec-head-title">おすすめ情報</div>
   </div>
   <div class="rec-scroll">
-    <a class="rec-card" href="pages/yatsumorin.html"><img class="rec-photo" src="assets/img/yatsumorin-face.png" alt="やつもりん" style="object-position:center 22%"><p class="rec-title">やつもりん（公式キャラ）</p><p class="rec-sub">公式キャラを見る</p></a>
-    <a class="rec-card" href="pages/onsen-guide.html"><img class="rec-photo" src="assets/img/onsen.jpg" alt=""><p class="rec-title">遠刈田温泉ガイド</p><p class="rec-sub">スキーの後は温泉で</p></a>
-    <a class="rec-card" href="pages/gourmet.html"><img class="rec-photo" src="assets/img/gourmet.jpg" alt=""><p class="rec-title">周辺グルメ情報</p><p class="rec-sub">おすすめランチ・カフェ</p></a>
-    <a class="rec-card" href="pages/zao-ski-info.html"><img class="rec-photo" src="assets/img/zao-ski.jpg" alt=""><p class="rec-title">スキー場情報</p><p class="rec-sub">ゲレンデ・天気</p></a>
+    <a class="rec-card" href="pages/onsen-guide.html"><img class="rec-photo" src="assets/img/onsen.jpg" alt="遠刈田温泉ガイド"><p class="rec-title">遠刈田温泉ガイド</p><p class="rec-sub">スキーの後は温泉でリラックス</p></a>
+    <a class="rec-card" href="pages/gourmet.html"><img class="rec-photo" src="assets/img/gourmet.jpg" alt="周辺グルメ情報"><p class="rec-title">周辺グルメ情報</p><p class="rec-sub">おすすめランチ・カフェ</p></a>
+    <a class="rec-card" href="pages/zao-ski-info.html"><img class="rec-photo" src="assets/img/zao-ski.jpg" alt="蔵王のスキー場情報"><p class="rec-title">蔵王のスキー場情報</p><p class="rec-sub">ゲレンデ・積雪・天気をチェック</p></a>
+    <a class="rec-card" href="pages/yatsumorin.html"><img class="rec-photo" src="assets/img/yatsumorin-promo.jpg" alt="やつもりん" style="object-position:50% 0%"><p class="rec-title">やつもりん（公式キャラ）</p><p class="rec-sub">八つ森レンタルの公式キャラを見る</p></a>
   </div>
 </div>
 
