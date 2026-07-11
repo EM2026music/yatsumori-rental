@@ -1017,6 +1017,35 @@ function handleTextClick(el) {
     activeGrowHeight = activeGrowBlock.getBoundingClientRect().height; // 次の入力用に基準を更新
   };
   el.addEventListener("input", el._growInputHandler);
+
+  // 空にした状態でBackspace/Deleteを押したら、その行（箱）ごと消せるように。
+  // 見出し等の主要要素（TEXT_SEL）は誤操作で消えると困るので対象外。
+  if (el._delEmptyHandler) el.removeEventListener("keydown", el._delEmptyHandler);
+  el._delEmptyHandler = (e) => {
+    if (el.matches(TEXT_SEL)) return;
+    if ((e.key === "Backspace" || e.key === "Delete") && !el.textContent.replace(/​/g, "").trim()) {
+      e.preventDefault();
+      e.stopPropagation();
+      deleteEmptyTextLeaf(el);
+    }
+  };
+  el.addEventListener("keydown", el._delEmptyHandler);
+}
+
+// 空になったテキスト行そのものを削除する（下の項目があれば詰める）
+function deleteEmptyTextLeaf(el) {
+  const growBlock = activeGrowBlock;
+  const growHeight = activeGrowBlock ? activeGrowBlock.getBoundingClientRect().height : null;
+  if (el._growInputHandler) el.removeEventListener("input", el._growInputHandler);
+  if (el._delEmptyHandler) el.removeEventListener("keydown", el._delEmptyHandler);
+  activeTextEl = null;
+  activeGrowBlock = null;
+  activeGrowHeight = null;
+  el.remove();
+  if (growBlock && growBlock.isConnected) reflowAfterGrow(growBlock, growHeight);
+  snapshotForUndo();
+  deselect();
+  toast("空の行を削除しました", "success");
 }
 
 // サブページ本文（.container 直下）で、自由配置されている「項目」を辿って探す。
@@ -1057,6 +1086,10 @@ function commitText() {
   if (activeTextEl._growInputHandler) {
     activeTextEl.removeEventListener("input", activeTextEl._growInputHandler);
     activeTextEl._growInputHandler = null;
+  }
+  if (activeTextEl._delEmptyHandler) {
+    activeTextEl.removeEventListener("keydown", activeTextEl._delEmptyHandler);
+    activeTextEl._delEmptyHandler = null;
   }
   if (activeTextEl.innerHTML !== activeTextEl._snap) {
     if (activeGrowBlock) reflowAfterGrow(activeGrowBlock, activeGrowHeight);
