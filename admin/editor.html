@@ -1019,10 +1019,10 @@ function handleTextClick(el) {
   el.addEventListener("input", el._growInputHandler);
 
   // 空にした状態でBackspace/Deleteを押したら、その行（箱）ごと消せるように。
-  // 見出し等の主要要素（TEXT_SEL）は誤操作で消えると困るので対象外。
+  // 見出し等の主要要素（TEXT_SEL）や表のセル（消すと表が崩れる）は対象外。
   if (el._delEmptyHandler) el.removeEventListener("keydown", el._delEmptyHandler);
   el._delEmptyHandler = (e) => {
-    if (el.matches(TEXT_SEL)) return;
+    if (el.matches(TEXT_SEL) || el.tagName === "TD" || el.tagName === "TH") return;
     if ((e.key === "Backspace" || e.key === "Delete") && !el.textContent.replace(/​/g, "").trim()) {
       e.preventDefault();
       e.stopPropagation();
