@@ -152,11 +152,34 @@
     });
   }
 
+  // 話ごとに漫画画像の縦横比が違う（縦長1.41と1.25の2種類）ため、切替で画像の
+  // 高さが変わった分だけ、下にある項目を詰める/押し下げる（変な隙間・重なり防止）。
+  // 保存版（絶対配置レイアウト）のときだけ動く。通常の流し込みでは自然に詰まるので不要。
+  function reflowAfter(img, oldH){
+    var newH = img.getBoundingClientRect().height;
+    var delta = newH - oldH;
+    if (Math.abs(delta) < 2) return;
+    var container = img.parentElement;
+    if (!container || img.style.position !== "absolute") return;
+    var imgTop = parseFloat(img.style.top) || 0;
+    Array.prototype.forEach.call(container.children, function(sib){
+      if (sib === img || sib.style.position !== "absolute") return;
+      var top = parseFloat(sib.style.top) || 0;
+      if (top > imgTop) sib.style.top = Math.round(top + delta) + "px";
+    });
+    var curH = parseFloat(container.style.height) || container.getBoundingClientRect().height;
+    container.style.height = Math.round(curH + delta) + "px";
+  }
+
   function show(i, scroll){
     var d = els();
     var ep = EPISODES[i];
     if (!d.sel || !d.img || !ep) return;
     d.cap.textContent = ep.cap;
+    // 直前の画像が読み込み済みの時だけ高さの差を取る（読み込み中に切り替えると
+    // 高さ0を基準にしてしまい、大きくズレるため。その場合は位置調整をスキップ）
+    var oldH = (d.img.complete && d.img.naturalWidth) ? d.img.getBoundingClientRect().height : null;
+    d.img.onload = function(){ d.img.onload = null; if (oldH !== null) reflowAfter(d.img, oldH); };
     d.img.src = "../assets/img/" + ep.img;
     d.img.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
     d.sel.value = i;
