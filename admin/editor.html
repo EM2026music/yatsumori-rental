@@ -1008,6 +1008,14 @@ function attachEditHandlers() {
     e.preventDefault();
     openCtxMenu(e);
   });
+
+  // ダブルクリックはどの行でも必ず編集に入る（目印の有無・箱の入れ子に関係なく、
+  // カーソル直下の文字の行を掴んで編集）。1回クリックの当たり判定に左右されない保険。
+  iframeDoc.addEventListener("dblclick", (e) => {
+    if (e.target.closest("img")) return;
+    const line = hoverDeletable(e.target);
+    if (line) { e.preventDefault(); e.stopPropagation(); handleTextClick(line); }
+  });
 }
 
 function reattach() {
@@ -1669,17 +1677,21 @@ function hoverDeletable(target) {
     }
     el = el.parentElement;
   }
-
-  // 3) 最後の保険：自由配置ブロック
-  const block = target.closest("[data-ed-block]");
-  return (block && !bad(block)) ? block : null;
+  // 見出しや複数行を含む「箱全体」は対象にしない（箱ごと消える事故を防ぐ）。
+  // 文字の行が見つからなければ null。
+  return null;
 }
 
 function updateHoverDel(e) {
   if (activeTextEl) return hideHoverDel();       // 文字編集中はテキストバーの🗑を使う
   if (dragState || panState || marqueeState) return hideHoverDel();
   const el = hoverDeletable(e.target);
-  if (!el) return hideHoverDel();
+  if (!el) {
+    // 文字の無い所（項目の余白など）を通過中。
+    // ここで対象を消すと、行→🗑ボタンへ移動する途中で対象が入れ替わり
+    // 「箱ごと消える」事故になる。ボタン表示中は対象を維持して素通りする。
+    return;
+  }
   hoverDelTarget = el;
   const ifr = iframe.getBoundingClientRect();
   const r = el.getBoundingClientRect();
