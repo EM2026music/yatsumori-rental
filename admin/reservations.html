@@ -48,6 +48,15 @@ function showError(msg) {
     msg ? `<div class="alert alert-error">${msg}</div>` : "";
 }
 
+// お客様が入力した文字列（氏名・電話・要望・ニックネーム等）を画面に表示する前に
+// HTMLとして無害化する。これをしないと、悪意ある予約名（例: <img onerror=...>）が
+// 管理画面を開いたスタッフのブラウザで実行される（ストアドXSS）恐れがある。
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "キャンセル" };
 const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード", none: "板レンタルなし" };
 const GENDER_LABEL = { male: "男性", female: "女性" };
@@ -135,18 +144,18 @@ function renderCard(r) {
       .slice()
       .sort((a, b) => a.member_no - b.member_no)
       .map((m) => {
-        const who = (m.is_child ? "子供" : "大人") + (m.nickname ? `・${m.nickname}` : "");
+        const who = (m.is_child ? "子供" : "大人") + (m.nickname ? `・${esc(m.nickname)}` : "");
         const extra = [];
-        if (m.set_type) extra.push(SET_LABEL[m.set_type] || m.set_type);
-        if (m.addons && m.addons.length) extra.push("追加:" + m.addons.map(function (k) { return ADDONS[k] ? ADDONS[k].label : k; }).join("・"));
-        if (m.gender) extra.push(GENDER_LABEL[m.gender] || m.gender);
+        if (m.set_type) extra.push(esc(SET_LABEL[m.set_type] || m.set_type));
+        if (m.addons && m.addons.length) extra.push("追加:" + m.addons.map(function (k) { return esc(ADDONS[k] ? ADDONS[k].label : k); }).join("・"));
+        if (m.gender) extra.push(esc(GENDER_LABEL[m.gender] || m.gender));
         if (m.age != null) extra.push(m.age + "歳");
-        if (m.board_type === "snowboard" && m.stance) extra.push(STANCE_LABEL[m.stance] || m.stance);
+        if (m.board_type === "snowboard" && m.stance) extra.push(esc(STANCE_LABEL[m.stance] || m.stance));
         const extraStr = extra.length ? `｜${extra.join("｜")}` : "";
         const pr = memberPrice(m, days);
         if (pr != null) total += pr; else allSet = false;
         const prStr = pr != null ? `｜<b>${yen(pr)}</b>` : "";
-        return `<div class="data-card-meta" style="padding-left:6px">・<b>${who}</b>｜身長 ${m.height_cm}cm｜靴 ${m.shoe_cm}cm｜${BOARD_LABEL[m.board_type] || m.board_type}${extraStr}${prStr}</div>`;
+        return `<div class="data-card-meta" style="padding-left:6px">・<b>${who}</b>｜身長 ${m.height_cm}cm｜靴 ${m.shoe_cm}cm｜${esc(BOARD_LABEL[m.board_type] || m.board_type)}${extraStr}${prStr}</div>`;
       }).join("");
     const totalStr = `<div class="data-card-meta" style="padding-left:6px;margin-top:2px;font-weight:800">合計（目安・現金）：${allSet ? yen(total) : "—"}</div>`;
     detail = `<div class="data-card-meta" style="margin-top:4px;font-weight:700">ご利用者（${members.length}名）</div>${rows}${totalStr}`;
@@ -173,14 +182,14 @@ function renderCard(r) {
     <div class="data-card">
       <div class="data-card-top">
         <div>
-          <div class="data-card-name">${r.customer_name} 様${r.eve_pickup ? ` <span style="font-size:10px;font-weight:700;color:#8a6a1f;background:#fff3cd;border:1px solid #f0b429;border-radius:999px;padding:1px 8px;margin-left:6px">前日受取</span>` : ""}</div>
-          <div class="data-card-meta">${periodText(r)}　${partyText}　${r.customer_phone}</div>
+          <div class="data-card-name">${esc(r.customer_name)} 様${r.eve_pickup ? ` <span style="font-size:10px;font-weight:700;color:#8a6a1f;background:#fff3cd;border:1px solid #f0b429;border-radius:999px;padding:1px 8px;margin-left:6px">前日受取</span>` : ""}</div>
+          <div class="data-card-meta">${periodText(r)}　${partyText}　${esc(r.customer_phone)}</div>
         </div>
         <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status]}</span>
       </div>
-      <div class="data-card-meta">予約番号: ${r.reservation_code}</div>
+      <div class="data-card-meta">予約番号: ${esc(r.reservation_code)}</div>
       ${detail}
-      ${r.notes ? `<div class="data-card-meta">ご要望: ${r.notes}</div>` : ""}
+      ${r.notes ? `<div class="data-card-meta">ご要望: ${esc(r.notes)}</div>` : ""}
       ${actions}
     </div>`;
 }

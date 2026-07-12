@@ -35,6 +35,13 @@ function showError(msg) {
     msg ? `<div class="alert alert-error">${msg}</div>` : "";
 }
 
+// お客様の入力文字列を画面表示前にHTML無害化（ストアドXSS対策）
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "キャンセル" };
 
 async function loadReservations(dateStr) {
@@ -74,12 +81,12 @@ function renderCard(r) {
     <div class="data-card">
       <div class="data-card-top">
         <div>
-          <div class="data-card-name">${r.customer_name} 様</div>
-          <div class="data-card-meta">${r.rental_date}　${r.party_size}名　${r.customer_phone}</div>
+          <div class="data-card-name">${esc(r.customer_name)} 様</div>
+          <div class="data-card-meta">${r.rental_date}　${r.party_size}名　${esc(r.customer_phone)}</div>
         </div>
         <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status]}</span>
       </div>
-      <div class="data-card-meta">予約番号: ${r.reservation_code}</div>
+      <div class="data-card-meta">予約番号: ${esc(r.reservation_code)}</div>
       <div class="data-card-meta">用具: ${items}</div>
       ${actions}
     </div>`;
