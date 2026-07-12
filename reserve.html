@@ -61,6 +61,10 @@
 .addon-item input { width:17px; height:17px; accent-color:#2f6fb0; flex:0 0 auto; cursor:pointer; margin:0; }
 .addon-item b { color:var(--gold); font-weight:800; }
 .addon-item:has(input:checked) { border-color:#2f6fb0; background:#e4eff9; box-shadow:0 0 0 1px #2f6fb0 inset; }
+.check-row { display:flex; align-items:center; gap:9px; padding:11px 13px; border:1.5px solid var(--border); border-radius:10px; background:#fff; font-size:13px; font-weight:700; cursor:pointer; }
+.check-row input { width:18px; height:18px; accent-color:#2f6fb0; flex:0 0 auto; cursor:pointer; margin:0; }
+.check-row:has(input:checked) { border-color:#2f6fb0; background:#e4eff9; box-shadow:0 0 0 1px #2f6fb0 inset; }
+.none-set-note { font-size:11.5px; line-height:1.6; color:#8a6a1f; background:#fff8e8; border:1px dashed var(--gold); border-radius:8px; padding:9px 11px; margin-top:4px; }
 @media(max-width:480px){ .addon-grid{ grid-template-columns:1fr; } }
 .avail-hint { font-size:12.5px; font-weight:600; color:#45535f; background:#f5f7f9; border:1px solid #e5e9ef; border-radius:10px; padding:11px 14px; margin-bottom:18px; }
 .confirm-sec { margin-bottom:18px; }
@@ -137,6 +141,14 @@
         </div>
         <p class="help-text">日帰りの場合は開始日と返却日を同じ日にしてください。</p>
         <button type="button" class="manga-q" data-ep="1"><img src="assets/img/yatsumorin-face.png" alt=""><span>予約しておくと当日スムーズ！<span class="mq-link">マンガで見る</span></span></button>
+      </div>
+
+      <div class="field">
+        <label class="check-row">
+          <input type="checkbox" id="eve-pickup">
+          <span>前日の午後2時から受け取りたい<span class="opt-tag">（任意）</span></span>
+        </label>
+        <p class="help-text">宿泊先などで前日に受け取っておくと、当日は朝からそのままゲレンデへ向かえます。満数の場合はご希望に添えないことがあります。</p>
       </div>
 
       <p class="field-label" style="margin-top:6px">ご利用人数<span class="req">必須</span></p>
@@ -255,8 +267,8 @@
 <script src="assets/js/supabaseClient.js?v=5"></script>
 <script src="assets/js/booking.js?v=6"></script>
 <script>
-const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
-const SET_LABEL = { gliding: "滑走セット", full: "フルセット（ウェア付き）" };
+const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード", none: "板のレンタルなし" };
+const SET_LABEL = { gliding: "滑走セット", full: "フルセット（ウェア付き）", none: "セットなし（単品のみ）" };
 
 // 料金表（pricing.html と一致）。配列は 1/2/3/4日、addA/addC は5日目以降の1日追加。
 const PRICE = {
@@ -281,8 +293,15 @@ function rentalDays() {
   return Math.floor(ms / 86400000) + 1; // 開始日・返却日を含む日数
 }
 function memberPrice(m, days) {
+  if (!days || days < 1) return null;
+  // セットなし（板・ブーツ等は借りず、追加レンタルの単品だけ）の人は
+  // セット料金が発生しない。単品（追加レンタル）が1つ以上必須。
+  if (m.setType === "none") {
+    if (!m.addons || !m.addons.length) return null;
+    return addonsTotal(m) * days;
+  }
   const p = PRICE[m.setType];
-  if (!p || !days || days < 1) return null;
+  if (!p) return null;
   const base = m.isChild ? p.child : p.adult;
   const add = m.isChild ? p.addC : p.addA;
   const setPrice = days <= 4 ? base[days - 1] : base[3] + (days - 4) * add;
@@ -307,6 +326,10 @@ function addonChecks(m) {
     return '<label class="addon-item"><input type="checkbox" class="m-addon" value="' + k + '"' + checked + '><span>' + a.label + ' <b>+¥' + a.price.toLocaleString("ja-JP") + '</b></span></label>';
   }).join("");
 }
+// 料金が未確定のときの案内文（セット未選択 or 単品なのに何も選んでいない）
+function priceHintText(m) {
+  return m.board === "none" ? "追加レンタルを選択してください" : "セットを選択してください";
+}
 // 各カードの料金と合計（目安）を再計算してDOMに反映
 function refreshPrices() {
   const days = rentalDays();
@@ -314,7 +337,7 @@ function refreshPrices() {
   state.members.forEach((m, i) => {
     const pr = memberPrice(m, days);
     const el = document.querySelector(`.member-card[data-i="${i}"] .m-price`);
-    if (el) el.textContent = pr != null ? yen(pr) : "セットを選択してください";
+    if (el) el.textContent = pr != null ? yen(pr) : priceHintText(m);
     if (pr != null) total += pr; else allSet = false;
   });
   const tv = document.getElementById("member-total-val");
@@ -374,6 +397,7 @@ document.addEventListener("click", (e) => {
 
 const state = {
   start: null, end: null,
+  evePickup: false,      // 前日受け取り希望
   adults: 1, children: 0,
   avail: null,           // { ski, snowboard }
   members: [],           // [{ label, isChild, height, shoe, board }]
@@ -434,15 +458,17 @@ async function handleToStep2() {
   showError("");
   const start = document.getElementById("start-date").value;
   const end = document.getElementById("end-date").value;
+  const evePickup = document.getElementById("eve-pickup").checked;
   if (!start || !end) { showError("ご利用期間（開始日と返却日）を選択してください。"); return; }
   if (end < start) { showError("返却日は開始日と同じか、あとの日付にしてください。"); return; }
-  state.start = start; state.end = end;
+  if (evePickup && start <= todayStr()) { showError("前日受け取りをご希望の場合、開始日は明日以降にしてください（前日がすでに今日か過去になっています）。"); return; }
+  state.start = start; state.end = end; state.evePickup = evePickup;
 
   const btn = document.getElementById("to-step2");
   btn.disabled = true; btn.textContent = "空き状況を確認中...";
   try {
     // 空き状況はUX上のヒント（最終判定はサーバー側）。取得に失敗しても先へ進める。
-    try { state.avail = await fetchAvailabilityV2(start, end); } catch (_) { state.avail = null; }
+    try { state.avail = await fetchAvailabilityV2(start, end, evePickup); } catch (_) { state.avail = null; }
     buildMembers();
     renderAvailHint();
     gotoStep(2);
@@ -455,7 +481,7 @@ function renderAvailHint() {
   const el = document.getElementById("avail-hint");
   if (!state.avail) { el.style.display = "none"; return; }
   el.style.display = "block";
-  el.innerHTML = `この期間の空き状況：スキー <b>${state.avail.ski}</b> 本 ／ スノーボード <b>${state.avail.snowboard}</b> 本`;
+  el.innerHTML = `この期間${state.evePickup ? "（前日受け取り込み）" : ""}の空き状況：スキー <b>${state.avail.ski}</b> 本 ／ スノーボード <b>${state.avail.snowboard}</b> 本`;
 }
 
 // ── 利用者カードの生成 ──
@@ -533,16 +559,20 @@ function buildMembers() {
             <label class="radio-pill"><input type="radio" name="board-${i}" value="ski" ${m.board === "ski" ? "checked" : ""}><span>スキー</span></label>
             <label class="radio-pill"><input type="radio" name="board-${i}" value="snowboard" ${m.board === "snowboard" ? "checked" : ""}><span>スノーボード</span></label>
           </div>
+          <div class="radio-row" style="margin-top:8px">
+            <label class="radio-pill"><input type="radio" name="board-${i}" value="none" ${m.board === "none" ? "checked" : ""}><span class="small">レンタルしない<small class="pill-note">持ち込み・単品のみ</small></span></label>
+          </div>
           ${i === 0 ? mangaQ(3, "どっちにするか迷ったら") : ""}
         </div>
 
-        <div class="field">
+        <div class="field m-set-wrap" style="${m.board === "none" ? "display:none" : ""}">
           <label class="field-label">レンタルセット<span class="req">必須</span></label>
           <div class="radio-row">
             <label class="radio-pill"><input type="radio" name="set-${i}" value="gliding" ${m.setType === "gliding" ? "checked" : ""}><span class="small">滑走セット<small class="pill-note">板・ブーツ・ストック</small></span></label>
             <label class="radio-pill"><input type="radio" name="set-${i}" value="full" ${m.setType === "full" ? "checked" : ""}><span class="small">フルセット<small class="pill-note">滑走＋ウェア上下</small></span></label>
           </div>
         </div>
+        <div class="none-set-note" style="${m.board === "none" ? "" : "display:none"}">板・ブーツ・ストックはレンタルされません。下の「追加レンタル」からウェアやヘルメット等の単品をお選びください（1つ以上必須）。</div>
 
         <div class="field m-stance-wrap" style="${showStance ? "" : "display:none"}">
           <label class="field-label">スタンス（前にする足）<span class="opt-tag">（任意）</span></label>
@@ -560,7 +590,7 @@ function buildMembers() {
           <div class="addon-grid">${addonChecks(m)}</div>
         </div>
 
-        <div class="price-line" style="margin-top:2px"><span class="price-line-label">この方の料金（${rentalDays() || "―"}日間・${isChild ? "子供" : "大人"}）</span><span class="m-price">${memberPrice(m, rentalDays()) != null ? yen(memberPrice(m, rentalDays())) : "セットを選択してください"}</span></div>
+        <div class="price-line" style="margin-top:2px"><span class="price-line-label">この方の料金（${rentalDays() || "―"}日間・${isChild ? "子供" : "大人"}）</span><span class="m-price">${memberPrice(m, rentalDays()) != null ? yen(memberPrice(m, rentalDays())) : priceHintText(m)}</span></div>
       </div>`;
   });
   container.innerHTML = html;
@@ -602,6 +632,7 @@ function buildMembers() {
     });
     card.querySelectorAll(`input[name="board-${i}"]`).forEach((r) => {
       r.addEventListener("change", (e) => {
+        const prevBoard = state.members[i].board;
         state.members[i].board = e.target.value;
         // スノーボードのときだけスタンス欄を表示。スキーに変えたらスタンスは消す。
         const wrap = card.querySelector(".m-stance-wrap");
@@ -612,6 +643,21 @@ function buildMembers() {
           state.members[i].stance = "";
           card.querySelectorAll(`input[name="stance-${i}"]`).forEach((s) => { s.checked = false; });
         }
+        // 「レンタルしない（単品のみ）」⇄ スキー/スノーボードの切替
+        const setWrap = card.querySelector(".m-set-wrap");
+        const noneNote = card.querySelector(".none-set-note");
+        if (e.target.value === "none") {
+          setWrap.style.display = "none";
+          noneNote.style.display = "";
+          state.members[i].setType = "none";
+          card.querySelectorAll(`input[name="set-${i}"]`).forEach((s) => { s.checked = false; });
+        } else {
+          setWrap.style.display = "";
+          noneNote.style.display = "none";
+          // none以外に戻ったら、setTypeがnoneのままだと不整合なのでリセットして選び直させる
+          if (prevBoard === "none" || state.members[i].setType === "none") state.members[i].setType = "";
+        }
+        refreshPrices();
       });
     });
   });
@@ -627,8 +673,12 @@ function handleToStep3() {
     const s = parseFloat(m.shoe);
     if (!h || h < 80 || h > 220) { showError(`${who}の身長を選択してください。`); return; }
     if (!s || s < 14 || s > 33) { showError(`${who}の靴のサイズを選択してください。`); return; }
-    if (m.board !== "ski" && m.board !== "snowboard") { showError(`${who}の用具（スキー / スノーボード）を選んでください。`); return; }
-    if (m.setType !== "gliding" && m.setType !== "full") { showError(`${who}のレンタルセット（滑走セット / フルセット）を選んでください。`); return; }
+    if (m.board !== "ski" && m.board !== "snowboard" && m.board !== "none") { showError(`${who}の用具（スキー / スノーボード / レンタルしない）を選んでください。`); return; }
+    if (m.board === "none") {
+      if (!m.addons || !m.addons.length) { showError(`${who}は「レンタルしない」を選んでいるため、追加レンタルから単品を1つ以上選んでください。`); return; }
+    } else if (m.setType !== "gliding" && m.setType !== "full") {
+      showError(`${who}のレンタルセット（滑走セット / フルセット）を選んでください。`); return;
+    }
   }
   gotoStep(3);
 }
@@ -682,6 +732,7 @@ function renderConfirm() {
       <div class="confirm-sec-title">ご利用日程</div>
       <div class="summary-list">
         <div class="summary-row"><span class="k">期間</span><span class="v">${periodLabel()}</span></div>
+        ${state.evePickup ? `<div class="summary-row"><span class="k">前日受け取り</span><span class="v">希望する（${addDaysStr(state.start, -1)} 午後2時〜）</span></div>` : ""}
         <div class="summary-row"><span class="k">人数</span><span class="v">大人 ${state.adults}名${state.children ? ` / 子供 ${state.children}名` : ""}</span></div>
       </div>
     </div>
@@ -725,6 +776,7 @@ async function handleSubmit() {
       name: state.name, phone: state.phone, email: state.email,
       adults: state.adults, children: state.children,
       members, notes: state.notes,
+      evePickup: state.evePickup,
     });
     showResult(res);
     gotoStep(5);
@@ -742,6 +794,7 @@ function showResult(res) {
   const boardText = Object.entries(boardTally).map(([b, n]) => `${BOARD_LABEL[b]} ${n}名`).join("、");
   document.getElementById("result-summary").innerHTML = `
     <div class="summary-row"><span class="k">期間</span><span class="v">${periodLabel()}</span></div>
+    ${state.evePickup ? `<div class="summary-row"><span class="k">前日受け取り</span><span class="v">${addDaysStr(state.start, -1)} 午後2時〜</span></div>` : ""}
     <div class="summary-row"><span class="k">お名前</span><span class="v">${state.name} 様</span></div>
     <div class="summary-row"><span class="k">人数</span><span class="v">大人 ${state.adults}名${state.children ? ` / 子供 ${state.children}名` : ""}</span></div>
     <div class="summary-row"><span class="k">用具</span><span class="v">${boardText}</span></div>

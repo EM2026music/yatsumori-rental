@@ -49,10 +49,10 @@ function showError(msg) {
 }
 
 const STATUS_LABEL = { pending: "受付中", confirmed: "確定", cancelled: "キャンセル" };
-const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
+const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード", none: "板レンタルなし" };
 const GENDER_LABEL = { male: "男性", female: "女性" };
 const STANCE_LABEL = { regular: "レギュラー(左足前)", goofy: "グーフィー(右足前)", unknown: "スタンス未定" };
-const SET_LABEL = { gliding: "滑走セット", full: "フルセット(ウェア付)" };
+const SET_LABEL = { gliding: "滑走セット", full: "フルセット(ウェア付)", none: "セットなし(単品のみ)" };
 const ADDONS = {
   wear_top: { label: "ウェア（上）",     price: 2000 },
   wear_btm: { label: "ウェア（下）",     price: 2000 },
@@ -69,8 +69,13 @@ const PRICE = {
   gliding: { adult: [3500, 6000, 8000, 10000],   child: [2500, 4000, 5000, 6000],  addA: 2500, addC: 2000 },
 };
 function memberPrice(m, days) {
+  if (!days || days < 1) return null;
+  if (m.set_type === "none") {
+    if (!m.addons || !m.addons.length) return null;
+    return addonsTotal(m) * days;
+  }
   const p = PRICE[m.set_type];
-  if (!p || !days || days < 1) return null;
+  if (!p) return null;
   const base = m.is_child ? p.child : p.adult;
   const add = m.is_child ? p.addC : p.addA;
   const setPrice = days <= 4 ? base[days - 1] : base[3] + (days - 4) * add;
@@ -96,12 +101,17 @@ async function loadReservations() {
 
   let q = sb
     .from("reservations")
-    .select("id, reservation_code, rental_date, return_date, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance, nickname, set_type, addons), reservation_items(quantity, equipment_items(category, size_label))")
+    .select("id, reservation_code, rental_date, return_date, eve_pickup, customer_name, customer_phone, party_size, adults, children, notes, status, reservation_members(member_no, height_cm, shoe_cm, board_type, is_child, age, gender, stance, nickname, set_type, addons), reservation_items(quantity, equipment_items(category, size_label))")
     .order("rental_date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  // 日付で絞り込み：その日が利用期間（開始〜返却）に含まれる予約を表示
-  if (dateStr) q = q.lte("rental_date", dateStr).gte("return_date", dateStr);
+  // 日付で絞り込み：その日が利用期間（開始〜返却）に含まれる予約に加えて、
+  // その日を前日受け取りとして指定した予約（翌日開始・eve_pickup）も表示
+  // （スタッフがその日に何を準備・お渡しすればよいか一覧できるように）
+  if (dateStr) {
+    const nextDay = addDaysStr(dateStr, 1);
+    q = q.or(`and(rental_date.lte.${dateStr},return_date.gte.${dateStr}),and(eve_pickup.eq.true,rental_date.eq.${nextDay})`);
+  }
   if (statusVal === "active") q = q.in("status", ["pending", "confirmed"]);
   else if (statusVal !== "all") q = q.eq("status", statusVal);
 
@@ -163,7 +173,7 @@ function renderCard(r) {
     <div class="data-card">
       <div class="data-card-top">
         <div>
-          <div class="data-card-name">${r.customer_name} 様</div>
+          <div class="data-card-name">${r.customer_name} 様${r.eve_pickup ? ` <span style="font-size:10px;font-weight:700;color:#8a6a1f;background:#fff3cd;border:1px solid #f0b429;border-radius:999px;padding:1px 8px;margin-left:6px">前日受取</span>` : ""}</div>
           <div class="data-card-meta">${periodText(r)}　${partyText}　${r.customer_phone}</div>
         </div>
         <span class="status-badge status-${r.status}">${STATUS_LABEL[r.status]}</span>

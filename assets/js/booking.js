@@ -36,8 +36,12 @@ async function createReservation({ rentalDate, name, phone, email, partySize, it
 // ===== v2（期間レンタル・大人/子供・1人ずつの情報）=====
 
 // 期間の空き状況（カテゴリ単位の残数）。戻り値: { ski: n, snowboard: n }
-async function fetchAvailabilityV2(startStr, endStr) {
-  const { data, error } = await sb.rpc("get_availability_v2", { p_start: startStr, p_end: endStr });
+// evePickup=true のときは前日分も含めて数える。
+// ※p_eve はチェック時だけ渡す＝SQL移行(sql/12)前の旧関数でもエラーにならない後方互換
+async function fetchAvailabilityV2(startStr, endStr, evePickup) {
+  const params = { p_start: startStr, p_end: endStr };
+  if (evePickup) params.p_eve = true;
+  const { data, error } = await sb.rpc("get_availability_v2", params);
   if (error) throw error;
   const out = { ski: 0, snowboard: 0 };
   (data || []).forEach((r) => { out[r.category] = r.remaining; });
@@ -45,9 +49,11 @@ async function fetchAvailabilityV2(startStr, endStr) {
 }
 
 // 予約作成v2。members は [{ height_cm, shoe_cm, board_type, is_child }, ...]。
+// board_type は 'ski' / 'snowboard' / 'none'（板を借りない＝単品のみの人）。
 // 成功時: { reservation_id, reservation_code }
-async function createReservationV2({ start, end, name, phone, email, adults, children, members, notes }) {
-  const { data, error } = await sb.rpc("create_reservation_v2", {
+// ※p_eve_pickup はチェック時だけ渡す（後方互換：上と同じ理由）
+async function createReservationV2({ start, end, name, phone, email, adults, children, members, notes, evePickup }) {
+  const params = {
     p_start: start,
     p_end: end,
     p_name: name,
@@ -57,7 +63,9 @@ async function createReservationV2({ start, end, name, phone, email, adults, chi
     p_children: children,
     p_members: members,
     p_notes: notes || null,
-  });
+  };
+  if (evePickup) params.p_eve_pickup = true;
+  const { data, error } = await sb.rpc("create_reservation_v2", params);
   if (error) throw error;
   return Array.isArray(data) ? data[0] : data;
 }
@@ -98,6 +106,8 @@ async function cancelReservation(code, phone) {
 function translateError(error) {
   const msg = (error && (error.message || error.hint || "")) || "";
   if (msg.includes("OUT_OF_STOCK")) return "ご希望の期間・用具は満数になりました。日程を変えるか、お電話（070-2472-3633）でご相談ください。";
+  if (msg.includes("EVE_CLOSED")) return "前日は休業日のため、前日受け取りはご利用いただけません。当日受け取りでご予約いただくか、お電話でご相談ください。";
+  if (msg.includes("EVE_IN_PAST")) return "前日受け取りができない日程です（前日がすでに過去の日付になっています）。開始日を1日後にずらしてください。";
   if (msg.includes("SHOP_CLOSED_ON_DATE")) return "期間内に休業日が含まれています。別の日をお選びください。";
   if (msg.includes("DATE_IN_PAST")) return "過去の日付は予約できません。";
   if (msg.includes("INVALID_DATES")) return "利用日の指定が正しくありません。開始日と返却日をご確認ください。";

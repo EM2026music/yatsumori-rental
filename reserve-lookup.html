@@ -81,7 +81,7 @@
 <script src="assets/js/supabaseClient.js?v=5"></script>
 <script src="assets/js/booking.js?v=6"></script>
 <script>
-const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード" };
+const BOARD_LABEL = { ski: "スキー", snowboard: "スノーボード", none: "板のレンタルなし" };
 const GENDER_LABEL = { male: "男性", female: "女性" };
 const STANCE_LABEL = { regular: "レギュラー", goofy: "グーフィー", unknown: "スタンス未定" };
 let current = null; // 現在表示中の予約
@@ -126,6 +126,7 @@ function renderResult(r) {
     </div>
     <div class="summary-list">
       <div class="summary-row"><span class="k">ご利用期間</span><span class="v">${periodText(r)}</span></div>
+      ${r.eve_pickup ? `<div class="summary-row"><span class="k">前日受け取り</span><span class="v">希望する</span></div>` : ""}
       <div class="summary-row"><span class="k">お名前</span><span class="v">${r.customer_name} 様</span></div>
       ${partyText ? `<div class="summary-row"><span class="k">人数</span><span class="v">${partyText}</span></div>` : ""}
       ${memberRows}
