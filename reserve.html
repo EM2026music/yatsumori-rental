@@ -102,6 +102,15 @@
 /* 未入力・未選択のとき、その項目を赤枠で示す（どこが足りないか一目で分かる） */
 .field-invalid { outline:2px solid #e0342b; outline-offset:3px; border-radius:11px; animation:reqShake .32s ease; }
 @keyframes reqShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 80%{transform:translateX(-2px)} }
+/* 完了画面：予約番号をタップで選べるように＋コピーボタン＋スクショ保存の案内 */
+#result-code { user-select:all; -webkit-user-select:all; }
+.code-copy { margin-top:12px; padding:8px 20px; border:1.5px solid var(--gold); background:#fff8e8; color:#8a6a1f; font-family:inherit; font-size:12.5px; font-weight:800; border-radius:999px; cursor:pointer; transition:all .15s; }
+.code-copy:active { transform:scale(.97); }
+.code-copy.copied { background:var(--gold); color:#15314f; border-color:var(--gold); }
+.save-note { display:flex; gap:11px; align-items:flex-start; text-align:left; background:#fff8e8; border:2px solid var(--gold); border-radius:12px; padding:13px 15px; margin:0 0 18px; box-shadow:0 3px 12px rgba(240,180,41,.2); }
+.save-note-ico { font-size:21px; line-height:1.1; flex:0 0 auto; }
+.save-note b { display:block; color:#15314f; font-size:13.5px; margin-bottom:2px; }
+.save-note div { font-size:12px; color:#8a6a1f; line-height:1.6; }
 </style>
 </head>
 <body>
@@ -251,6 +260,12 @@
         <div class="code-box">
           <p class="code-label">予約番号</p>
           <p class="code-value" id="result-code">YR-XXXXXX</p>
+          <button type="button" class="code-copy" id="copy-code">番号をコピー</button>
+        </div>
+
+        <div class="save-note">
+          <span class="save-note-ico">📸</span>
+          <div><b>この画面をスクリーンショットで保存してください。</b><br>予約番号は、予約の確認・変更・キャンセルのときに必要です。</div>
         </div>
 
         <div class="summary-list" id="result-summary"></div>
@@ -822,8 +837,7 @@ function showResult(res) {
     <div class="summary-row"><span class="k">用具</span><span class="v">${boardText}</span></div>
     <div class="manga-after">${mangaQ(10, "当日の受け取りの流れ")}${mangaQ(9, "服装・持ち物のチェック")}</div>`;
   document.getElementById("email-note").textContent =
-    state.email ? "ご入力のメールアドレスに確認メールをお送りします。" :
-    "予約番号は控えておいてください（確認・変更に必要です）。";
+    state.email ? "ご入力のメールアドレスにも確認メールをお送りします。" : "";
 }
 
 // ── 初期化（エディタ再配線フックにも対応） ──
@@ -855,7 +869,22 @@ window.__yatsumoriRebind = function () {
   on("to-step4", handleToStep4);
   on("back-step3", () => { showError(""); gotoStep(3); });
   on("submit-reservation", handleSubmit);
+  on("copy-code", (e) => {
+    const btn = e.currentTarget;
+    const code = document.getElementById("result-code").textContent.trim();
+    const done = () => { btn.textContent = "コピーしました ✓"; btn.classList.add("copied"); setTimeout(() => { btn.textContent = "番号をコピー"; btn.classList.remove("copied"); }, 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done).catch(() => selectResultCode());
+    } else {
+      selectResultCode();
+    }
+  });
 };
+// クリップボードが使えない端末では、番号を選択状態にしてコピーしやすくする
+function selectResultCode() {
+  const el = document.getElementById("result-code");
+  try { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } catch (_) {}
+}
 window.__yatsumoriRebind();
 </script>
 <script>window.YATSUMORI_PAGE_KEY="reserve";</script>
