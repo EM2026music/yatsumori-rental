@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>WEB予約 | 8つ森レンタル</title>
-<link rel="stylesheet" href="assets/css/style.css?v=13">
+<link rel="stylesheet" href="assets/css/style.css?v=14">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
@@ -92,6 +92,16 @@
 .mm-body img { width:100%; display:block; min-height:180px; cursor:pointer; }
 .mm-foot { display:block; text-align:center; padding:11px; font-size:12.5px; font-weight:800; color:#1c4f3a; background:#eef5ea; border-top:1px solid #d5e6cd; text-decoration:none; }
 .manga-after { display:flex; flex-wrap:wrap; gap:2px 16px; justify-content:center; margin-top:10px; }
+/* レンタルセット＝この予約のメイン選択。金枠パネルで一番目立たせる */
+.m-set-wrap { background:#fff8e8; border:2px solid var(--gold); border-radius:13px; padding:13px 15px 15px; margin-top:8px; box-shadow:0 3px 12px rgba(240,180,41,.22); }
+.m-set-wrap > .field-label { font-size:15px; font-weight:800; color:#15314f; margin-bottom:10px; }
+.m-set-wrap > .field-label .req { background:#c62a22; }
+.m-set-lead { display:block; font-size:11px; font-weight:700; color:#8a6a1f; margin-top:2px; }
+.m-set-wrap .radio-pill span.small { padding:13px 6px; font-size:13px; }
+.m-set-wrap .radio-pill span.small .pill-note { font-size:10.5px; margin-top:3px; }
+/* 未入力・未選択のとき、その項目を赤枠で示す（どこが足りないか一目で分かる） */
+.field-invalid { outline:2px solid #e0342b; outline-offset:3px; border-radius:11px; animation:reqShake .32s ease; }
+@keyframes reqShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 60%{transform:translateX(5px)} 80%{transform:translateX(-2px)} }
 </style>
 </head>
 <body>
@@ -404,9 +414,18 @@ const state = {
   name: "", phone: "", email: "", notes: "",
 };
 
-function showError(msg) {
+let _flaggedField = null;
+function showError(msg, el) {
   document.getElementById("error-box").innerHTML =
     msg ? `<div class="alert alert-error">${msg}</div>` : "";
+  // 直前に赤くした項目のハイライトを消す
+  if (_flaggedField) { _flaggedField.classList.remove("field-invalid"); _flaggedField = null; }
+  // 未入力の項目があれば赤枠にして、その位置までスクロール
+  if (msg && el) {
+    el.classList.add("field-invalid");
+    _flaggedField = el;
+    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (_) {}
+  }
 }
 
 function gotoStep(n) {
@@ -459,9 +478,10 @@ async function handleToStep2() {
   const start = document.getElementById("start-date").value;
   const end = document.getElementById("end-date").value;
   const evePickup = document.getElementById("eve-pickup").checked;
-  if (!start || !end) { showError("ご利用期間（開始日と返却日）を選択してください。"); return; }
-  if (end < start) { showError("返却日は開始日と同じか、あとの日付にしてください。"); return; }
-  if (evePickup && start <= todayStr()) { showError("前日受け取りをご希望の場合、開始日は明日以降にしてください（前日がすでに今日か過去になっています）。"); return; }
+  const dateRow = document.querySelector("#step1 .date-range-row");
+  if (!start || !end) { showError("ご利用期間（開始日と返却日）を選択してください。", dateRow); return; }
+  if (end < start) { showError("返却日は開始日と同じか、あとの日付にしてください。", dateRow); return; }
+  if (evePickup && start <= todayStr()) { showError("前日受け取りをご希望の場合、開始日は明日以降にしてください（前日がすでに今日か過去になっています）。", dateRow); return; }
   state.start = start; state.end = end; state.evePickup = evePickup;
 
   const btn = document.getElementById("to-step2");
@@ -566,7 +586,7 @@ function buildMembers() {
         </div>
 
         <div class="field m-set-wrap" style="${m.board === "none" ? "display:none" : ""}">
-          <label class="field-label">レンタルセット<span class="req">必須</span></label>
+          <label class="field-label">レンタルセット<span class="req">必須</span><small class="m-set-lead">この予約でいちばん大事な選択です</small></label>
           <div class="radio-row">
             <label class="radio-pill"><input type="radio" name="set-${i}" value="gliding" ${m.setType === "gliding" ? "checked" : ""}><span class="small">滑走セット<small class="pill-note">板・ブーツ・ストック</small></span></label>
             <label class="radio-pill"><input type="radio" name="set-${i}" value="full" ${m.setType === "full" ? "checked" : ""}><span class="small">フルセット<small class="pill-note">滑走＋ウェア上下</small></span></label>
@@ -666,18 +686,20 @@ function buildMembers() {
 // ── ステップ2 → 3（利用者情報の検証） ──
 function handleToStep3() {
   showError("");
+  const cards = document.querySelectorAll("#members-container .member-card");
   for (let i = 0; i < state.members.length; i++) {
     const m = state.members[i];
+    const card = cards[i];
     const who = m.isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
     const h = parseInt(m.height, 10);
     const s = parseFloat(m.shoe);
-    if (!h || h < 80 || h > 220) { showError(`${who}の身長を選択してください。`); return; }
-    if (!s || s < 14 || s > 33) { showError(`${who}の靴のサイズを選択してください。`); return; }
-    if (m.board !== "ski" && m.board !== "snowboard" && m.board !== "none") { showError(`${who}の用具（スキー / スノーボード / レンタルしない）を選んでください。`); return; }
+    if (!h || h < 80 || h > 220) { showError(`${who}の身長を選択してください。`, card && card.querySelector(".m-height")); return; }
+    if (!s || s < 14 || s > 33) { showError(`${who}の靴のサイズを選択してください。`, card && card.querySelector(".m-shoe")); return; }
+    if (m.board !== "ski" && m.board !== "snowboard" && m.board !== "none") { showError(`${who}の用具（スキー / スノーボード / レンタルしない）を選んでください。`, card && card.querySelector(`[name="board-${i}"]`) && card.querySelector(`[name="board-${i}"]`).closest(".field")); return; }
     if (m.board === "none") {
-      if (!m.addons || !m.addons.length) { showError(`${who}は「レンタルしない」を選んでいるため、追加レンタルから単品を1つ以上選んでください。`); return; }
+      if (!m.addons || !m.addons.length) { showError(`${who}は「レンタルしない」を選んでいるため、追加レンタルから単品を1つ以上選んでください。`, card && card.querySelector(".opt-sec")); return; }
     } else if (m.setType !== "gliding" && m.setType !== "full") {
-      showError(`${who}のレンタルセット（滑走セット / フルセット）を選んでください。`); return;
+      showError(`${who}のレンタルセット（滑走セット / フルセット）を選んでください。`, card && card.querySelector(".m-set-wrap")); return;
     }
   }
   gotoStep(3);
@@ -691,9 +713,9 @@ function handleToStep4() {
   state.email = document.getElementById("cust-email").value.trim();
   state.notes = document.getElementById("cust-notes").value.trim();
 
-  if (!state.name) { showError("代表者のお名前を入力してください。"); return; }
+  if (!state.name) { showError("代表者のお名前を入力してください。", document.getElementById("cust-name")); return; }
   const phoneDigits = state.phone.replace(/[^0-9]/g, "");
-  if (phoneDigits.length < 10) { showError("当日つながる電話番号を正しく入力してください。"); return; }
+  if (phoneDigits.length < 10) { showError("当日つながる電話番号を正しく入力してください。", document.getElementById("cust-phone")); return; }
 
   renderConfirm();
   gotoStep(4);
