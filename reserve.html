@@ -334,6 +334,17 @@ function memberPrice(m, days) {
 }
 function yen(n) { return "¥" + Number(n).toLocaleString("ja-JP"); }
 function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+// 年齢の選択範囲。大人＝中学生以上（中1は12歳の子もいるので12から）、子供＝小学生まで。
+// 大人なのに1歳、子供なのに40歳が選べてしまうのを防ぐ。
+const AGE_RANGE = { adult: [12, 99], child: [1, 12] };
+function ageRange(isChild) { return isChild ? AGE_RANGE.child : AGE_RANGE.adult; }
+// 大人⇔子供の区分が変わったとき、その区分で選べない年齢が残っていたら空に戻す
+function normalizeAge(m, isChild) {
+  if (m.age === "" || m.age == null) return;
+  const r = ageRange(isChild);
+  const v = parseInt(m.age, 10);
+  if (isNaN(v) || v < r[0] || v > r[1]) m.age = "";
+}
 // n刻みの数値<option>群。cur は現在値（文字列）、dec=true で0.5刻み等の小数表示。
 function numOptions(min, max, step, cur, dec) {
   let out = "";
@@ -537,6 +548,7 @@ function buildMembers() {
   state.members.forEach((m, i) => {
     const isChild = i >= state.adults;
     m.isChild = isChild;
+    normalizeAge(m, isChild); // 人数の内訳を変えたとき、区分に合わない年齢は選び直してもらう
     const who = isChild ? `お子様 ${i - state.adults + 1}人目` : `大人 ${i + 1}人目`;
     const showStance = m.board === "snowboard";
     html += `
@@ -579,7 +591,7 @@ function buildMembers() {
               <label class="field-label">年齢</label>
               <select class="field-select m-age">
                 <option value=""${m.age === "" ? " selected" : ""}>—</option>
-                ${numOptions(1, 99, 1, m.age, false)}
+                ${numOptions(ageRange(isChild)[0], ageRange(isChild)[1], 1, m.age, false)}
               </select>
             </div>
           </div>
@@ -888,6 +900,7 @@ function selectResultCode() {
 window.__yatsumoriRebind();
 </script>
 <script>window.YATSUMORI_PAGE_KEY="reserve";</script>
+<script src="assets/js/i18n.js?v=1"></script>
 <script src="assets/js/pageRenderer.js?v=4"></script>
 </body>
 </html>

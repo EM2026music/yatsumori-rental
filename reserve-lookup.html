@@ -163,7 +163,9 @@ async function handleSearch() {
 async function handleCancel() {
   if (window.__YATSUMORI_EDITOR__) { alert("編集モードのためキャンセル操作は無効です"); return; }
   if (!current) return;
-  if (!confirm("この予約をキャンセルします。よろしいですか？")) return;
+  // 確認ダイアログはDOMに出ないので、表示中の言語に合わせて文言を取り出す（i18n.js）
+  var askCancel = "この予約をキャンセルします。よろしいですか？";
+  if (!confirm(window.yrT ? window.yrT(askCancel) : askCancel)) return;
   showError("");
   const btn = document.getElementById("cancel-btn");
   btn.disabled = true; btn.textContent = "処理中...";
@@ -194,6 +196,7 @@ document.getElementById("search-again").addEventListener("click", resetToSearch)
 window.__yatsumoriRebind();
 </script>
 <script>window.YATSUMORI_PAGE_KEY="reserve-lookup";</script>
+<script src="assets/js/i18n.js?v=1"></script>
 <script src="assets/js/pageRenderer.js?v=4"></script>
 </body>
 </html>
