@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1536">
+<script>
+// スマホ端末だけ専用ページへ（?pc=1 でPC版を強制表示）
+if (window.self === window.top && /Android|iPhone|iPod|Mobile/i.test(navigator.userAgent) && location.search.indexOf("pc=1") === -1) {
+  location.replace("mobile.html");
+}
+</script>
+<title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
+<meta name="description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。ご予約はお電話で。ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
+<!-- ============================================================
+     予約なし版（HPのみ）。WEB予約システム・Supabaseは使っていません。
+     見た目は本番トップ（公開データ）と同じで、予約導線だけ電話にしてあります。
+     ============================================================ -->
+<style>
+
+:root{
+  --navy:#15314f;
+  --navy-dark:#0c2138;
+  --yellow:#f0b429;
+  --yellow-dark:#d9960f;
+  --bg:#f5f6f8;
+  --white:#ffffff;
+  --text-gray:#6b7785;
+  --border:#dde2e8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  background:#ffffff;color:var(--navy);-webkit-font-smoothing:antialiased;
+}
+a{text-decoration:none;color:inherit}
+img{display:block}
+
+/* ページ全体：1536px 固定・画面が広いときは中央寄せ */
+.page{width:1536px;background:#ffffff;position:relative;overflow:hidden;margin:0 auto}
+
+/* ==============================
+   HEADER  高さ88px
+============================== */
+.site-header{
+  width:1536px;height:88px;padding:0 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:1px solid var(--border);
+}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-logo{width:54px;height:54px;border-radius:50%;object-fit:contain;border:1px solid var(--border)}
+.brand-name{font-weight:800;font-size:20px;line-height:1.2}
+.brand-sub{font-size:10px;color:var(--text-gray);letter-spacing:.08em;margin-top:3px}
+
+.desktop-nav{display:flex;align-items:center;gap:30px}
+.desktop-nav a{text-align:center;color:var(--navy)}
+.desktop-nav a .en{display:block;font-size:14px;font-weight:700;letter-spacing:.04em}
+.desktop-nav a .jp{display:block;font-size:10px;color:var(--text-gray);font-weight:500;margin-top:3px}
+
+.header-cta-btn{
+  display:flex;align-items:center;gap:10px;
+  background:var(--navy);color:#fff;border-radius:10px;
+  padding:13px 24px;font-weight:800;font-size:15px;
+}
+.header-cta-btn .cta-sub{display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px}
+
+/* ==============================
+   HERO  高さ386px
+============================== */
+.hero{position:relative;width:1536px;height:386px;overflow:hidden}
+
+.hero-photo{
+  width:1536px;height:386px;
+  object-fit:cover;object-position:center 30%;
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 620px 200px at 700px 330px,
+      rgba(255,255,255,.72), rgba(255,255,255,0) 72%),
+    linear-gradient(90deg,
+      rgba(255,255,255,0)   0%,
+      rgba(255,255,255,0)   24%,
+      rgba(255,255,255,.55) 42%,
+      rgba(255,255,255,.72) 62%,
+      rgba(255,255,255,.55) 100%);
+}
+
+/* heroテキスト：left 456px / ページ上端から132px（hero内では44px） */
+.hero-content{position:absolute;left:456px;top:44px;width:640px;z-index:2;color:var(--navy)}
+.hero-title{font-size:40px;font-weight:800;line-height:1.4;margin-bottom:14px;text-shadow:0 0 18px rgba(255,255,255,.9),0 0 36px rgba(255,255,255,.7)}
+.hero-desc{font-size:14px;color:#415062;line-height:1.7;text-shadow:0 0 12px rgba(255,255,255,.95)}
+
+/* バッジ（heroテキスト直下・left 456px・画像の大きな白丸に合わせる）
+   ※詳細度を高くしてある：公開済みデータに旧デザインのCSSコピーが
+   含まれていても、この（元の）デザインが必ず勝つようにするため */
+.badges{position:absolute;left:456px;top:232px;z-index:2;display:flex;gap:38px}
+.badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+.page .badges .badge .badge-icon{
+  width:84px;height:84px;border-radius:50%;border:0;
+  background:rgba(255,255,255,.95);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 12px rgba(20,40,60,.12);
+}
+.page .badges .badge .badge-icon svg{stroke:#15314f;stroke-width:1.6}
+.page .badges .badge .badge-icon img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.page .badges .badge .badge-label{font-size:13px;font-weight:800;color:#15314f;background:none;padding:0;text-shadow:0 0 10px rgba(255,255,255,.95),0 0 20px rgba(255,255,255,.8)}
+.page .badges .badge .badge-sub{font-size:10px;font-weight:400;color:#4a5867;background:none;padding:0;border-radius:0;box-shadow:none;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 16px rgba(255,255,255,.85)}
+
+/* 予約カード：right 64px / top 76px / 336x276（absolute） */
+.booking-card{
+  position:absolute;right:64px;top:76px;width:336px;height:276px;
+  background:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(20,40,60,.18);
+  padding:22px;z-index:3;display:flex;flex-direction:column;
+}
+.booking-card-title{text-align:center;font-weight:800;font-size:15px;margin-bottom:16px;color:var(--navy)}
+.booking-steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
+.booking-step{display:flex;flex-direction:column;align-items:center;gap:5px}
+.booking-step-icon{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;background:#fff}
+.booking-step-label{font-size:10px;font-weight:700;color:var(--navy)}
+.booking-step-chevron{color:#bbb;font-size:15px;font-weight:700;line-height:1}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 18px;font-weight:800;font-size:14px;cursor:pointer}
+.btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:9px}
+.btn-secondary{border:1.5px solid var(--border);color:var(--navy);background:#fff}
+
+/* ==============================
+   SERVICE CARDS
+   container padding40 / repeat(4,1fr) / gap12 / height172 / radius6
+============================== */
+.content-grid{width:1536px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:40px}
+.content-card{
+  position:relative;height:172px;border-radius:6px;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:16px;background-size:cover;background-position:center;color:#fff;
+}
+.content-card::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,46,.05) 25%,rgba(8,18,46,.80) 100%)}
+.content-card>*{position:relative;z-index:1}
+.content-card-title{font-weight:800;font-size:17px;margin-bottom:4px}
+.content-card-desc{font-size:12px;opacity:.9;margin-bottom:10px;line-height:1.4}
+.pill-btn{align-self:flex-start;background:rgba(255,255,255,.94);color:var(--navy);font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px}
+
+/* ==============================
+   SECTION HEAD
+============================== */
+.sec-kicker{font-size:12px;color:var(--yellow-dark);font-weight:800;margin-bottom:5px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sec-head-title{font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px}
+.sec-head-more{font-size:12px;color:var(--text-gray);font-weight:700}
+
+/* ==============================
+   INFO ROW  左584 / 中484 / 右352 / gap16
+============================== */
+.info-row{width:1536px;display:flex;gap:16px;padding:0 40px 24px}
+.info-sec{width:584px}
+.reviews-sec{width:484px}
+.access-sec{width:352px}
+
+/* おすすめ情報 */
+.rec-scroll{display:flex;gap:12px}
+.rec-card{flex:1;min-width:0;color:var(--navy)}
+.rec-photo{width:100%;height:96px;border-radius:8px;object-fit:cover;margin-bottom:6px;background:var(--bg)}
+.rec-title{font-size:13px;font-weight:800}
+.rec-sub{font-size:10px;color:var(--text-gray);line-height:1.4}
+
+/* お客様の声（画像どおり：アバター｜本文｜星を横一列） */
+.review-card{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:7px}
+.review-avatar{width:34px;height:34px;border-radius:50%;background:#c8cdd5;flex-shrink:0}
+.review-text{flex:1;font-size:12.5px;font-weight:600;line-height:1.5}
+.review-stars{color:var(--yellow);font-size:13px;flex-shrink:0;letter-spacing:1px}
+
+/* アクセス */
+.access-inner{background:var(--bg);border-radius:8px;padding:10px}
+.access-photo{width:100%;height:42px;object-fit:cover;border-radius:8px;margin-bottom:6px}
+.access-row{display:flex;align-items:flex-start;gap:7px;font-size:12px;margin-bottom:2px}
+.access-btn{display:block;text-align:center;border:1.5px solid var(--border);border-radius:999px;padding:7px;font-size:12px;font-weight:800;margin-top:7px;background:#fff}
+
+/* ==============================
+   FOOTER (UTILITY BAR)  高さ56px
+============================== */
+.utility-bar{width:1536px;height:56px;background:var(--navy);color:#fff;padding:0 40px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.utility-ig{display:flex;align-items:center;gap:9px;font-weight:700}
+.utility-links{display:flex;gap:24px;opacity:.85}
+.utility-links a{display:flex;align-items:center}
+
+/* 公開版(site_pages)への差し替えが終わるまで中身を隠し、古い静的版のチラ見えを防ぐ。
+   差し替え完了(__yatsumoriPageReady)でフェードイン表示する。 */
+#page-root{opacity:0;transition:opacity .28s ease}
+#page-root.yr-ready{opacity:1}
+
+
+/* --- 予約なし版：電話カード --- */
+#page-root{opacity:1 !important}
+.tel-card{text-align:center;margin:6px 0 14px}
+.tel-num{display:block;font-size:27px;font-weight:800;color:#15314f;letter-spacing:.02em;line-height:1.2}
+.tel-sub{font-size:11px;color:#6b7785;margin-top:4px}
+.booking-card .btn-secondary{margin-top:0}
+
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+</head>
+<body>
+<div class="page" id="page-root">
+
+
+<!-- ▼ HEADER -->
+<header class="site-header">
+  <a class="brand" href="index.html">
+    <img class="brand-logo" src="../assets/img/logo.png" alt="8つ森レンタル" style="width: 82px; height: 82px;" loading="eager">
+    <div>
+      <div class="brand-name">8つ森レンタル</div>
+      <div class="brand-sub">SKI &amp; SNOWBOARD RENTAL</div>
+    </div>
+  </a>
+
+  <nav class="desktop-nav">
+    <a href="index.html"><span class="en">HOME</span><span class="jp">ホーム</span></a>
+    <a href="pages/beginner-guide.html"><span class="en">GUIDE</span><span class="jp">初心者ガイド</span></a>
+    <a href="pages/pricing.html"><span class="en">RENTAL</span><span class="jp">レンタル料金</span></a>
+    <a href="pages/waxing.html"><span class="en">WAXING</span><span class="jp">ワクシング</span></a>
+    <a href="pages/catalog.html"><span class="en">GALLERY</span><span class="jp">ギャラリー</span></a>
+    <a href="pages/access.html"><span class="en">ACCESS</span><span class="jp">アクセス</span></a>
+  </nav>
+
+  <a class="header-cta-btn" href="tel:07024723633"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.6 2.8a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.2-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.8 2Z"/></svg><span>お電話でご予約<span class="cta-sub">070-2472-3633</span></span></a>
+</header>
+
+<!-- ▼ HERO -->
+<section class="hero">
+  <img class="hero-photo" src="../assets/img/home/1783345301360-image7.jpg" alt="蔵王の雪山でスキーを持つ人" style="object-position: 50% 46.6%;" loading="eager">
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content" style="left: 335px; top: 20px; right: auto; margin: 0px;">
+    <h1 class="hero-title" data-legibility="plate-light" style="text-shadow: none; background: rgba(255, 255, 255, 0.82); padding: 6px 14px; border-radius: 8px; font-size: 34px;">蔵王の雪をもっと自由に。<br>手ぶらでOK！最高の1日を。</h1>
+    <p class="hero-desc" style="font-size: 18px; font-weight: 800; text-shadow: none; background: rgba(255, 255, 255, 0.82); padding: 6px 14px; border-radius: 8px;" data-legibility="plate-light">8つ森レンタルは、宮城蔵王・遠刈田温泉の<br>スキー・スノーボードレンタル専門店です。</p>
+  </div>
+
+  <!-- 予約カード -->
+  <div class="booking-card">
+    <p class="booking-card-title">ご予約・お問い合わせ</p>
+    <div class="tel-card">
+      <a class="tel-num" href="tel:07024723633">070-2472-3633</a>
+      <p class="tel-sub">受付時間 8:00〜17:00（不定休）</p>
+    </div>
+    <a class="btn btn-primary" href="tel:07024723633">📞 電話で予約する</a>
+    <a class="btn btn-secondary" href="pages/pricing.html">レンタル料金を見る</a>
+  </div>
+
+  <!-- バッジ -->
+  <div class="badges" style="height: 137px; left: 456px; top: 227px; right: auto; width: 0px;">
+    <div class="badge" style="position: absolute; left: -165px; top: 0px; width: 84px; margin: 0px; right: auto;">
+      <div class="badge-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"></path></svg>
+      </div>
+      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">手ぶらでOK<div>小物も充実‼</div></div>
+      <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
+    </div>
+    <a href="index.html" style="text-decoration: none; color: inherit;"></a>
+    <div class="badge" style="position: absolute; left: 138px; top: 0px; width: 129px; margin: 0px; right: auto;">
+      <div class="badge-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"></circle><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"></path></svg>
+      </div>
+      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">板は<div>ワクシング済み‼</div></div>
+      <div class="badge-sub"><br></div>
+    </div>
+    <div class="badge" style="position: absolute; left: 487px; top: 2px; width: 90px; margin: 0px; right: auto;">
+      <div class="badge-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"></path></svg>
+      </div>
+      <div class="badge-label" style="font-size: 15px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">温泉街の中に立地‼</div>
+      <div class="badge-sub" style="font-size: 11px; font-weight: 800;"><br></div>
+    </div>
+  <div class="badge" style="position: absolute; left: 0px; top: 0px; width: 84px; margin: 0px; right: auto;">
+      <div class="badge-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"></path></svg>
+      </div>
+      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">前日貸し出しOK‼</div>
+      <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
+    </div><div class="badge" style="position: absolute; left: 321px; top: 0px; width: 84px; margin: 0px; right: auto;">
+      <div class="badge-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"></path></svg>
+      </div>
+      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">男女別<div>更衣室完備</div><div>ロッカー有</div></div>
+      <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
+    </div></div>
+</section>
+
+<!-- ▼ SERVICE CARDS -->
+<section class="content-grid" style="position: relative; height: 252px; width: 1536px;">
+  <a class="content-card" style="background-image: url(&quot;../assets/img/home/1783177383179-RIMG2873.jpg&quot;); position: absolute; left: 1135px; top: 40px; width: 357px; margin: 0px; right: auto; height: 193px;" href="pages/catalog.html">
+    <h3 class="content-card-title">ギャラリー</h3>
+    <p class="content-card-desc">初心者〜上級者まで<br>豊富なラインナップ</p>
+    <span class="pill-btn">一覧を見る ›</span>
+  </a>
+  <a class="content-card" style="background-image: url(&quot;../assets/img/home/1783203332409-__________2-1024x640.jpg&quot;); position: absolute; left: 43px; top: 40px; width: 316px; margin: 0px; right: auto; height: 198px;" href="pages/beginner-guide.html">
+    <h3 class="content-card-title">初心者ガイド</h3>
+    <p class="content-card-desc">はじめての方も安心！<br>蔵王を楽しむコツをご紹介</p>
+    <span class="pill-btn">詳しく見る ›</span>
+  </a>
+  <a class="content-card" style="background-image: url(&quot;../assets/img/home/1785162200661-20250104_091258.jpg&quot;); position: absolute; left: 377px; top: 40px; width: 355px; margin: 0px; right: auto; height: 197px;" href="pages/pricing.html">
+    <h3 class="content-card-title">レンタル料金</h3>
+    <p class="content-card-desc">わかりやすい料金プラン</p>
+    <span class="pill-btn">料金表を見る ›</span>
+  </a>
+  <a class="content-card" style="background-image: url(&quot;../assets/img/home/1785162077353-RIMG3025.jpg&quot;); position: absolute; left: 750px; top: 40px; width: 362px; margin: 0px; right: auto; height: 195px;" href="pages/waxing.html">
+    <h3 class="content-card-title">ワクシングサービス</h3>
+    <p class="content-card-desc">滑りが変わる！<br>板をベストコンディションに</p>
+    <span class="pill-btn">詳しく見る ›</span>
+  </a>
+</section>
+
+<!-- ▼ INFO ROW -->
+<div class="info-row" style="position: relative; height: 254px; width: 1536px;">
+
+  <!-- おすすめ情報 -->
+  <div class="info-sec" style="position: absolute; left: 40px; top: 0px; width: 1060px; margin: 0px;">
+    <p class="sec-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
+    <div class="sec-head">
+      <div class="sec-head-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="2"><path d="M3 20L9 8L13 14L16 9L21 20H3Z"></path></svg>
+        おすすめ情報
+      </div>
+      <a class="sec-head-more" href="#">もっと見る ›</a>
+    </div>
+    <div class="rec-scroll" style="position: relative; height: 185px; width: 1060px;">
+      <a class="rec-card" href="pages/onsen-guide.html" style="position: absolute; left: 0px; top: 0px; width: 252px; height: auto; margin: 0px; right: auto;">
+        <img class="rec-photo" src="../assets/img/onsen.jpg" alt="遠刈田温泉ガイド" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px;" loading="eager">
+        <p class="rec-title">遠刈田温泉ガイド</p>
+        <p class="rec-sub">スキーの後は温泉でリラックス</p>
+      </a>
+      <a class="rec-card" href="pages/gourmet.html" style="position: absolute; left: 268px; top: 0px; width: 252px; height: auto; margin: 0px; right: auto;">
+        <img class="rec-photo" src="../assets/img/home/1785162627972-______.jpg" alt="周辺グルメ情報" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px;" loading="eager">
+        <p class="rec-title">周辺グルメ情報</p>
+        <p class="rec-sub">おすすめランチ・カフェ</p>
+      </a>
+      
+    <a class="rec-card" href="pages/yatsumorin.html" style="position: absolute; left: 804px; top: 0px; width: 252px; height: auto; margin: 0px; right: auto;">
+        <img class="rec-photo" src="../assets/img/home/1785168113854-ChatGPT_Image_2026_7_28__01_00_06__2_.jpg" alt="やつもりん" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; object-position: 50% 0%;" loading="eager">
+        <p class="rec-title">やつもりん（公式キャラ）</p>
+        <p class="rec-sub">八つ森レンタルの公式キャラを見る</p>
+      </a><a class="rec-card" href="pages/zao-ski-info.html" style="position: absolute; left: 536px; top: 0px; width: 252px; height: auto; margin: 0px; right: auto;">
+        <img class="rec-photo" src="../assets/img/zao-ski.jpg" alt="蔵王のスキー場情報" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px;" loading="eager">
+        <p class="rec-title">蔵王のスキー場情報</p>
+        <p class="rec-sub">ゲレンデ・積雪・天気をチェック</p>
+      </a></div>
+  </div>
+
+  <!-- お客様の声 -->
+  
+
+  <!-- アクセス -->
+  <div class="access-sec" style="position: absolute; left: 1140px; top: 0px; width: 352px; margin: 0px;">
+    <div class="sec-head">
+      <div class="sec-head-title">アクセス</div>
+    </div>
+    <div class="access-inner" style="padding: 8px;">
+      <img class="access-photo" src="../assets/img/home/1785162884344-__.jpg" alt="8つ森レンタル 店舗写真" style="height: 88px; object-position: 50% 19%; object-fit: cover; width: 323px;" loading="eager">
+      <div class="access-row" style="margin-bottom: 1px;">📍 <span>宮城県刈田郡蔵王町遠刈田温泉中町16</span></div>
+      <div class="access-row" style="margin-bottom: 1px;">🕒 <span>営業時間　8:00〜17:00（不定休）</span></div>
+      <div class="access-row" style="margin-bottom: 1px;">📞 <strong>070-2472-3633</strong></div>
+      <a class="access-btn" href="pages/access.html" style="margin-top: 5px; padding: 6px;">詳しいアクセスを見る ›</a>
+    </div>
+  </div>
+</div>
+
+<!-- ▼ FOOTER (UTILITY BAR) -->
+<div class="utility-bar">
+  <span class="utility-ig">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="5"></circle><circle cx="17.5" cy="6.5" r="1" fill="white"></circle></svg>
+    最新情報はInstagramでチェック！&nbsp;&nbsp;@8mori_rental
+  </span>
+  <div class="utility-links">
+    <a href="pages/faq.html">❓ よくある質問</a>
+    <a href="tel:07024723633">✉️ お問い合わせ</a>
+    <a href="pages/privacy.html">🔒 プライバシーポリシー</a>
+  </div>
+</div>
+
+
+</div><!-- .page -->
+<script>
+window.__yatsumoriRebind = function () {
+  // フッターの死にリンク補修
+  document.querySelectorAll(".utility-links a").forEach(function (a) {
+    var t = a.textContent || "";
+    if (/よくある|質問/.test(t)) a.setAttribute("href", "pages/faq.html");
+    else if (/問い合わせ/.test(t)) a.setAttribute("href", "tel:07024723633");
+    else if (/プライバシー/.test(t)) a.setAttribute("href", "pages/privacy.html");
+  });
+  // 初心者ガイドのサービスカードは漫画のあるページへ
+  document.querySelectorAll(".content-card").forEach(function (a) {
+    var ttl = a.querySelector(".content-card-title");
+    if (ttl && /初心者/.test(ttl.textContent)) a.setAttribute("href", "pages/beginner-guide.html");
+  });
+  // おすすめ情報：重複した「周辺グルメ」を1つ「蔵王のスキー場情報」に置き換える
+  // （編集時に誤って複製された分を、まだ無いスキー場カードに振り替える）
+  var recs = Array.prototype.slice.call(document.querySelectorAll(".rec-card"));
+  var gourmet = recs.filter(function (a) { return /gourmet/.test(a.getAttribute("href") || ""); });
+  var hasSki = recs.some(function (a) { return /zao-ski-info/.test(a.getAttribute("href") || ""); });
+  if (gourmet.length > 1 && !hasSki) {
+    var c = gourmet[gourmet.length - 1];
+    c.setAttribute("href", "pages/zao-ski-info.html");
+    var img = c.querySelector("img"); if (img) { img.setAttribute("src", "../assets/img/zao-ski.jpg"); img.setAttribute("alt", "蔵王のスキー場情報"); }
+    var t2 = c.querySelector(".rec-title"); if (t2) t2.textContent = "蔵王のスキー場情報";
+    var s2 = c.querySelector(".rec-sub"); if (s2) s2.textContent = "ゲレンデ・積雪・天気をチェック";
+  }
+  // 公開版（エディタで絶対配置化された）レイアウトのときだけ、おすすめ情報を
+  // アクセスの手前まで広げて4枚を均等サイズに整える（やつもりんを4枚目に）。
+  // 大きすぎたプロモバナーはやめて、他のカードと同じサイズに揃える。
+  // 静的フォールバック（flexレイアウト）は位置がstaticなので発動しない。
+  var infoSec = document.querySelector(".info-sec");
+  var recScroll = document.querySelector(".rec-scroll");
+  var accessSec = document.querySelector(".access-sec");
+  if (infoSec && recScroll && accessSec && getComputedStyle(infoSec).position === "absolute") {
+    infoSec.style.width = "1060px";
+    recScroll.style.width = "1060px";
+    recScroll.style.height = "185px";
+    var pickHref = function (sub) {
+      return Array.prototype.slice.call(recScroll.querySelectorAll(".rec-card"))
+        .filter(function (a) { return (a.getAttribute("href") || "").indexOf(sub) >= 0; })[0];
+    };
+    var W = 252, GAP = 16, IMGH = 140;
+    var place = function (card, idx, title, sub, img, alt, objPos) {
+      if (!card) return;
+      card.style.cssText = "position:absolute;left:" + (idx * (W + GAP)) + "px;top:0;width:" + W + "px;height:auto;margin:0;right:auto;";
+      var im = card.querySelector("img");
+      if (im) {
+        // 切り取り位置(object-position)はエディタで設定した値を尊重し上書きしない
+        var pos = objPos || im.style.objectPosition || "";
+        im.style.cssText = "width:100%;height:" + IMGH + "px;border-radius:8px;object-fit:cover;margin-bottom:6px;" + (pos ? "object-position:" + pos + ";" : "");
+        if (img) im.setAttribute("src", img);
+        if (alt) im.setAttribute("alt", alt);
+      }
+      var t = card.querySelector(".rec-title"); if (t && title) t.textContent = title;
+      var s = card.querySelector(".rec-sub"); if (s && sub) s.textContent = sub;
+    };
+    place(pickHref("onsen"), 0);
+    place(pickHref("gourmet"), 1);
+    place(pickHref("zao-ski"), 2);
+    place(pickHref("yatsumorin"), 3, "やつもりん（公式キャラ）", "8つ森レンタルの公式キャラを見る", "../assets/img/yatsumorin-promo.jpg?v=2", "やつもりん");
+
+    // アクセスカードが枠(info-row 242px)を突き抜けてフッターに約26px重なっていた
+    // （写真を42→100pxにした副作用で右カラムだけ縦に伸びた）。写真を88pxに戻し、
+    // 余白を詰め、枠を254pxへ広げて、左のおすすめ4枚と底を揃えつつフッターに
+    // 被らないよう調整（headless実測: 左底971 / 右底972 / フッター980 で確定）。
+    var infoRow = document.querySelector(".info-row");
+    if (infoRow) infoRow.style.height = "254px";
+    var accessPhoto = document.querySelector(".access-photo");
+    if (accessPhoto) accessPhoto.style.height = "88px";
+    var accessInner = document.querySelector(".access-inner");
+    if (accessInner) accessInner.style.padding = "8px";
+    document.querySelectorAll(".access-row").forEach(function (r) { r.style.marginBottom = "1px"; });
+    var accessBtn = document.querySelector(".access-btn");
+    if (accessBtn) { accessBtn.style.marginTop = "5px"; accessBtn.style.padding = "6px"; }
+  }
+};
+window.__yatsumoriRebind();
+</script>
+<script src="../assets/js/i18n.js?v=1"></script>
+</body>
+</html>

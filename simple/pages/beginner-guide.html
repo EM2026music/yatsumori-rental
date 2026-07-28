@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>初心者ガイド | 8つ森レンタル</title>
+<meta name="description" content="スキー・スノーボードが初めての方へ。8つ森レンタルの使い方、持ち物、服装のコツ、当日の流れを、看板娘やつもりんがご案内します。">
+<link rel="stylesheet" href="../../assets/css/style.css?v=13">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="bg-css">
+/* 読みやすさ改善（2026-07-06）：本文を全体的に大きく＋薄いグレーを一段濃く */
+.bg-lead{font-size:16px;line-height:1.95;color:#33495f;margin:6px 0 22px}
+.help-text{font-size:14px;color:#5b6774}
+.bg-h{font-size:19px;font-weight:800;color:#15314f;margin:32px 0 14px;padding-left:11px;border-left:4px solid #f0b429}
+.manga-select{display:block;width:100%;max-width:440px;padding:13px 15px;font-size:15px;font-weight:800;color:#1c4f3a;font-family:inherit;border:1.5px solid #d5e6cd;border-radius:12px;background:#fff;cursor:pointer;margin:0 0 14px;box-shadow:0 2px 8px rgba(20,40,60,.05)}
+.manga-select:focus{outline:none;border-color:#1c4f3a}
+.manga-cap{font-size:14.5px;font-weight:800;color:#1c4f3a;background:#eef5ea;border:1px solid #d5e6cd;border-radius:8px;padding:8px 13px;margin:0 0 8px}
+.manga-img{width:100%;border-radius:12px;display:block;margin:0 0 8px;box-shadow:0 6px 18px rgba(20,40,60,.14)}
+.manga-ep{display:none}
+.manga-ep.active{display:block}
+.manga-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 0 6px}
+.manga-nav button{border-radius:10px;padding:11px 18px;font-size:14px;font-weight:800;line-height:1.4;cursor:pointer;text-align:center}
+.manga-nav button small{font-weight:700;font-size:11px}
+/* 次の話へ＝目立つ塗りボタン（白文字） */
+.manga-nav .manga-next{margin-left:auto;background:#1c4f3a;color:#fff;border:none;box-shadow:0 4px 12px rgba(28,79,58,.28)}
+.manga-nav .manga-next small{color:rgba(255,255,255,.85)}
+.manga-nav .manga-next:hover{background:#17422f}
+/* 前の話へ＝控えめ */
+.manga-nav .manga-prev{background:#fff;border:1.5px solid #d5e6cd;color:#1c4f3a}
+.manga-nav .manga-prev small{opacity:.75}
+.manga-nav .manga-prev:hover{background:#eef5ea}
+.manga-nav .manga-end{font-size:13px;color:var(--text-mute);font-weight:700}
+.flow-step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #eef1f5}
+.flow-step:last-child{border-bottom:none}
+.flow-no{flex:0 0 32px;height:32px;border-radius:50%;background:#f0b429;color:#15314f;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.flow-body{flex:1}
+.flow-title{font-size:16px;font-weight:800;color:#15314f}
+.flow-desc{font-size:15px;line-height:1.85;color:#45535f;margin-top:3px}
+.tip-card{border:1px solid var(--border,#dde2e8);border-radius:12px;padding:15px 18px;background:#fff;margin-bottom:12px}
+.tip-title{font-size:16px;font-weight:800;color:#15314f;margin-bottom:8px}
+.tip-list{margin:0 0 0 2px}
+.tip-list li{list-style:none;padding-left:24px;position:relative;line-height:1.9;font-size:15px;color:#45535f}
+.tip-list li::before{content:"✔";position:absolute;left:0;color:#f0b429;font-weight:800}
+.bg-note{font-size:14px;line-height:1.85;color:#5b6774;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:15px 18px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="page" id="page-root">
+  <header class="subpage-header">
+    <a class="back-link" href="../index.html">&#8249;</a>
+    <span class="subpage-title">初心者ガイド</span>
+  </header>
+  <div class="container">
+    <h2 style="font-size:22px;font-weight:800;color:#15314f;margin:8px 0 4px">はじめての方へ</h2>
+    <p class="bg-lead">スキー・スノーボードが初めてでも大丈夫！8つ森レンタルの看板娘「やつもりん」が、レンタルの流れと準備のコツをご案内します。</p>
+
+    <!-- やつもりん予約案内マンガ（タブで話を切り替え） -->
+    <div class="bg-h">やつもりんの予約案内マンガ</div>
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">看板娘やつもりんが、WEB予約のコツを漫画でご案内します。読みたい話を選んでください。</p>
+    <select class="manga-select" id="manga-select" aria-label="読みたい話を選ぶ"></select>
+    <div class="manga-cap" id="manga-cap"></div>
+    <img class="manga-img" id="manga-img" alt="やつもりんの予約案内マンガ">
+    <div class="manga-nav" id="manga-nav"></div>
+    <div class="wizard-actions" style="margin:10px 0 6px">
+      <a class="btn-nav primary btn-block" href="tel:07024723633">📞 070-2472-3633<br><small style="font-size:12px;font-weight:700">お電話でご予約ください</small></a>
+    </div>
+
+    <!-- 当日の流れ（文字補足） -->
+    <div class="bg-h">レンタル当日の流れ</div>
+    <div class="flow-step"><div class="flow-no">1</div><div class="flow-body"><div class="flow-title">ご来店・受付</div><div class="flow-desc">WEB予約された方は代表者のお名前をお伝えください。前日午後2時からのお渡しも可能です。</div></div></div>
+    <div class="flow-step"><div class="flow-no">2</div><div class="flow-body"><div class="flow-title">サイズ合わせ</div><div class="flow-desc">身長を見てスタッフが板をお選びします。ブーツは普段の靴のサイズを目安に、試着でフィット感を確認します。</div></div></div>
+    <div class="flow-step"><div class="flow-no">3</div><div class="flow-body"><div class="flow-title">ゲレンデへ！</div><div class="flow-desc">道具が揃ったら、いよいよ雪山へ。手ぶらでOK、身軽に楽しめます。</div></div></div>
+    <div class="flow-step"><div class="flow-no">4</div><div class="flow-body"><div class="flow-title">帰りに温泉</div><div class="flow-desc">お店は遠刈田温泉のすぐそば。滑ったあとは温泉で温まって帰るのがおすすめです。</div></div></div>
+    <div class="flow-step"><div class="flow-no">5</div><div class="flow-body"><div class="flow-title">返却</div><div class="flow-desc">営業時間内に道具をご返却ください。お支払いは現金のみです。</div></div></div>
+
+    <!-- 服装・持ち物のコツ -->
+    <div class="bg-h">服装・持ち物のコツ</div>
+    <div class="tip-card">
+      <div class="tip-title">🧦 靴下はハイソックスがおすすめ</div>
+      <ul class="tip-list">
+        <li>膝下までの長い靴下だと、脱ぎ履きの際に脱げず安心です。</li>
+        <li>足首の厚みが重ならないので血流を妨げず、痛くなりにくいです。</li>
+        <li><b>もこもこの靴下はNG</b>。ブーツの中で滑って履きにくくなります。</li>
+      </ul>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">🧤 自分で用意すると良いもの</div>
+      <ul class="tip-list">
+        <li>ニット帽・グローブ・ネックウォーマー（セットには含まれません。店頭でも販売しています）</li>
+        <li>インナー（動きやすく、汗をかいても冷えにくいもの）</li>
+        <li>日焼け止め（雪面の照り返しは強いです）</li>
+      </ul>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">🎿 板やブーツのサイズは心配いりません</div>
+      <ul class="tip-list">
+        <li>スタッフが身長・滑り方に合わせて最適な板を選びます。</li>
+        <li>ブーツは普段の靴のサイズでOK。試着で確認できます。</li>
+      </ul>
+    </div>
+
+    <div class="bg-note">
+      わからないことは、お気軽にお電話（070-2472-3633）または<a href="faq.html" style="color:#1c4f82;font-weight:700">よくあるご質問</a>をご覧ください。
+    </div>
+
+    <div class="wizard-actions" style="margin-top:18px">
+      <a class="btn-nav primary btn-block" href="tel:07024723633">📞 070-2472-3633<br><small style="font-size:12px;font-weight:700">お電話でご予約ください</small></a>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  // 話が増えたらここに1行足すだけ（img は assets/img/ 内のファイル名）
+  var EPISODES = [
+    { no:"第1話",  ttl:"予約でスムーズ",     cap:"第1話：予約しておくと当日スムーズ！",              img:"manga-1.jpg" },
+    { no:"第2話",  ttl:"入力してほしいこと", cap:"第2話：予約で入力してほしいこと",                 img:"manga-2.jpg" },
+    { no:"第3話",  ttl:"スキー？スノボ？",   cap:"第3話：スキー？スノーボード？迷ったらチェック！",  img:"manga-3.jpg" },
+    { no:"第4話",  ttl:"身長・靴のサイズ",   cap:"第4話：身長・靴のサイズは何に使うの？",           img:"manga-4.jpg" },
+    { no:"第5話",  ttl:"年齢・性別",         cap:"第5話：年齢・性別は何に使うの？",                 img:"manga-5.jpg" },
+    { no:"第6話",  ttl:"開放値って何？",     cap:"第6話：開放値って何？（転倒時に板が外れる仕組み）", img:"manga-6.jpg" },
+    { no:"第7話",  ttl:"スタンス",           cap:"第7話：スタンスって何？",                         img:"manga-7.jpg" },
+    { no:"第8話",  ttl:"家族・グループ予約", cap:"第8話：家族・グループで予約するとき",             img:"manga-8.jpg" },
+    { no:"第9話",  ttl:"服装・持ち物",       cap:"第9話：当日の服装・持ち物は？",                   img:"manga-9.jpg" },
+    { no:"第10話", ttl:"受け取りの流れ",     cap:"第10話：予約から受け取りまでの流れ",              img:"manga-10.jpg" },
+    { no:"第11話", ttl:"ブーツの履き方",     cap:"第11話：ブーツの履き方＆困ったときは",            img:"manga-11.jpg" }
+  ];
+  // 公開版ではSupabase保存版がページ中身を丸ごと差し替えるため、要素は毎回
+  // 引き直し、イベントは document への委譲で付ける（差し替え後も操作が効き続ける）。
+  function els(){
+    return {
+      sel: document.getElementById("manga-select"),
+      cap: document.getElementById("manga-cap"),
+      img: document.getElementById("manga-img"),
+      nav: document.getElementById("manga-nav")
+    };
+  }
+
+  // プルダウンを生成（保存版には生成済みで入っているので二重生成しない）
+  function populate(){
+    var sel = els().sel;
+    if (!sel || sel.options.length) return;
+    EPISODES.forEach(function(ep, i){
+      var o = document.createElement("option");
+      o.value = i;
+      o.textContent = ep.no + "　" + ep.ttl;
+      sel.appendChild(o);
+    });
+  }
+
+  // 話ごとに漫画画像の縦横比が違う（縦長1.41と1.25の2種類）ため、切替で画像の
+  // 高さが変わった分だけ、下にある項目を詰める/押し下げる（変な隙間・重なり防止）。
+  // 保存版（絶対配置レイアウト）のときだけ動く。通常の流し込みでは自然に詰まるので不要。
+  function reflowAfter(img, oldH){
+    var newH = img.getBoundingClientRect().height;
+    var delta = newH - oldH;
+    if (Math.abs(delta) < 2) return;
+    var container = img.parentElement;
+    if (!container || img.style.position !== "absolute") return;
+    var imgTop = parseFloat(img.style.top) || 0;
+    Array.prototype.forEach.call(container.children, function(sib){
+      if (sib === img || sib.style.position !== "absolute") return;
+      var top = parseFloat(sib.style.top) || 0;
+      if (top > imgTop) sib.style.top = Math.round(top + delta) + "px";
+    });
+    var curH = parseFloat(container.style.height) || container.getBoundingClientRect().height;
+    container.style.height = Math.round(curH + delta) + "px";
+  }
+
+  function show(i, scroll){
+    var d = els();
+    var ep = EPISODES[i];
+    if (!d.sel || !d.img || !ep) return;
+    d.cap.textContent = ep.cap;
+    // 直前の画像が読み込み済みの時だけ高さの差を取る（読み込み中に切り替えると
+    // 高さ0を基準にしてしまい、大きくズレるため。その場合は位置調整をスキップ）
+    var oldH = (d.img.complete && d.img.naturalWidth) ? d.img.getBoundingClientRect().height : null;
+    d.img.onload = function(){ d.img.onload = null; if (oldH !== null) reflowAfter(d.img, oldH); };
+    d.img.src = "../../assets/img/" + ep.img;
+    d.img.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
+    d.sel.value = i;
+    // 前へ／次へ
+    d.nav.innerHTML = "";
+    if (i > 0) {
+      var p = EPISODES[i-1];
+      var pb = document.createElement("button"); pb.className = "manga-prev";
+      pb.setAttribute("data-ep", i-1);
+      pb.innerHTML = "◂ 前の話へ<br><small>" + p.no + " " + p.ttl + "</small>";
+      d.nav.appendChild(pb);
+    } else { d.nav.appendChild(document.createElement("span")); }
+    if (i < EPISODES.length - 1) {
+      var n = EPISODES[i+1];
+      var nb = document.createElement("button"); nb.className = "manga-next";
+      nb.setAttribute("data-ep", i+1);
+      nb.innerHTML = "次の話へ ▸<br><small>" + n.no + " " + n.ttl + "</small>";
+      d.nav.appendChild(nb);
+    } else {
+      var e = document.createElement("span"); e.className = "manga-end"; e.textContent = "最終話までありがとう！";
+      d.nav.appendChild(e);
+    }
+    if (scroll) { var t = d.sel.getBoundingClientRect().top + window.pageYOffset - 12; window.scrollTo({ top: t, behavior: "smooth" }); }
+  }
+
+  document.addEventListener("change", function(e){
+    if (e.target && e.target.id === "manga-select") show(parseInt(e.target.value, 10), false);
+  });
+  document.addEventListener("click", function(e){
+    var b = e.target.closest ? e.target.closest("#manga-nav button") : null;
+    if (!b) return;
+    var d = els();
+    var cur = d.sel ? (parseInt(d.sel.value, 10) || 0) : 0;
+    // 旧保存データのボタン（data-ep無し）でも前後が判定できるようにする
+    var i = b.hasAttribute("data-ep") ? parseInt(b.getAttribute("data-ep"), 10)
+          : (b.className.indexOf("manga-next") !== -1 ? cur + 1 : cur - 1);
+    show(i, true);
+  });
+
+  // 差し替え後にもプルダウンの中身を保証する（pageRendererが呼んでくれるフック）
+  window.__yatsumoriRebind = function(){ populate(); };
+
+  if (!els().sel || !els().img) return;
+  populate();
+  show(0, false);
+})();
+</script>
+<script>if (window.__yatsumoriRebind) window.__yatsumoriRebind();</script>
+</body>
+</html>

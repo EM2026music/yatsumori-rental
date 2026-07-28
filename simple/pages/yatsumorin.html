@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>やつもりん | 8つ森レンタル 公式キャラクター</title>
+<meta name="description" content="8つ森レンタルの看板娘「やつもりん」。森と雪山を愛するツンデレなスノーボーダー。公式グッズや使い方講座もこちら。">
+<link rel="stylesheet" href="../../assets/css/style.css?v=13">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
+<style id="ym-css">
+.ym-hero{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,#15314f 0%,#1c4f3a 100%);border-radius:16px;padding:20px;color:#fff;margin:6px 0 22px}
+.ym-avatar{flex:0 0 138px;width:138px;height:138px;border-radius:50%;overflow:hidden;background:#0e2237;border:3px solid #a6ce39;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.ym-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.ym-hero-text{flex:1;min-width:0}
+/* 基本プロフィール横のイラスト（ぎりぎりまで大きく） */
+.profile-row{display:flex;gap:10px;align-items:flex-end}
+.profile-row .ym-profile{flex:1;min-width:0}
+.profile-char{flex:0 0 225px;width:225px;filter:drop-shadow(0 8px 14px rgba(20,40,60,.22))}
+@media(max-width:560px){.profile-char{flex-basis:150px;width:150px}}
+.ym-name{font-size:26px;font-weight:800;font-family:"Zen Maru Gothic",sans-serif;letter-spacing:.02em}
+.ym-name small{display:block;font-size:12px;letter-spacing:.18em;color:#b6e3a0;font-weight:700;margin-top:2px}
+.ym-tag{font-size:13px;line-height:1.8;margin-top:10px;color:rgba(255,255,255,.92)}
+.ym-h{font-size:17px;font-weight:800;color:#15314f;margin:28px 0 12px;padding-left:10px;border-left:4px solid #6aa84f}
+.ym-profile{border:1px solid var(--border,#dde2e8);border-radius:12px;padding:14px 16px;background:#fff}
+.ym-profile .row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #eef1f5;font-size:13px;line-height:1.6}
+.ym-profile .row:last-child{border-bottom:none}
+.ym-profile .k{flex:0 0 84px;font-weight:800;color:#6aa84f}
+.ym-profile .v{color:#39506a}
+.ym-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ym-chips span{font-size:12px;font-weight:700;border-radius:999px;padding:4px 11px}
+.chips-like span{color:#1c4f3a;background:#eef5ea;border:1px solid #d5e6cd}
+.chips-weak span{color:#8a5a2b;background:#fdf3e7;border:1px solid #f0dcc2}
+.ym-quote{border-left:4px solid #a6ce39;background:#f7faf2;border-radius:0 10px 10px 0;padding:12px 14px;margin-top:4px}
+.ym-quote p{font-size:13.5px;line-height:1.9;color:#15314f;font-weight:700;margin:0}
+.ym-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.ym-two{grid-template-columns:1fr}}
+.goods-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.goods-card{border:1px solid var(--border,#dde2e8);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(20,40,60,.06)}
+.goods-img{aspect-ratio:1/1;background:#f4f7f4;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px}
+.goods-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 3px 8px rgba(20,40,60,.10))}
+.goods-body{padding:11px 13px}
+.goods-name{font-size:14px;font-weight:800;color:#15314f}
+.goods-price{font-size:13px;font-weight:800;color:#d0342c;margin-top:3px}
+.goods-price.soon{color:#9aa7b4;font-weight:700}
+a.goods-card{text-decoration:none;color:inherit;display:block;transition:transform .15s ease,box-shadow .15s ease}
+a.goods-card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(20,40,60,.14)}
+.goods-more{color:#1c4f82;font-weight:800;font-size:12px;float:right}
+.ym-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:14px}
+/* 日常のやつもりん ギャラリー */
+.ym-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ym-gallery a{display:block;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(20,40,60,.14);line-height:0;cursor:zoom-in}
+.ym-gallery img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;transition:transform .3s ease}
+.ym-gallery a:hover img{transform:scale(1.05)}
+@media(max-width:480px){.ym-gallery{grid-template-columns:1fr 1fr}}
+.gl-lb{position:fixed;inset:0;background:rgba(8,16,28,.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;cursor:zoom-out}
+.gl-lb.open{display:flex}
+.gl-lb img{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 12px 44px rgba(0,0,0,.55)}
+.video-box{height:200px;border:2px dashed #cfd8e2;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;color:#9aa7b4;font-size:12.5px;line-height:1.8;background:#fafbfc}
+</style>
+</head>
+<body>
+<div class="page" id="page-root">
+  <header class="subpage-header">
+    <a class="back-link" href="../index.html">&#8249;</a>
+    <span class="subpage-title">やつもりん</span>
+  </header>
+  <div class="container">
+
+    <!-- キャラクター紹介（丸枠の顔アバター） -->
+    <div class="ym-hero">
+      <div class="ym-avatar"><img src="../../assets/img/yatsumorin-avatar.png" alt="やつもりん"></div>
+      <div class="ym-hero-text">
+        <div class="ym-name">やつもりん<small>YATSUMORIN</small></div>
+        <div class="ym-tag">8つ森レンタルの看板娘。森と雪山をこよなく愛するツンデレなスノーボーダー。今日もゲレンデでみんなを見守ってくれているよ！</div>
+      </div>
+    </div>
+
+    <div class="ym-h">基本プロフィール</div>
+    <div class="profile-row">
+      <div class="ym-profile">
+        <div class="row"><span class="k">名前</span><span class="v">やつもりん（8ツ森ン）／ YATSUMORIN</span></div>
+        <div class="row"><span class="k">役割</span><span class="v">8つ森レンタルの案内役・公式キャラクター（看板娘）</span></div>
+        <div class="row"><span class="k">誕生日</span><span class="v">12月8日</span></div>
+        <div class="row"><span class="k">身長</span><span class="v">158cm・細身でアクティブ</span></div>
+        <div class="row"><span class="k">一人称</span><span class="v">わたし（口調は少しツン、でも親切）</span></div>
+        <div class="row"><span class="k">イメージカラー</span><span class="v">リーフグリーン</span></div>
+        <div class="row"><span class="k">モチーフ</span><span class="v">雪山・森・数字の8・スノーボード</span></div>
+      </div>
+      <img class="profile-char" src="../../assets/img/yatsumorin-char.png" alt="やつもりん立ち絵">
+    </div>
+
+    <div class="ym-h">性格</div>
+    <p class="help-text" style="margin-top:0">クールでツンデレ。でも面倒見がよくて、初心者にはやさしい。ただし、準備にはちょっと厳しめ。自然（森・雪山）を大切にしていて、髪にはリーフのモチーフが入っている。</p>
+
+    <div class="ym-two">
+      <div>
+        <div class="ym-h" style="margin-top:8px">好きなもの</div>
+        <div class="ym-chips chips-like">
+          <span>雪山</span><span>森</span><span>スノーボード</span><span>きちんとした準備</span><span>温かい飲み物</span>
+        </div>
+      </div>
+      <div>
+        <div class="ym-h" style="margin-top:8px">苦手なもの</div>
+        <div class="ym-chips chips-weak">
+          <span>暑さ</span><span>ぐだぐだした準備</span><span>無計画</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ym-h">決めゼリフ</div>
+    <div class="ym-quote">
+      <p>「別にあんたのためじゃないし。」<br>「ちゃんと準備しておくの、大事なんだから。」<br>「迷ったら聞いて。教えてあげる。」</p>
+    </div>
+
+    <!-- 日常のやつもりん ギャラリー -->
+    <div class="ym-h">日常のやつもりん</div>
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">ゲレンデや街での、やつもりんのふだんの様子です。（写真をタップで拡大）</p>
+    <div class="ym-gallery">
+      <a href="../../assets/img/yatsumorin-daily/daily-1.jpg"><img src="../../assets/img/yatsumorin-daily/daily-1.jpg" loading="lazy" alt="日常のやつもりん 1"></a>
+      <a href="../../assets/img/yatsumorin-daily/daily-2.jpg"><img src="../../assets/img/yatsumorin-daily/daily-2.jpg" loading="lazy" alt="日常のやつもりん 2"></a>
+      <a href="../../assets/img/yatsumorin-daily/daily-3.jpg"><img src="../../assets/img/yatsumorin-daily/daily-3.jpg" loading="lazy" alt="日常のやつもりん 3"></a>
+      <a href="../../assets/img/yatsumorin-daily/daily-4.jpg"><img src="../../assets/img/yatsumorin-daily/daily-4.jpg" loading="lazy" alt="日常のやつもりん 4"></a>
+      <a href="../../assets/img/yatsumorin-daily/daily-5.jpg"><img src="../../assets/img/yatsumorin-daily/daily-5.jpg" loading="lazy" alt="日常のやつもりん 5"></a>
+    </div>
+
+    <!-- 使い方講座（8コマ漫画）→ 初心者ガイドへ -->
+    <div class="ym-h">やつもりんの予約案内マンガ</div>
+    <p class="help-text" style="margin-top:0">やつもりんがWEB予約のコツを漫画でご案内！（初心者ガイドで公開中）</p>
+    <a href="beginner-guide.html" class="btn-nav ghost btn-block" style="margin-top:6px">マンガを読む（初心者ガイド）›</a>
+
+    <!-- 動画（踊ってみた・歌ってみた等） -->
+    <div class="ym-h">やつもりんの動画</div>
+    <p class="help-text" style="margin-top:0;margin-bottom:10px">「歌ってみた・踊ってみた」などのショート動画を準備中です。YouTube・SNSで公開予定！</p>
+    <img src="../../assets/img/yatsumorin-sing.jpg" alt="やつもりん歌ってみた COMING SOON" style="width:100%;max-width:520px;display:block;margin:0 auto;border-radius:14px;box-shadow:0 6px 18px rgba(20,40,60,.16)">
+
+    <!-- グッズ -->
+    <div class="ym-h">やつもりん公式グッズ</div>
+    <p class="help-text" style="margin-top:0;margin-bottom:12px">8つ森レンタルの公式グッズ一覧です（店頭でも販売予定）。各カテゴリをタップすると<b>全4種のデザイン</b>が見られます。写真はイメージ・価格は目安です。</p>
+    <div class="goods-grid">
+      <a class="goods-card" href="goods.html?cat=plush"><div class="goods-img"><img src="../../assets/img/goods/plush/1.jpg" loading="lazy" alt="ぬいぐるみ"></div><div class="goods-body"><div class="goods-name">ぬいぐるみ</div><div class="goods-price">¥3,500〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=acryl"><div class="goods-img"><img src="../../assets/img/goods/acryl/1.jpg" loading="lazy" alt="ステッカー"></div><div class="goods-body"><div class="goods-name">ステッカー</div><div class="goods-price">¥1,500〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=diorama"><div class="goods-img"><img src="../../assets/img/goods/diorama/1.jpg" loading="lazy" alt="情景アクリルスタンド"></div><div class="goods-body"><div class="goods-name">情景アクリルスタンド</div><div class="goods-price">¥2,200〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=keychain"><div class="goods-img"><img src="../../assets/img/goods/keychain/1.jpg" loading="lazy" alt="アクリルキーホルダー"></div><div class="goods-body"><div class="goods-name">アクリルキーホルダー</div><div class="goods-price">¥800〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=badge"><div class="goods-img"><img src="../../assets/img/goods/badge/1.jpg" loading="lazy" alt="缶バッジ"></div><div class="goods-body"><div class="goods-name">缶バッジ</div><div class="goods-price">¥400〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=cap"><div class="goods-img"><img src="../../assets/img/goods/cap/2.jpg" loading="lazy" alt="帽子（キャップ・ニット）"></div><div class="goods-body"><div class="goods-name">帽子（キャップ・ニット）</div><div class="goods-price">¥2,800〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=tote"><div class="goods-img"><img src="../../assets/img/goods/tote/4.jpg" loading="lazy" alt="トートバッグ"></div><div class="goods-body"><div class="goods-name">トートバッグ</div><div class="goods-price">¥1,800〜<span class="goods-more">全4種 ›</span></div></div></a>
+      <a class="goods-card" href="goods.html?cat=clearfile"><div class="goods-img"><img src="../../assets/img/goods/clearfile/1.jpg" loading="lazy" alt="クリアファイル"></div><div class="goods-body"><div class="goods-name">クリアファイル</div><div class="goods-price">¥400〜<span class="goods-more">全4種 ›</span></div></div></a>
+    </div>
+
+    <div class="ym-note">
+      <b>ご注文について（準備中）</b><br>
+      グッズのご注文は、当面お電話またはInstagramのDMで承ります。<br>
+      ・お電話 070-2472-3633（営業 8:00〜17:00）<br>
+      ・Instagram <a href="https://www.instagram.com/yatsumorirental/" target="_blank" rel="noopener" style="color:#1c4f82;font-weight:700">@yatsumorirental</a>
+    </div>
+
+    <div class="wizard-actions" style="margin-top:18px">
+      <a class="btn-nav primary btn-block" href="tel:07024723633">📞 070-2472-3633<br><small style="font-size:12px;font-weight:700">お電話でご予約ください</small></a>
+    </div>
+  </div>
+</div>
+<script>
+// 日常ギャラリーのタップ拡大ライトボックス（軽量）
+(function () {
+  var lb = document.createElement("div");
+  lb.className = "gl-lb";
+  lb.innerHTML = '<img alt="拡大画像">';
+  document.body.appendChild(lb);
+  var close = function () { lb.classList.remove("open"); };
+  lb.addEventListener("click", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest(".ym-gallery a") : null;
+    if (!a) return;
+    e.preventDefault();
+    lb.firstChild.src = a.getAttribute("href");
+    lb.classList.add("open");
+  });
+})();
+</script>
+<script>if (window.__yatsumoriRebind) window.__yatsumoriRebind();</script>
+</body>
+</html>
