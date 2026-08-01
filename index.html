@@ -391,7 +391,7 @@ img{display:block}
     <div class="access-inner">
       <img class="access-photo" src="assets/img/shop-thumb.jpg" alt="8つ森レンタル 店舗写真">
       <div class="access-row">📍 <span>宮城県刈田郡蔵王町遠刈田温泉中町16</span></div>
-      <div class="access-row">🕒 <span>営業時間　8:30〜18:00（不定休）</span></div>
+      <div class="access-row">🕒 <span>営業時間　8:00〜17:00（不定休）</span></div>
       <div class="access-row">📞 <strong>070-2472-3633</strong></div>
       <a class="access-btn" href="pages/access.html">詳しいアクセスを見る &rsaquo;</a>
     </div>
@@ -402,7 +402,7 @@ img{display:block}
 <div class="utility-bar">
   <span class="utility-ig">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white"/></svg>
-    最新情報はInstagramでチェック！&nbsp;&nbsp;@8mori_rental
+    最新情報はInstagramでチェック！&nbsp;&nbsp;@yatsumorirental
   </span>
   <div class="utility-links">
     <a href="pages/faq.html">❓ よくある質問</a>
@@ -432,6 +432,15 @@ window.__yatsumoriRebind = function () {
     var ttl = a.querySelector(".content-card-title");
     if (ttl && /初心者/.test(ttl.textContent)) a.setAttribute("href", "pages/beginner-guide.html");
   });
+  // 営業時間・Instagramの旧表記を補正（公開版に古い値が残っていても正す。
+  // 正: 営業 8:00〜17:00 ／ IG @yatsumorirental）
+  document.querySelectorAll(".access-row").forEach(function (el) {
+    if (/営業時間/.test(el.textContent)) {
+      el.innerHTML = el.innerHTML.replace(/8([:：])30/g, "8$1" + "00").replace(/18([:：])00/g, "17$1" + "00");
+    }
+  });
+  var __ig = document.querySelector(".utility-ig");
+  if (__ig && /8mori_rental/.test(__ig.innerHTML)) __ig.innerHTML = __ig.innerHTML.replace(/@?8mori_rental/g, "@yatsumorirental");
   // おすすめ情報：重複した「周辺グルメ」を1つ「蔵王のスキー場情報」に置き換える
   // （編集時に誤って複製された分を、まだ無いスキー場カードに振り替える）
   var recs = Array.prototype.slice.call(document.querySelectorAll(".rec-card"));
