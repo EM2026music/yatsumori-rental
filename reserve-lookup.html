@@ -144,7 +144,9 @@ function renderResult(r) {
 async function handleSearch() {
   showError("");
   const code = document.getElementById("code").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  // 電話番号は数字だけで照合（予約時も数字だけで保存しているため、ハイフン等の
+  // 書式が違っても本人の予約が見つかる）
+  const phone = document.getElementById("phone").value.replace(/[^0-9]/g, "");
   if (!code || !phone) { showError("予約番号と電話番号を入力してください。"); return; }
 
   const btn = document.getElementById("search-btn");
@@ -170,9 +172,10 @@ async function handleCancel() {
   const btn = document.getElementById("cancel-btn");
   btn.disabled = true; btn.textContent = "処理中...";
   try {
-    await cancelReservation(current.reservation_code, document.getElementById("phone").value.trim());
+    const phone = document.getElementById("phone").value.replace(/[^0-9]/g, "");
+    await cancelReservation(current.reservation_code, phone);
     // 最新状態を取り直して表示
-    const r = await lookupReservationV2(current.reservation_code, document.getElementById("phone").value.trim());
+    const r = await lookupReservationV2(current.reservation_code, phone);
     if (r) renderResult(r);
   } catch (e) {
     showError(translateError(e));

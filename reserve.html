@@ -743,6 +743,9 @@ function handleToStep4() {
   if (!state.name) { showError("代表者のお名前を入力してください。", document.getElementById("cust-name")); return; }
   const phoneDigits = state.phone.replace(/[^0-9]/g, "");
   if (phoneDigits.length < 10) { showError("当日つながる電話番号を正しく入力してください。", document.getElementById("cust-phone")); return; }
+  // 電話番号は数字だけで保存・照合する（予約時と確認・変更時でハイフン等の
+  // 書式が違っても本人の予約が見つかるように統一する）
+  state.phone = phoneDigits;
 
   renderConfirm();
   gotoStep(4);
