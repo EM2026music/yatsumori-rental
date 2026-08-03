@@ -86,6 +86,9 @@ const GENDER_LABEL = { male: "男性", female: "女性" };
 const STANCE_LABEL = { regular: "レギュラー", goofy: "グーフィー", unknown: "スタンス未定" };
 let current = null; // 現在表示中の予約
 
+// 表示前にHTML特殊文字を無害化（お名前など顧客入力をinnerHTMLに出すため）
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
 function showError(msg) {
   document.getElementById("error-box").innerHTML =
     msg ? `<div class="alert alert-error">${msg}</div>` : "";
@@ -127,7 +130,7 @@ function renderResult(r) {
     <div class="summary-list">
       <div class="summary-row"><span class="k">ご利用期間</span><span class="v">${periodText(r)}</span></div>
       ${r.eve_pickup ? `<div class="summary-row"><span class="k">前日受け取り</span><span class="v">希望する</span></div>` : ""}
-      <div class="summary-row"><span class="k">お名前</span><span class="v">${r.customer_name} 様</span></div>
+      <div class="summary-row"><span class="k">お名前</span><span class="v">${esc(r.customer_name)} 様</span></div>
       ${partyText ? `<div class="summary-row"><span class="k">人数</span><span class="v">${partyText}</span></div>` : ""}
       ${memberRows}
     </div>`;

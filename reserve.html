@@ -795,10 +795,10 @@ function renderConfirm() {
     <div class="confirm-sec">
       <div class="confirm-sec-title">代表者</div>
       <div class="summary-list">
-        <div class="summary-row"><span class="k">お名前</span><span class="v">${state.name} 様</span></div>
-        <div class="summary-row"><span class="k">電話番号</span><span class="v">${state.phone}</span></div>
-        <div class="summary-row"><span class="k">メール</span><span class="v">${state.email || "（未入力）"}</span></div>
-        ${state.notes ? `<div class="summary-row"><span class="k">ご要望</span><span class="v">${state.notes}</span></div>` : ""}
+        <div class="summary-row"><span class="k">お名前</span><span class="v">${esc(state.name)} 様</span></div>
+        <div class="summary-row"><span class="k">電話番号</span><span class="v">${esc(state.phone)}</span></div>
+        <div class="summary-row"><span class="k">メール</span><span class="v">${state.email ? esc(state.email) : "（未入力）"}</span></div>
+        ${state.notes ? `<div class="summary-row"><span class="k">ご要望</span><span class="v">${esc(state.notes)}</span></div>` : ""}
       </div>
     </div>`;
 }
@@ -847,7 +847,7 @@ function showResult(res) {
   document.getElementById("result-summary").innerHTML = `
     <div class="summary-row"><span class="k">期間</span><span class="v">${periodLabel()}</span></div>
     ${state.evePickup ? `<div class="summary-row"><span class="k">前日受け取り</span><span class="v">${addDaysStr(state.start, -1)} 午後2時〜</span></div>` : ""}
-    <div class="summary-row"><span class="k">お名前</span><span class="v">${state.name} 様</span></div>
+    <div class="summary-row"><span class="k">お名前</span><span class="v">${esc(state.name)} 様</span></div>
     <div class="summary-row"><span class="k">人数</span><span class="v">大人 ${state.adults}名${state.children ? ` / 子供 ${state.children}名` : ""}</span></div>
     <div class="summary-row"><span class="k">用具</span><span class="v">${boardText}</span></div>
     <div class="manga-after">${mangaQ(10, "当日の受け取りの流れ")}${mangaQ(9, "服装・持ち物のチェック")}</div>`;
