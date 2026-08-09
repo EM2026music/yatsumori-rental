@@ -126,8 +126,7 @@
     { no:"第7話",  ttl:"スタンス",           cap:"第7話：スタンスって何？",                         img:"manga-7.jpg" },
     { no:"第8話",  ttl:"家族・グループ予約", cap:"第8話：家族・グループで予約するとき",             img:"manga-8.jpg" },
     { no:"第9話",  ttl:"服装・持ち物",       cap:"第9話：当日の服装・持ち物は？",                   img:"manga-9.jpg" },
-    { no:"第10話", ttl:"受け取りの流れ",     cap:"第10話：予約から受け取りまでの流れ",              img:"manga-10.jpg" },
-    { no:"第11話", ttl:"ブーツの履き方",     cap:"第11話：ブーツの履き方＆困ったときは",            img:"manga-11.jpg" }
+    { no:"第10話", ttl:"受け取りの流れ",     cap:"第10話：予約から受け取りまでの流れ",              img:"manga-10.jpg" }
   ];
   // 公開版ではSupabase保存版がページ中身を丸ごと差し替えるため、要素は毎回
   // 引き直し、イベントは document への委譲で付ける（差し替え後も操作が効き続ける）。
@@ -180,7 +179,7 @@
     // 高さ0を基準にしてしまい、大きくズレるため。その場合は位置調整をスキップ）
     var oldH = (d.img.complete && d.img.naturalWidth) ? d.img.getBoundingClientRect().height : null;
     d.img.onload = function(){ d.img.onload = null; if (oldH !== null) reflowAfter(d.img, oldH); };
-    d.img.src = "../assets/img/" + ep.img;
+    d.img.src = "../assets/img/" + ep.img + "?v=2";
     d.img.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
     d.sel.value = i;
     // 前へ／次へ
@@ -227,9 +226,6 @@
   show(0, false);
 })();
 </script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabaseClient.js?v=6"></script>
-<script>window.YATSUMORI_PAGE_KEY="beginner-guide";</script>
-<script src="../assets/js/pageRenderer.js?v=4"></script>
+<!-- このページは静的表示のみ（古い公開版の11話・旧画像を使わず、常にこの最新10話版を表示） -->
 </body>
 </html>

@@ -422,7 +422,8 @@ function openManga(ep) {
   ensureMangaModal();
   document.getElementById("mm-title").textContent = d.t;
   const img = document.getElementById("mm-img");
-  if (img.getAttribute("src") !== d.img) img.src = d.img; // 開いたときだけ読み込む（フォーム表示を重くしない）
+  const mSrc = d.img + "?v=2"; // 画像更新のキャッシュ回避
+  if (img.getAttribute("src") !== mSrc) img.src = mSrc; // 開いたときだけ読み込む（フォーム表示を重くしない）
   document.getElementById("manga-modal").classList.add("open");
   document.body.style.overflow = "hidden";
 }
