@@ -26,8 +26,9 @@
 .og-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:14px}
 /* 提携ホテル（メルキュール）の紹介ページを画像で直接埋め込み。
    横幅いっぱい・はみ出しなしで表示（幅100%・高さ自動） */
+/* スマホ：横幅いっぱい（左右の隙間なし）。PC：中央寄せのプレビュー幅にして縦長を軽減＆左右対称に */
 .mercure-embed{width:calc(100% + 40px);max-width:none;height:auto;display:block;margin:8px -20px 4px}
-@media(min-width:760px){.mercure-embed{width:calc(100% + 96px);margin-left:-48px;margin-right:-48px}}
+@media(min-width:760px){.mercure-embed{width:100%;max-width:560px;margin:10px auto 4px}}
 .mercure-cap{font-size:11.5px;line-height:1.7;color:#8a6a1f;background:#fff8e8;border:1px solid #f0b429;border-radius:10px;padding:10px 12px;margin:4px 0 10px}
 </style>
 </head>
@@ -70,30 +71,6 @@
     </div>
   </div>
 </div>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabaseClient.js?v=6"></script>
-<script>window.YATSUMORI_PAGE_KEY="onsen-guide";</script>
-<script>
-// 公開版(site_pages)が上書き表示されるデスクトップでも「提携ホテル」の画像を出す。
-// pageRendererが差し替えた後にこの関数を呼ぶので、埋め込み画像が無ければ追加する。
-window.__yatsumoriRebind = function () {
-  if (document.getElementById("mercure-embed")) return; // 既にあれば何もしない（スマホの静的版）
-  var root = document.querySelector(".container") || document.getElementById("page-root");
-  if (!root) return;
-  var h = document.createElement("div");
-  h.className = "og-h"; h.textContent = "提携ホテル：メルキュール宮城蔵王";
-  h.style.position = "relative"; h.style.zIndex = "5";
-  var cap = document.createElement("p");
-  cap.className = "mercure-cap"; cap.style.position = "relative"; cap.style.zIndex = "5";
-  cap.textContent = "⚠ たたき台（デザイン案）です。内容・写真・文言は今後調整します。メルキュール宮城蔵王とは提携のうえ掲載許可をいただいています。";
-  var img = document.createElement("img");
-  img.id = "mercure-embed"; img.className = "mercure-embed";
-  img.src = "../assets/img/mercure/full.jpg";
-  img.alt = "メルキュール宮城蔵王リゾート＆スパ 紹介ページ案";
-  img.style.position = "relative"; img.style.zIndex = "5";
-  root.appendChild(h); root.appendChild(cap); root.appendChild(img);
-};
-</script>
-<script src="../assets/js/pageRenderer.js?v=4"></script>
+<!-- このページは静的表示のみ（古い公開版を使わず、常にこの整ったレスポンシブ版を表示） -->
 </body>
 </html>
