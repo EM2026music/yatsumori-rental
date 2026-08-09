@@ -24,6 +24,12 @@
 .og-step .t{font-size:13.5px;font-weight:800;color:#15314f}
 .og-step .d{font-size:12.5px;color:#4a5867;line-height:1.7;margin-top:2px}
 .og-note{font-size:12.5px;line-height:1.85;color:#6b7785;background:#f5f6f8;border:1px solid var(--border,#dde2e8);border-radius:10px;padding:14px 16px;margin-top:14px}
+/* 提携ホテル（メルキュール）への入口カード */
+.mercure-entry{display:flex;align-items:center;gap:12px;text-decoration:none;background:linear-gradient(135deg,#1b2f4e,#2a4a74);color:#fff;border-radius:14px;padding:14px 16px;margin:6px 0 4px;box-shadow:0 4px 14px rgba(20,40,60,.18)}
+.mercure-entry .me-ico{font-size:26px;flex:0 0 auto}
+.mercure-entry .me-txt{display:flex;flex-direction:column;line-height:1.4}
+.mercure-entry .me-txt b{font-size:14px}
+.mercure-entry .me-txt small{font-size:11.5px;color:rgba(255,255,255,.82);margin-top:2px}
 </style>
 </head>
 <body>
@@ -56,6 +62,12 @@
       ※ 各温泉施設の営業時間・料金は施設により異なります。おすすめの立ち寄り湯は、ご来店時にスタッフへお気軽にお尋ねください。
     </div>
 
+    <div class="og-h">提携ホテル</div>
+    <a id="mercure-entry" class="mercure-entry" href="mercure.html">
+      <span class="me-ico">🏨</span>
+      <span class="me-txt"><b>メルキュール宮城蔵王リゾート＆スパ</b><small>8つ森レンタルの提携ホテル。ご紹介（たたき台）を見る ›</small></span>
+    </a>
+
     <div class="wizard-actions" style="margin-top:18px">
       <a class="btn-nav primary btn-block" href="../reserve.html">WEBで予約する</a>
     </div>
@@ -64,6 +76,20 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="../assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="onsen-guide";</script>
+<script>
+// 公開版(site_pages)が上書き表示されるデスクトップでも「提携ホテル」の入口を出す。
+// pageRendererが差し替えた後にこの関数を呼ぶので、入口カードが無ければ追加する。
+window.__yatsumoriRebind = function () {
+  if (document.getElementById("mercure-entry")) return; // 既にあれば何もしない（スマホの静的版）
+  var root = document.querySelector(".container") || document.getElementById("page-root");
+  if (!root) return;
+  var a = document.createElement("a");
+  a.id = "mercure-entry"; a.className = "mercure-entry"; a.href = "mercure.html";
+  a.style.position = "relative"; a.style.zIndex = "5";
+  a.innerHTML = '<span class="me-ico">🏨</span><span class="me-txt"><b>メルキュール宮城蔵王リゾート＆スパ</b><small>8つ森レンタルの提携ホテル。ご紹介（たたき台）を見る ›</small></span>';
+  root.appendChild(a);
+};
+</script>
 <script src="../assets/js/pageRenderer.js?v=4"></script>
 </body>
 </html>
