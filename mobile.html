@@ -55,6 +55,10 @@ img{display:block}
 .btn{display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;padding:13px 18px;font-weight:800;font-size:14px}
 .btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:8px}
 .btn-secondary{border:1.5px solid var(--border);background:#fff}
+/* 電話予約カード（WEB予約システム本稼働までの間） */
+.tel-card{text-align:center;margin:2px 0 12px}
+.tel-num{display:block;font-size:25px;font-weight:800;color:var(--navy);line-height:1.2}
+.tel-sub{font-size:10.5px;color:var(--text-gray);margin-top:3px}
 
 /* はみ出した項目で横スクロールが発生しないように（スマホ版は390px固定） */
 html,body{overflow-x:hidden}
@@ -98,7 +102,7 @@ html,body{overflow-x:hidden}
 .footer-actions{display:flex;gap:8px;margin-top:12px}
 .footer-action-btn{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:10px;padding:11px 6px;font-size:11px;font-weight:800;background:#fff;display:flex;flex-direction:column;align-items:center;gap:4px}
 </style>
-<meta name="description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。WEB予約でスムーズ受取、ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
+<meta name="description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。お電話でのご予約でスムーズ受取、ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
@@ -117,8 +121,7 @@ html,body{overflow-x:hidden}
   <button class="menu-btn" id="menu-btn"><span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>メニュー</button>
 </header>
 <nav class="global-nav" id="global-nav">
-  <a href="reserve.html">今すぐ予約する</a>
-  <a href="reserve-lookup.html">予約の確認・変更</a>
+  <a href="tel:07024723633">📞 電話で予約する（070-2472-3633）</a>
   <a href="pages/catalog.html">板カタログ</a>
   <a href="pages/beginner-guide.html">初心者ガイド</a>
   <a href="pages/pricing.html">レンタル料金</a>
@@ -139,16 +142,13 @@ html,body{overflow-x:hidden}
 </section>
 
 <div class="booking-card">
-  <p class="booking-card-title">かんたんWEB予約</p>
-  <div class="booking-steps">
-    <div class="booking-step"><div class="booking-step-icon">📅</div><div class="booking-step-label">日付を選ぶ</div></div>
-    <span class="booking-step-chevron">›</span>
-    <div class="booking-step"><div class="booking-step-icon">👤</div><div class="booking-step-label">人数を入力</div></div>
-    <span class="booking-step-chevron">›</span>
-    <div class="booking-step"><div class="booking-step-icon">✓</div><div class="booking-step-label">完了！</div></div>
+  <p class="booking-card-title">ご予約・お問い合わせ</p>
+  <div class="tel-card">
+    <a class="tel-num" href="tel:07024723633">070-2472-3633</a>
+    <p class="tel-sub">受付時間 8:00〜17:00（不定休）</p>
   </div>
-  <a class="btn btn-primary" href="reserve.html">📅 今すぐ予約する</a>
-  <a class="btn btn-secondary" href="reserve-lookup.html">予約の確認・変更はこちら</a>
+  <a class="btn btn-primary" href="tel:07024723633">📞 電話で予約する</a>
+  <a class="btn btn-secondary" href="pages/pricing.html">レンタル料金を見る</a>
 </div>
 
 <div class="badges">
