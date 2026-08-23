@@ -383,7 +383,7 @@ function refreshPrices() {
 // ── マンガヘルプ（入力欄と初心者ガイドのマンガを紐づけ。モーダルはbody直下に生成するのでpageRendererの差し替え後も残る） ──
 const MANGA_EP = {
   1:  { t: "第1話：予約しておくと当日スムーズ！",       img: "assets/img/manga-1.jpg" },
-  2:  { t: "第2話：予約で入力してほしいこと",           img: "assets/img/manga-2.jpg" },
+  2:  { t: "第2話：予約で伝えてほしいこと、まとめたよ！",           img: "assets/img/manga-2.jpg" },
   3:  { t: "第3話：スキー？スノーボード？",             img: "assets/img/manga-3.jpg" },
   4:  { t: "第4話：身長・靴のサイズは何に使うの？",     img: "assets/img/manga-4.jpg" },
   5:  { t: "第5話：年齢・性別は何に使うの？",           img: "assets/img/manga-5.jpg" },
@@ -422,7 +422,7 @@ function openManga(ep) {
   ensureMangaModal();
   document.getElementById("mm-title").textContent = d.t;
   const img = document.getElementById("mm-img");
-  const mSrc = d.img + "?v=2"; // 画像更新のキャッシュ回避
+  const mSrc = d.img + "?v=3"; // 画像更新のキャッシュ回避
   if (img.getAttribute("src") !== mSrc) img.src = mSrc; // 開いたときだけ読み込む（フォーム表示を重くしない）
   document.getElementById("manga-modal").classList.add("open");
   document.body.style.overflow = "hidden";
