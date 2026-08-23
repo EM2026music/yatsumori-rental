@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>ギャラリー | 8つ森レンタル</title>
-<link rel="stylesheet" href="../assets/css/style.css?v=13">
+<link rel="stylesheet" href="../assets/css/style.css?v=15">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Klee+One:wght@400;600&family=Yusei+Magic&family=Dela+Gothic+One&family=Yuji+Syuku&display=swap">
@@ -50,7 +50,7 @@ window.__yatsumoriRebind = function () {
     container.innerHTML =
         '<p class="gallery-intro">8つ森レンタルの店内・レンタル道具・ゲレンデの様子をご紹介します。写真をタップすると大きく表示できます。</p>'
       + '<div class="gallery-grid">' + cells + '</div>'
-      + '<div class="wizard-actions" style="margin-top:20px"><a class="btn-nav primary btn-block" href="tel:07024723633">📞 電話で予約する</a></div>';
+      + '<div class="cta-actions" style="margin-top:20px"><a class="btn-nav primary" href="tel:07024723633">📞 電話で予約する</a><a class="btn-nav cta-dm" href="https://ig.me/m/yatsumorirental" target="_blank" rel="noopener">📷 InstagramのDMで予約</a></div>';
   }
   // ライトボックスは一度だけ用意（#page-root外＝body直下なので差し替えでも生き残る）
   if (!window.__glBound) {
@@ -73,9 +73,6 @@ window.__yatsumoriRebind = function () {
 };
 window.__yatsumoriRebind();
 </script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="../assets/js/supabaseClient.js?v=6"></script>
-<script>window.YATSUMORI_PAGE_KEY="catalog";</script>
-<script src="../assets/js/pageRenderer.js?v=4"></script>
+<!-- このページは静的表示のみ（古い公開版を使わず、常にこの最新版を表示） -->
 </body>
 </html>

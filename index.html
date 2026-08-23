@@ -129,6 +129,7 @@ img{display:block}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 18px;font-weight:800;font-size:14px;cursor:pointer}
 .btn-primary{background:var(--yellow);color:var(--navy-dark);box-shadow:0 4px 14px rgba(240,180,41,.38);margin-bottom:9px}
 .btn-secondary{border:1.5px solid var(--border);color:var(--navy);background:#fff}
+.btn-dm{background:var(--navy);color:#fff;margin-bottom:8px;box-shadow:0 4px 12px rgba(21,49,79,.24)}
 
 /* ==============================
    SERVICE CARDS
@@ -249,6 +250,7 @@ img{display:block}
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.98.36 1.94.7 2.86a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.92.34 1.88.57 2.86.7A2 2 0 0 1 22 16.92z"/></svg>
       電話で予約する
     </a>
+    <a class="btn btn-dm" href="https://ig.me/m/yatsumorirental" target="_blank" rel="noopener">📷 InstagramのDMで予約</a>
     <a class="btn btn-secondary" href="pages/pricing.html">レンタル料金を見る</a>
   </div>
 
@@ -441,6 +443,18 @@ window.__yatsumoriRebind = function () {
     el.outerHTML = '<div class="tel-card"><a class="tel-num" href="tel:07024723633">070-2472-3633</a><p class="tel-sub">受付時間 8:00〜17:00（不定休）</p></div>';
   });
   document.querySelectorAll(".badge-label").forEach(function (el) { if (/WEB予約/.test(el.textContent)) el.textContent = "電話でご予約"; });
+  // 予約カードに「InstagramのDMで予約」が無ければ足す（公開版が上書きしても必ず出す）
+  document.querySelectorAll(".booking-card").forEach(function (card) {
+    if (card.querySelector(".btn-dm")) return;
+    var tel = card.querySelector('a.btn[href^="tel:"]') || card.querySelector("a.btn-primary");
+    if (!tel) return;
+    var d = document.createElement("a");
+    d.className = "btn btn-dm";
+    d.href = "https://ig.me/m/yatsumorirental";
+    d.target = "_blank"; d.rel = "noopener";
+    d.textContent = "\U0001F4F7 InstagramのDMで予約";
+    tel.insertAdjacentElement("afterend", d);
+  });
   // おすすめ情報：重複した「周辺グルメ」を1つ「蔵王のスキー場情報」に置き換える
   // （編集時に誤って複製された分を、まだ無いスキー場カードに振り替える）
   var recs = Array.prototype.slice.call(document.querySelectorAll(".rec-card"));

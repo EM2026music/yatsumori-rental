@@ -176,6 +176,12 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---------- ボタン ---------- */
 .wizard-actions { display: flex; gap: 10px; margin-top: 8px; }
+/* ご予約CTA：電話＋Instagram DM の2ボタン（WEB予約システム本稼働までの導線）。
+   狭い画面では自動で縦に積む（flex-basis 230px + wrap） */
+.cta-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.cta-actions .btn-nav { flex: 1 1 230px; width: auto; }
+.btn-nav.cta-dm { background: #15314f; color: #fff; border: none; box-shadow: 0 4px 12px rgba(21,49,79,.22); }
+.btn-nav.cta-dm:hover { background: #0f2540; }
 .btn-block { width: 100%; }
 .btn-nav {
   flex: 1;
