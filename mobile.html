@@ -205,7 +205,16 @@ html,body{overflow-x:hidden}
 </footer>
 
 </div><!-- .page -->
-<script>document.getElementById("menu-btn").addEventListener("click",()=>document.getElementById("global-nav").classList.toggle("open"));</script>
+<script>
+// メニュー開閉は document への委譲にする（公開版(site_pages)で #page-root が丸ごと
+// 差し替わってもイベントが死なない。要素直付けは差し替えで無効になる＝既知の地雷）
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest ? e.target.closest("#menu-btn") : null;
+  if (!btn) return;
+  var nav = document.getElementById("global-nav");
+  if (nav) nav.classList.toggle("open");
+});
+</script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="home-m";</script>
