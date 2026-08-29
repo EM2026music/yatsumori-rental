@@ -262,7 +262,7 @@ img{display:block}
     <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">板は</div><div class="badge-sub">ワクシング済み‼</div></div>
     <div class="badge"><div class="badge-icon">🚻</div><div class="badge-label">男女別</div><div class="badge-sub">更衣室完備・ロッカー有</div></div>
     <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街の中に立地‼</div></div>
-    <div class="badge"><div class="badge-icon"><img src="assets/img/badge-prep.png?v=1" alt=""></div><div class="badge-label">事前準備で混雑回避</div></div>
+    <div class="badge"><div class="badge-icon"><img src="assets/img/badge-prep.png?v=1" alt=""></div><div class="badge-label">事前準備で<div>混雑回避</div></div></div>
   </div>
 </section>
 
@@ -456,7 +456,7 @@ window.__yatsumoriRebind = function () {
       var ico = nb.querySelector(".badge-icon");
       if (ico) { ico.innerHTML = '<img src="assets/img/badge-prep.png?v=1" alt="">'; }
       var lab = nb.querySelector(".badge-label");
-      if (lab) { lab.innerHTML = ""; lab.textContent = "事前準備で混雑回避"; lab.style.fontSize = "14px"; }
+      if (lab) { lab.innerHTML = "事前準備で<div>混雑回避</div>"; lab.style.fontSize = "14px"; }
       var sub = nb.querySelector(".badge-sub");
       if (sub) sub.innerHTML = "<br>";
       wrap.appendChild(nb);
@@ -470,7 +470,7 @@ window.__yatsumoriRebind = function () {
       [/ワクシング|板は/,  105, 129],
       [/男女別|更衣室/,    285, 84],
       [/温泉/,             420, 90],
-      [/混雑回避/,         560, 96]
+      [/混雑回避/,         560, 84]
     ];
     LAYOUT.forEach(function (row) {
       var b = badges.filter(function (x) { return row[0].test(x.textContent || ""); })[0];
@@ -576,7 +576,7 @@ window.__yatsumoriRebind();
   window.addEventListener("load", function () { setTimeout(reveal, 2500); }); // 最終保険
 })();
 </script>
-<script src="assets/js/i18n.js?v=2"></script>
+<script src="assets/js/i18n.js?v=3"></script>
 <script src="assets/js/pageRenderer.js?v=4"></script>
 </body>
 </html>
