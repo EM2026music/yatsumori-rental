@@ -98,7 +98,7 @@ img{display:block}
 /* バッジ（heroテキスト直下・left 456px・画像の大きな白丸に合わせる）
    ※詳細度を高くしてある：公開済みデータに旧デザインのCSSコピーが
    含まれていても、この（元の）デザインが必ず勝つようにするため */
-.badges{position:absolute;left:456px;top:232px;z-index:2;display:flex;gap:38px}
+.badges{position:absolute;left:291px;top:232px;z-index:2;display:flex;gap:30px}
 .badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
 .page .badges .badge .badge-icon{
   width:84px;height:84px;border-radius:50%;border:0;
@@ -262,6 +262,7 @@ img{display:block}
     <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">板は</div><div class="badge-sub">ワクシング済み‼</div></div>
     <div class="badge"><div class="badge-icon">🚻</div><div class="badge-label">男女別</div><div class="badge-sub">更衣室完備・ロッカー有</div></div>
     <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街の中に立地‼</div></div>
+    <div class="badge"><div class="badge-icon">⚖️</div><div class="badge-label">事前準備で混雑回避</div></div>
   </div>
 </section>
 
@@ -428,7 +429,8 @@ window.__yatsumoriRebind = function () {
     [/ワクシング|板/,  "🏅"],
     [/男女別|更衣室/,  "🚻"],
     [/温泉/,          "♨️"],
-    [/電話/,          "📞"]
+    [/電話/,          "📞"],
+    [/事前準備|混雑回避/, "⚖️"]
   ];
   document.querySelectorAll(".badges .badge").forEach(function (b) {
     var ico = b.querySelector(".badge-icon");
@@ -442,6 +444,46 @@ window.__yatsumoriRebind = function () {
       }
     }
   });
+  // 6つ目のバッジ「事前準備で混雑回避」を足し、6個が予約カードに被らないよう座標を配り直す
+  // （公開版はバッジが1個ずつ絶対配置なので、位置はここで決め直すしかない）
+  (function () {
+    var wrap = document.querySelector(".badges");
+    if (!wrap) return;
+    var list = function () { return Array.prototype.slice.call(wrap.querySelectorAll(".badge")); };
+    var badges = list();
+    if (!badges.length) return;
+    if (!badges.some(function (b) { return /混雑回避/.test(b.textContent || ""); })) {
+      var nb = badges[badges.length - 1].cloneNode(true);   // 装飾（白フチ等）を引き継ぐため複製
+      var ico = nb.querySelector(".badge-icon");
+      if (ico) { ico.innerHTML = ""; ico.textContent = "⚖️"; ico.style.fontSize = "38px"; ico.style.lineHeight = "1"; }
+      var lab = nb.querySelector(".badge-label");
+      if (lab) { lab.innerHTML = ""; lab.textContent = "事前準備で混雑回避"; lab.style.fontSize = "14px"; }
+      var sub = nb.querySelector(".badge-sub");
+      if (sub) sub.innerHTML = "<br>";
+      wrap.appendChild(nb);
+      badges = list();
+    }
+    // 絶対配置（＝公開版）のときだけ再配置する。静的フォールバックはflexなので触らない
+    if (getComputedStyle(badges[0]).position !== "absolute") return;
+    var LAYOUT = [
+      [/手ぶら/,          -165, 84],
+      [/前日|貸し出し/,    -30, 84],
+      [/ワクシング|板は/,  105, 129],
+      [/男女別|更衣室/,    285, 84],
+      [/温泉/,             420, 90],
+      [/混雑回避/,         560, 96]
+    ];
+    LAYOUT.forEach(function (row) {
+      var b = badges.filter(function (x) { return row[0].test(x.textContent || ""); })[0];
+      if (!b) return;
+      b.style.position = "absolute";
+      b.style.left = row[1] + "px";
+      b.style.width = row[2] + "px";
+      b.style.right = "auto";
+      b.style.margin = "0px";
+      if (!b.style.top) b.style.top = "0px";
+    });
+  })();
   // 予約カードに「InstagramのDMで予約」が無ければ足す（公開版が上書きしても必ず出す）
   document.querySelectorAll(".booking-card").forEach(function (card) {
     if (card.querySelector(".btn-dm")) return;
@@ -535,7 +577,7 @@ window.__yatsumoriRebind();
   window.addEventListener("load", function () { setTimeout(reveal, 2500); }); // 最終保険
 })();
 </script>
-<script src="assets/js/i18n.js?v=1"></script>
+<script src="assets/js/i18n.js?v=2"></script>
 <script src="assets/js/pageRenderer.js?v=4"></script>
 </body>
 </html>

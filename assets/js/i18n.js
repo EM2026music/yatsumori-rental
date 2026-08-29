@@ -84,6 +84,7 @@
     "板は": ["Boards are", "雪板"],
     "ワクシング済み‼": ["freshly waxed‼", "已打蠟‼"],
     "温泉街の中に立地‼": ["Right in the onsen town‼", "就在溫泉街內‼"],
+    "事前準備で混雑回避": ["Prep ahead, skip the queue", "事先準備 避開人潮"],
     "前日貸し出しOK‼": ["Pick up the day before‼", "可前一天領取‼"],
     "男女別": ["Separate", "男女分開"],
     "更衣室完備": ["changing rooms", "更衣室完備"],
