@@ -262,7 +262,7 @@ img{display:block}
     <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">板は</div><div class="badge-sub">ワクシング済み‼</div></div>
     <div class="badge"><div class="badge-icon">🚻</div><div class="badge-label">男女別</div><div class="badge-sub">更衣室完備・ロッカー有</div></div>
     <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街の中に立地‼</div></div>
-    <div class="badge"><div class="badge-icon">⚖️</div><div class="badge-label">事前準備で混雑回避</div></div>
+    <div class="badge"><div class="badge-icon"><img src="assets/img/badge-prep.png?v=1" alt=""></div><div class="badge-label">事前準備で混雑回避</div></div>
   </div>
 </section>
 
@@ -429,8 +429,7 @@ window.__yatsumoriRebind = function () {
     [/ワクシング|板/,  "🏅"],
     [/男女別|更衣室/,  "🚻"],
     [/温泉/,          "♨️"],
-    [/電話/,          "📞"],
-    [/事前準備|混雑回避/, "⚖️"]
+    [/電話/,          "📞"]
   ];
   document.querySelectorAll(".badges .badge").forEach(function (b) {
     var ico = b.querySelector(".badge-icon");
@@ -455,7 +454,7 @@ window.__yatsumoriRebind = function () {
     if (!badges.some(function (b) { return /混雑回避/.test(b.textContent || ""); })) {
       var nb = badges[badges.length - 1].cloneNode(true);   // 装飾（白フチ等）を引き継ぐため複製
       var ico = nb.querySelector(".badge-icon");
-      if (ico) { ico.innerHTML = ""; ico.textContent = "⚖️"; ico.style.fontSize = "38px"; ico.style.lineHeight = "1"; }
+      if (ico) { ico.innerHTML = '<img src="assets/img/badge-prep.png?v=1" alt="">'; }
       var lab = nb.querySelector(".badge-label");
       if (lab) { lab.innerHTML = ""; lab.textContent = "事前準備で混雑回避"; lab.style.fontSize = "14px"; }
       var sub = nb.querySelector(".badge-sub");
