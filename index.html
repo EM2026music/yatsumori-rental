@@ -107,6 +107,7 @@ img{display:block}
   box-shadow:0 3px 12px rgba(20,40,60,.12);
 }
 .page .badges .badge .badge-icon svg{stroke:#15314f;stroke-width:1.6}
+.page .badges .badge .badge-icon{font-size:38px;line-height:1}
 .page .badges .badge .badge-icon img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .page .badges .badge .badge-label{font-size:13px;font-weight:800;color:#15314f;background:none;padding:0;text-shadow:0 0 10px rgba(255,255,255,.95),0 0 20px rgba(255,255,255,.8)}
 .page .badges .badge .badge-sub{font-size:10px;font-weight:400;color:#4a5867;background:none;padding:0;border-radius:0;box-shadow:none;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 16px rgba(255,255,255,.85)}
@@ -256,34 +257,11 @@ img{display:block}
 
   <!-- バッジ -->
   <div class="badges">
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"/></svg>
-      </div>
-      <div class="badge-label">手ぶらでOK</div>
-      <div class="badge-sub">ウェアも充実</div>
-    </div>
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.98.36 1.94.7 2.86a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.92.34 1.88.57 2.86.7A2 2 0 0 1 22 16.92z"/></svg>
-      </div>
-      <div class="badge-label">電話でご予約</div>
-      <div class="badge-sub">スムーズ受取</div>
-    </div>
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"/></svg>
-      </div>
-      <div class="badge-label">高品質な板</div>
-      <div class="badge-sub">メンテナンス済み</div>
-    </div>
-    <div class="badge">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"/></svg>
-      </div>
-      <div class="badge-label">温泉街すぐそば</div>
-      <div class="badge-sub">帰りに温泉も！</div>
-    </div>
+    <div class="badge"><div class="badge-icon">🎿</div><div class="badge-label">手ぶらでOK</div><div class="badge-sub">小物も充実‼</div></div>
+    <div class="badge"><div class="badge-icon">📅</div><div class="badge-label">前日貸し出しOK‼</div></div>
+    <div class="badge"><div class="badge-icon">🏅</div><div class="badge-label">板は</div><div class="badge-sub">ワクシング済み‼</div></div>
+    <div class="badge"><div class="badge-icon">🚻</div><div class="badge-label">男女別</div><div class="badge-sub">更衣室完備・ロッカー有</div></div>
+    <div class="badge"><div class="badge-icon">♨️</div><div class="badge-label">温泉街の中に立地‼</div></div>
   </div>
 </section>
 
@@ -443,6 +421,27 @@ window.__yatsumoriRebind = function () {
     el.outerHTML = '<div class="tel-card"><a class="tel-num" href="tel:07024723633">070-2472-3633</a><p class="tel-sub">受付時間 8:00〜17:00（不定休）</p></div>';
   });
   document.querySelectorAll(".badge-label").forEach(function (el) { if (/WEB予約/.test(el.textContent)) el.textContent = "電話でご予約"; });
+  // バッジのアイコンをスマホ版と同じ絵文字に統一（公開版のSVGを置き換える）
+  var BADGE_ICON = [
+    [/手ぶら/,        "🎿"],
+    [/前日|貸し出し/,  "📅"],
+    [/ワクシング|板/,  "🏅"],
+    [/男女別|更衣室/,  "🚻"],
+    [/温泉/,          "♨️"],
+    [/電話/,          "📞"]
+  ];
+  document.querySelectorAll(".badges .badge").forEach(function (b) {
+    var ico = b.querySelector(".badge-icon");
+    if (!ico) return;
+    var txt = b.textContent || "";
+    for (var i = 0; i < BADGE_ICON.length; i++) {
+      if (BADGE_ICON[i][0].test(txt)) {
+        if (ico.textContent.trim() !== BADGE_ICON[i][1]) ico.textContent = BADGE_ICON[i][1];
+        ico.style.fontSize = "38px"; ico.style.lineHeight = "1";
+        break;
+      }
+    }
+  });
   // 予約カードに「InstagramのDMで予約」が無ければ足す（公開版が上書きしても必ず出す）
   document.querySelectorAll(".booking-card").forEach(function (card) {
     if (card.querySelector(".btn-dm")) return;
@@ -452,7 +451,7 @@ window.__yatsumoriRebind = function () {
     d.className = "btn btn-dm";
     d.href = "https://ig.me/m/yatsumorirental";
     d.target = "_blank"; d.rel = "noopener";
-    d.textContent = "\U0001F4F7 InstagramのDMで予約";
+    d.textContent = "📷 InstagramのDMで予約";
     tel.insertAdjacentElement("afterend", d);
   });
   // おすすめ情報：重複した「周辺グルメ」を1つ「蔵王のスキー場情報」に置き換える
