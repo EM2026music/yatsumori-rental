@@ -209,6 +209,8 @@ html,body{overflow-x:hidden}
 <script>
 // メニュー開閉は document への委譲にする（公開版(site_pages)で #page-root が丸ごと
 // 差し替わってもイベントが死なない。要素直付けは差し替えで無効になる＝既知の地雷）
+// pageRenderer側の二重登録を防ぐ目印（両方がtoggleすると開いた直後に閉じる）
+window.__yatsumoriNavDelegated = true;
 document.addEventListener("click", function (e) {
   var btn = e.target.closest ? e.target.closest("#menu-btn") : null;
   if (!btn) return;
@@ -220,6 +222,6 @@ document.addEventListener("click", function (e) {
 <script src="assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="home-m";</script>
 <script src="assets/js/i18n.js?v=3"></script>
-<script src="assets/js/pageRenderer.js?v=4"></script>
+<script src="assets/js/pageRenderer.js?v=5"></script>
 </body>
 </html>

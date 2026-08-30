@@ -20,6 +20,9 @@
   }
 
   function rebindNavToggle() {
+    // ページ側が document 委譲でメニュー開閉を持っている場合はここで登録しない。
+    // 両方が登録されると1クリックで2回toggleされ「開かない」ように見える（実際にあった不具合）。
+    if (window.__yatsumoriNavDelegated) return;
     const btn = document.getElementById("menu-btn");
     const nav = document.getElementById("global-nav");
     if (!btn || !nav) return;
