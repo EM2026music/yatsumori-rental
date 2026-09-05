@@ -26,7 +26,7 @@ declare
 begin
   if p_start is null or p_end is null or p_end < p_start then raise exception 'INVALID_DATES' using errcode='P0001'; end if;
   if p_start < current_date then raise exception 'DATE_IN_PAST' using errcode='P0001'; end if;
-  if (p_end - p_start) > 30 then raise exception 'PERIOD_TOO_LONG' using errcode='P0001'; end if;
+  if (p_end - p_start) > 29 then raise exception 'PERIOD_TOO_LONG' using errcode='P0001'; end if;   -- 上限=開始日・返却日を含めて30日間
   if p_name is null or length(trim(p_name)) = 0 or p_phone is null or length(trim(p_phone)) < 10 then
     raise exception 'INVALID_CONTACT' using errcode='P0001'; end if;
   if p_members is null or jsonb_array_length(p_members) = 0 or jsonb_array_length(p_members) > 20 then
