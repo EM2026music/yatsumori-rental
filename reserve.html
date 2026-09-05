@@ -470,6 +470,17 @@ function gotoStep(n) {
   window.scrollTo(0, 0);
 }
 
+// 同じ要素に同じイベントを二重登録しない。
+// pageRendererは「公開版あり × スマホ幅」の分岐でDOMを差し替えずに__yatsumoriRebindを
+// もう一度呼ぶため、素のaddEventListenerだと人数の＋が1タップで2つ増える。
+// DOMごと差し替えられた場合は新しい要素に目印が無いので、ちゃんと再登録される。
+function bindOnce(el, type, fn, tag) {
+  if (!el) return;
+  const k = "__yb_" + (tag || type);
+  if (el[k]) return;
+  el[k] = true;
+  el.addEventListener(type, fn);
+}
 // ── ステップ1のカウンター（大人/子供） ──
 function bindCounters() {
   document.querySelectorAll("#step1 .stepper").forEach((stepper) => {
@@ -480,10 +491,10 @@ function bindCounters() {
       stepper.querySelector(".dec").disabled = state[key] <= min;
       stepper.querySelector(".inc").disabled = state.adults + state.children >= 20;
     };
-    stepper.querySelector(".inc").addEventListener("click", () => {
+    bindOnce(stepper.querySelector(".inc"), "click", () => {
       if (state.adults + state.children < 20) { state[key]++; refresh(); syncCounters(); }
     });
-    stepper.querySelector(".dec").addEventListener("click", () => {
+    bindOnce(stepper.querySelector(".dec"), "click", () => {
       if (state[key] > min) { state[key]--; refresh(); syncCounters(); }
     });
     refresh();
@@ -509,6 +520,10 @@ async function handleToStep2() {
   if (!start || !end) { showError("ご利用期間（開始日と返却日）を選択してください。", dateRow); return; }
   if (end < start) { showError("返却日は開始日と同じか、あとの日付にしてください。", dateRow); return; }
   if (evePickup && start <= todayStr()) { showError("前日受け取りをご希望の場合、開始日は明日以降にしてください（前日がすでに今日か過去になっています）。", dateRow); return; }
+  // 上限は「開始日・返却日を含めて30日間」。案内文（booking.jsのPERIOD_TOO_LONG）と数え方を揃える。
+  // ※サーバー側(sql)は (p_end - p_start) > 30 なので31日間まで通ってしまう。ここで先に止める。
+  const periodDays = Math.floor((new Date(end + "T00:00:00") - new Date(start + "T00:00:00")) / 86400000) + 1;
+  if (periodDays > 30) { showError("レンタル期間が長すぎます。30日以内でお選びください（今回は" + periodDays + "日間です）。", dateRow); return; }
   state.start = start; state.end = end; state.evePickup = evePickup;
 
   const btn = document.getElementById("to-step2");
@@ -863,8 +878,8 @@ window.__yatsumoriRebind = function () {
   if (startEl) {
     startEl.min = todayStr();
     startEl.max = addDaysStr(todayStr(), 90);
-    startEl.addEventListener("click", () => { try { startEl.showPicker(); } catch (e) {} });
-    startEl.addEventListener("change", () => {
+    bindOnce(startEl, "click", () => { try { startEl.showPicker(); } catch (e) {} });
+    bindOnce(startEl, "change", () => {
       // 開始日を選んだら返却日の下限を合わせ、空なら同日を初期値に
       endEl.min = startEl.value || todayStr();
       if (!endEl.value || endEl.value < startEl.value) endEl.value = startEl.value;
@@ -873,11 +888,11 @@ window.__yatsumoriRebind = function () {
   if (endEl) {
     endEl.min = todayStr();
     endEl.max = addDaysStr(todayStr(), 90);
-    endEl.addEventListener("click", () => { try { endEl.showPicker(); } catch (e) {} });
+    bindOnce(endEl, "click", () => { try { endEl.showPicker(); } catch (e) {} });
   }
   bindCounters();
 
-  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
+  const on = (id, fn) => bindOnce(document.getElementById(id), "click", fn);
   on("to-step2", handleToStep2);
   on("back-step1", () => { showError(""); gotoStep(1); });
   on("to-step3", handleToStep3);

@@ -197,7 +197,9 @@ function resetToSearch() {
 window.__yatsumoriRebind = function () {
 document.getElementById("search-btn").addEventListener("click", handleSearch);
 document.getElementById("cancel-btn").addEventListener("click", handleCancel);
-document.getElementById("search-again").addEventListener("click", resetToSearch);
+// 二重登録防止（pageRendererがrebindを再実行する経路があるため）
+const againBtn = document.getElementById("search-again");
+if (againBtn && !againBtn.__yb_click) { againBtn.__yb_click = true; againBtn.addEventListener("click", resetToSearch); }
 };
 window.__yatsumoriRebind();
 </script>
