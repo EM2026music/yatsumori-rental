@@ -182,7 +182,7 @@
     if (!MQ_MOBILE.matches) { host.innerHTML = ""; return; }
     var ep = i + 1, html = "";
     for (var p = 1; p <= 8; p++){
-      html += '<img class="manga-panel" src="../assets/img/manga/ep' + ep + 'p' + p + '.jpg?v=2"'
+      html += '<img class="manga-panel" src="../assets/img/manga/ep' + ep + 'p' + p + '.jpg?v=3"'
             + ' alt="第' + ep + '話 コマ' + p + '" loading="lazy" decoding="async">';
     }
     host.innerHTML = html;
@@ -203,7 +203,7 @@
     // 高さ0を基準にしてしまい、大きくズレるため。その場合は位置調整をスキップ）
     var oldH = (d.img.complete && d.img.naturalWidth) ? d.img.getBoundingClientRect().height : null;
     d.img.onload = function(){ d.img.onload = null; if (oldH !== null) reflowAfter(d.img, oldH); };
-    d.img.src = "../assets/img/" + ep.img + "?v=3";
+    d.img.src = "../assets/img/" + ep.img + "?v=4";
     renderPanels(i);
     d.img.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
     d.sel.value = i;
