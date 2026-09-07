@@ -318,7 +318,7 @@ img{display:block}
       </a>
       
     <a class="rec-card" href="pages/yatsumorin.html" style="position: absolute; left: 538px; top: 0px; width: 522px; height: auto; margin: 0px; right: auto;">
-        <img class="rec-photo" src="../assets/img/home/1785168113854-ChatGPT_Image_2026_7_28__01_00_06__2_.jpg" alt="やつもりん" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; object-position: 50% 0%;" loading="eager">
+        <img class="rec-photo" src="../assets/img/home/1785168113854-ChatGPT_Image_2026_7_28__01_00_06__2_.jpg" alt="やつもりん" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; object-position: 50% 9%;" loading="eager">
         <p class="rec-title">やつもりん（公式キャラ）</p>
         <p class="rec-sub">八つ森レンタルの公式キャラを見る</p>
       </a></div>
@@ -371,22 +371,12 @@ window.__yatsumoriRebind = function () {
     var ttl = a.querySelector(".content-card-title");
     if (ttl && /初心者/.test(ttl.textContent)) a.setAttribute("href", "pages/beginner-guide.html");
   });
-  // おすすめ情報：重複した「周辺グルメ」を1つ「蔵王のスキー場情報」に置き換える
-  // （編集時に誤って複製された分を、まだ無いスキー場カードに振り替える）
-  var recs = Array.prototype.slice.call(document.querySelectorAll(".rec-card"));
-  var gourmet = recs.filter(function (a) { return /gourmet/.test(a.getAttribute("href") || ""); });
-  var hasSki = recs.some(function (a) { return /zao-ski-info/.test(a.getAttribute("href") || ""); });
-  if (gourmet.length > 1 && !hasSki) {
-    var c = gourmet[gourmet.length - 1];
-    c.setAttribute("href", "pages/zao-ski-info.html");
-    var img = c.querySelector("img"); if (img) { img.setAttribute("src", "../assets/img/zao-ski.jpg"); img.setAttribute("alt", "蔵王のスキー場情報"); }
-    var t2 = c.querySelector(".rec-title"); if (t2) t2.textContent = "蔵王のスキー場情報";
-    var s2 = c.querySelector(".rec-sub"); if (s2) s2.textContent = "ゲレンデ・積雪・天気をチェック";
-  }
-  // 公開版（エディタで絶対配置化された）レイアウトのときだけ、おすすめ情報を
-  // アクセスの手前まで広げて4枚を均等サイズに整える（やつもりんを4枚目に）。
-  // 大きすぎたプロモバナーはやめて、他のカードと同じサイズに揃える。
-  // 静的フォールバック（flexレイアウト）は位置がstaticなので発動しない。
+  // おすすめ情報（オーナー指示）：グルメ／スキー場のカードを消し、残る2枚を横いっぱいに並べる
+  document.querySelectorAll(".rec-card").forEach(function (a) {
+    if (/gourmet|zao-ski-info/.test(a.getAttribute("href") || "")) a.remove();
+  });
+  var infoHead = document.querySelector(".info-sec .sec-head"); if (infoHead) infoHead.remove();
+  var kicker = document.querySelector(".sec-kicker"); if (kicker) kicker.style.fontSize = "16px";
   var infoSec = document.querySelector(".info-sec");
   var recScroll = document.querySelector(".rec-scroll");
   var accessSec = document.querySelector(".access-sec");
@@ -398,25 +388,25 @@ window.__yatsumoriRebind = function () {
       return Array.prototype.slice.call(recScroll.querySelectorAll(".rec-card"))
         .filter(function (a) { return (a.getAttribute("href") || "").indexOf(sub) >= 0; })[0];
     };
-    var W = 252, GAP = 16, IMGH = 140;
-    var place = function (card, idx, title, sub, img, alt, objPos) {
+    var W = 522, GAP = 16, IMGH = 140;
+    var place = function (card, idx, title, sub, img, alt, titleSize, objPos) {
       if (!card) return;
       card.style.cssText = "position:absolute;left:" + (idx * (W + GAP)) + "px;top:0;width:" + W + "px;height:auto;margin:0;right:auto;";
       var im = card.querySelector("img");
       if (im) {
-        // 切り取り位置(object-position)はエディタで設定した値を尊重し上書きしない
-        var pos = objPos || im.style.objectPosition || "";
-        im.style.cssText = "width:100%;height:" + IMGH + "px;border-radius:8px;object-fit:cover;margin-bottom:6px;" + (pos ? "object-position:" + pos + ";" : "");
+        im.style.cssText = "width:100%;height:" + IMGH + "px;border-radius:8px;object-fit:cover;margin-bottom:6px;"
+          + (objPos ? "object-position:" + objPos + ";" : "");
         if (img) im.setAttribute("src", img);
         if (alt) im.setAttribute("alt", alt);
       }
-      var t = card.querySelector(".rec-title"); if (t && title) t.textContent = title;
-      var s = card.querySelector(".rec-sub"); if (s && sub) s.textContent = sub;
+      var t = card.querySelector(".rec-title");
+      if (t) { if (title) t.textContent = title; if (titleSize) t.style.fontSize = titleSize; }
+      var sb = card.querySelector(".rec-sub"); if (sb && sub) sb.textContent = sub;
     };
-    place(pickHref("onsen"), 0);
-    place(pickHref("gourmet"), 1);
-    place(pickHref("zao-ski"), 2);
-    place(pickHref("yatsumorin"), 3, "やつもりん（公式キャラ）", "8つ森レンタルの公式キャラを見る", "../assets/img/yatsumorin-promo.jpg?v=2", "やつもりん");
+    place(pickHref("onsen"), 0, "お得な宿泊パックはこちら！", "宿泊とレンタルがセットのプラン",
+          "../assets/img/mercure/exterior.jpg?v=1", "メルキュール宮城蔵王リゾート＆スパ 外観", "17px");
+    place(pickHref("yatsumorin"), 1, "やつもりん（公式キャラ）", "8つ森レンタルの公式キャラを見る",
+          "../assets/img/yatsumorin-promo.jpg?v=2", "やつもりん", null, "50% 9%");
 
     // アクセスカードが枠(info-row 242px)を突き抜けてフッターに約26px重なっていた
     // （写真を42→100pxにした副作用で右カラムだけ縦に伸びた）。写真を88pxに戻し、
