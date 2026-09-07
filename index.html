@@ -313,14 +313,11 @@ img{display:block}
   <!-- おすすめ情報 -->
   <div class="info-sec" style="position: absolute; left: 40px; top: 0px; width: 1060px; margin: 0px;">
     <p class="sec-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
-    <div class="sec-head">
-      <a class="sec-head-more" href="#">もっと見る ›</a>
-    </div>
     <div class="rec-scroll" style="position: relative; height: 185px; width: 1060px;">
       <a class="rec-card" href="pages/onsen-guide.html" style="position: absolute; left: 0px; top: 0px; width: 522px; height: auto; margin: 0px; right: auto;">
         <img class="rec-photo" src="assets/img/mercure/exterior.jpg?v=1" alt="メルキュール宮城蔵王リゾート＆スパ 外観" style="width: 100%; height: 140px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; " loading="eager">
         <p class="rec-title" style="font-size:17px">お得な宿泊パックはこちら！</p>
-        <p class="rec-sub">スキーの後は温泉でリラックス</p>
+        <p class="rec-sub">宿泊とレンタルがセットのプラン</p>
       </a>
       
     <a class="rec-card" href="pages/yatsumorin.html" style="position: absolute; left: 538px; top: 0px; width: 522px; height: auto; margin: 0px; right: auto;">
@@ -491,10 +488,10 @@ window.__yatsumoriRebind = function () {
   document.querySelectorAll(".rec-card").forEach(function (a) {
     if (/gourmet|zao-ski-info/.test(a.getAttribute("href") || "")) a.remove();
   });
-  // 「おすすめ情報」の見出しだけ消す（.sec-head-titleは「アクセス」にもあるので文言で特定する）
-  document.querySelectorAll(".sec-head-title").forEach(function (t) {
-    if (/おすすめ情報/.test(t.textContent || "")) t.remove();
-  });
+  // 「おすすめ情報」の見出し行ごと削除（見出しを消すと「もっと見る ›」だけが残り、
+  //  しかもリンク先が # でどこにも飛ばないため）。「アクセス」側の見出しは .access-sec なので無事。
+  var infoHead = document.querySelector(".info-sec .sec-head");
+  if (infoHead) infoHead.remove();
   var kicker = document.querySelector(".sec-kicker"); if (kicker) kicker.style.fontSize = "16px";
   var infoSec = document.querySelector(".info-sec");
   var recScroll = document.querySelector(".rec-scroll");
@@ -521,7 +518,7 @@ window.__yatsumoriRebind = function () {
       if (t) { if (title) t.textContent = title; if (titleSize) t.style.fontSize = titleSize; }
       var sb = card.querySelector(".rec-sub"); if (sb && sub) sb.textContent = sub;
     };
-    place(pickHref("onsen"), 0, "お得な宿泊パックはこちら！", null,
+    place(pickHref("onsen"), 0, "お得な宿泊パックはこちら！", "宿泊とレンタルがセットのプラン",
           "assets/img/mercure/exterior.jpg?v=1", "メルキュール宮城蔵王リゾート＆スパ 外観", "17px");
     place(pickHref("yatsumorin"), 1, "やつもりん（公式キャラ）", "8つ森レンタルの公式キャラを見る",
           "assets/img/yatsumorin-promo.jpg?v=2", "やつもりん");
