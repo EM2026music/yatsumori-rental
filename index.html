@@ -312,7 +312,7 @@ img{display:block}
 
   <!-- おすすめ情報 -->
   <div class="info-sec" style="position: absolute; left: 40px; top: 0px; width: 1060px; margin: 0px;">
-    <p class="sec-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
+    <p class="sec-kicker" style="margin-left:102px">＼ 蔵王をもっと楽しもう！ ／</p>
     <div class="rec-scroll" style="position: relative; height: 210px; width: 1060px;">
       <a class="rec-card" href="pages/onsen-guide.html" style="position: absolute; left: 102px; top: 0px; width: 420px; height: auto; margin: 0px; right: auto;">
         <img class="rec-photo" src="assets/img/mercure/exterior.jpg?v=1" alt="メルキュール宮城蔵王リゾート＆スパ 外観" style="width: 100%; height: 165px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; " loading="eager">
@@ -499,7 +499,7 @@ window.__yatsumoriRebind = function () {
   //  しかもリンク先が # でどこにも飛ばないため）。「アクセス」側の見出しは .access-sec なので無事。
   var infoHead = document.querySelector(".info-sec .sec-head");
   if (infoHead) infoHead.remove();
-  var kicker = document.querySelector(".sec-kicker"); if (kicker) kicker.style.fontSize = "16px";
+  var kicker = document.querySelector(".sec-kicker"); if (kicker) { kicker.style.fontSize = "16px"; kicker.style.marginLeft = "102px"; }
   var infoSec = document.querySelector(".info-sec");
   var recScroll = document.querySelector(".rec-scroll");
   var accessSec = document.querySelector(".access-sec");
