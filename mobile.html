@@ -212,6 +212,17 @@ document.addEventListener("click", function (e) {
   var nav = document.getElementById("global-nav");
   if (nav) nav.classList.toggle("open");
 });
+// pageRendererが公開版に差し替えた後にも必ず実行される自己修復（同じ仕組みをindex.htmlでも使用）
+window.__yatsumoriRebind = function () {
+  // ワクシングサービスのカード画像を最新のものに強制（公開版に古い画像が残っていても差し替える）
+  document.querySelectorAll(".content-card").forEach(function (a) {
+    var ttl = a.querySelector(".content-card-title");
+    if (ttl && /ワクシング/.test(ttl.textContent) && a.style.backgroundImage.indexOf("waxing-card-v2") === -1) {
+      a.style.backgroundImage = "url('assets/img/home/waxing-card-v2.jpg')";
+    }
+  });
+};
+window.__yatsumoriRebind();
 </script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=6"></script>
