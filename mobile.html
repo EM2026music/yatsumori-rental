@@ -181,7 +181,7 @@ html,body{overflow-x:hidden}
   <p class="sec-kicker">＼ 蔵王をもっと楽しもう！ ／</p>
   <div class="rec-scroll">
     <a class="rec-card" href="pages/onsen-guide.html"><img class="rec-photo" src="assets/img/mercure/exterior.jpg?v=1" alt="メルキュール宮城蔵王リゾート＆スパ 外観"><p class="rec-title" style="font-size:14px">お得な宿泊パックはこちら！</p><p class="rec-sub">宿泊とレンタルがセットのプラン</p></a>
-    <a class="rec-card" href="pages/yatsumorin.html"><img class="rec-photo" src="assets/img/yatsumorin-promo.jpg?v=2" alt="やつもりん" style="object-position:50% 5%"><p class="rec-title">やつもりん（公式キャラ）</p><p class="rec-sub">8つ森レンタルの公式キャラを見る</p></a>
+    <a class="rec-card" href="javascript:void(0)" onclick="return false;" style="cursor:default"><img class="rec-photo" src="assets/img/yatsumorin-promo.jpg?v=2" alt="やつもりん" style="object-position:50% 5%"><p class="rec-title">やつもりん（公式キャラ）</p><p class="rec-sub">準備中</p></a>
   </div>
 </div>
 
@@ -220,6 +220,14 @@ window.__yatsumoriRebind = function () {
     if (ttl && /ワクシング/.test(ttl.textContent) && a.style.backgroundImage.indexOf("waxing-card-v2") === -1) {
       a.style.backgroundImage = "url('assets/img/home/waxing-card-v2.jpg')";
     }
+  });
+  // やつもりんページは未公開のため、いったんリンク無効化＋準備中表示（オーナー指示2026-09-26）
+  document.querySelectorAll(".rec-card").forEach(function (a) {
+    if ((a.getAttribute("href") || "").indexOf("yatsumorin") === -1) return;
+    a.setAttribute("href", "javascript:void(0)");
+    a.onclick = function (e) { e.preventDefault(); return false; };
+    a.style.cursor = "default";
+    var sb = a.querySelector(".rec-sub"); if (sb) sb.textContent = "準備中";
   });
 };
 window.__yatsumoriRebind();

@@ -317,10 +317,10 @@ img{display:block}
         <p class="rec-sub">宿泊とレンタルがセットのプラン</p>
       </a>
       
-    <a class="rec-card" href="pages/yatsumorin.html" style="position: absolute; left: 538px; top: 0px; width: 420px; height: auto; margin: 0px; right: auto;">
+    <a class="rec-card" href="javascript:void(0)" onclick="return false;" style="position: absolute; left: 538px; top: 0px; width: 420px; height: auto; margin: 0px; right: auto; cursor: default;">
         <img class="rec-photo" src="../assets/img/home/1785168113854-ChatGPT_Image_2026_7_28__01_00_06__2_.jpg" alt="やつもりん" style="width: 100%; height: 165px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; object-position: 50% 5%;" loading="eager">
         <p class="rec-title">やつもりん（公式キャラ）</p>
-        <p class="rec-sub">八つ森レンタルの公式キャラを見る</p>
+        <p class="rec-sub">準備中</p>
       </a></div>
   </div>
 
@@ -405,8 +405,15 @@ window.__yatsumoriRebind = function () {
     };
     place(pickHref("onsen"), 0, "お得な宿泊パックはこちら！", "宿泊とレンタルがセットのプラン",
           "../assets/img/mercure/exterior.jpg?v=1", "メルキュール宮城蔵王リゾート＆スパ 外観", "17px");
-    place(pickHref("yatsumorin"), 1, "やつもりん（公式キャラ）", "8つ森レンタルの公式キャラを見る",
+    var yCard = pickHref("yatsumorin");
+    place(yCard, 1, "やつもりん（公式キャラ）", "準備中",
           "../assets/img/yatsumorin-promo.jpg?v=2", "やつもりん", null, "50% 5%");
+    if (yCard) {
+      // やつもりんページは未公開のため、いったんリンク無効化＋準備中表示（オーナー指示2026-09-26）
+      yCard.setAttribute("href", "javascript:void(0)");
+      yCard.onclick = function (e) { e.preventDefault(); return false; };
+      yCard.style.cursor = "default";
+    }
 
     // アクセスカードが枠(info-row 242px)を突き抜けてフッターに約26px重なっていた
     // （写真を42→100pxにした副作用で右カラムだけ縦に伸びた）。写真を88pxに戻し、
