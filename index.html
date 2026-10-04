@@ -12,6 +12,29 @@ if (window.self === window.top && /Android|iPhone|iPod|Mobile/i.test(navigator.u
   location.replace("mobile.html" + (_yrLq ? "?lang=" + _yrLq[1] : ""));
 }
 </script>
+<script>
+// 幅1536px固定のPCトップを、画面の狭いPC（1280px等）では画面幅に合わせて縮小する（右側の予約カードが切れないように）
+// ※編集画面（iframe内）では縮小しない
+(function () {
+  if (window.self !== window.top) return;
+  var de = document.documentElement;
+  function fit() {
+    var w = de.clientWidth || window.innerWidth;
+    de.style.setProperty("--yr-fit", w < 1536 ? String(w / 1536) : "1");
+  }
+  fit();
+  window.addEventListener("resize", fit);
+  document.addEventListener("DOMContentLoaded", fit);
+  window.addEventListener("load", fit);
+})();
+</script>
+<style>
+body{zoom:var(--yr-fit,1)}
+/* 英語は文が長く見出しが3行になり紹介文がバッジに重なるため、見出し欄を広げて2行に収める */
+html[lang="en"] .hero-content{width:760px}
+/* 英語はバッジの文言が長く3行になり写真の下端に届くため、英語のときだけ少し小さく */
+html[lang="en"] .page .badges .badge .badge-label{font-size:12.5px !important;line-height:1.3}
+</style>
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
 <!--
   ============================================================
@@ -573,7 +596,7 @@ window.__yatsumoriRebind();
   window.addEventListener("load", function () { setTimeout(reveal, 2500); }); // 最終保険
 })();
 </script>
-<script src="assets/js/i18n.js?v=6"></script>
+<script src="assets/js/i18n.js?v=7"></script>
 <script src="assets/js/pageRenderer.js?v=5"></script>
 </body>
 </html>

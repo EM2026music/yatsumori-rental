@@ -89,7 +89,7 @@
     "前日貸し出しOK‼": ["Pick up the day before‼", "可前一天領取‼"],
     "男女別": ["Separate", "男女分開"],
     "更衣室完備": ["changing rooms", "更衣室完備"],
-    "ロッカー有": ["Lockers available", "附置物櫃"],
+    "ロッカー有": ["& lockers", "附置物櫃"],
     "更衣室完備・ロッカー有": ["changing rooms & lockers", "更衣室・置物櫃完備"],
     "WEB予約で": ["Book online for", "線上預約"],
     "スムーズ受取": ["smooth pickup", "領取更順暢"],
