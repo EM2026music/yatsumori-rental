@@ -424,7 +424,7 @@ function openManga(ep) {
   const img = document.getElementById("mm-img");
   const lang = window.yrLang ? window.yrLang() : "ja";
   const sfx = (lang === "en" || lang === "zh") ? "-" + lang : "";
-  const mSrc = d.img.replace(".jpg", sfx + ".jpg") + "?v=3"; // 英語・繁体字は言語別のマンガ／?vはキャッシュ回避
+  const mSrc = d.img.replace(".jpg", sfx + ".jpg") + "?v=4"; // 英語・繁体字は言語別のマンガ／?vはキャッシュ回避
   if (img.getAttribute("src") !== mSrc) img.src = mSrc; // 開いたときだけ読み込む（フォーム表示を重くしない）
   document.getElementById("manga-modal").classList.add("open");
   document.body.style.overflow = "hidden";
