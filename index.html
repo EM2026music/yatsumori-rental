@@ -36,6 +36,16 @@ html[lang="en"] .hero-content{width:760px}
 html[lang="en"] .page .badges .badge .badge-label{font-size:12.5px !important;line-height:1.3}
 </style>
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="8つ森レンタル">
+<meta property="og:title" content="8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル">
+<meta property="og:description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。お電話でのご予約でスムーズ受取、ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
+<meta property="og:url" content="https://em2026music.github.io/yatsumori-rental/">
+<meta property="og:image" content="https://em2026music.github.io/yatsumori-rental/assets/img/og-image.jpg">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
 <!--
   ============================================================
   PC版 1536px 固定カンプ（レスポンシブ無し・@media 未使用）
@@ -243,7 +253,7 @@ img{display:block}
     <a href="pages/beginner-guide.html"><span class="en">GUIDE</span><span class="jp">初心者ガイド</span></a>
     <a href="pages/pricing.html"><span class="en">RENTAL</span><span class="jp">レンタル料金</span></a>
     <a href="pages/waxing.html"><span class="en">WAXING</span><span class="jp">ワクシング</span></a>
-    <a href="https://em2026music.github.io/yatsumori-rental/pages/catalog.html"><span class="en">GALLERY</span><span class="jp">ギャラリー</span></a>
+    <a href="pages/catalog.html"><span class="en">GALLERY</span><span class="jp">ギャラリー</span></a>
     <a href="pages/access.html"><span class="en">ACCESS</span><span class="jp">アクセス</span></a>
   </nav>
 
@@ -591,7 +601,7 @@ window.__yatsumoriRebind();
   var t0 = Date.now();
   var iv = setInterval(function () {
     if (window.__yatsumoriPageReady) { clearInterval(iv); reveal(); }
-    else if (Date.now() - t0 > 1500) { clearInterval(iv); reveal(); } // 1.5秒で必ず表示（保険）
+    else if (Date.now() - t0 > 300) { clearInterval(iv); reveal(); } // 0.3秒で必ず表示（静的HTMLが公開版と同じ内容なので長く隠す必要がない。Supabase停止中に毎回2秒白くなっていた）
   }, 30);
   window.addEventListener("load", function () { setTimeout(reveal, 2500); }); // 最終保険
 })();
