@@ -501,11 +501,12 @@
     "はじめての方へ": ["For first-timers", "給第一次的您"],
     "スキー・スノーボードが初めてでも大丈夫！8つ森レンタルの看板娘「やつもりん」が、レンタルの流れと準備のコツをご案内します。": ["First time skiing or snowboarding? No problem! Yatsumorin, our shop mascot, walks you through renting and getting ready.", "第一次滑雪或單板也沒問題！8つ森 Rental 的看板娘「Yatsumorin」將為您介紹租借流程與準備訣竅。"],
     "やつもりんの予約案内マンガ": ["Yatsumorin's booking comic", "Yatsumorin 的預約導覽漫畫"],
-    "看板娘やつもりんが、ご予約のコツを漫画でご案内します。読みたい話を選んでください。": ["Our mascot Yatsumorin explains booking tips in comic form (in Japanese). Choose an episode.", "看板娘 Yatsumorin 用漫畫介紹預約訣竅（漫畫為日文）。請選擇想看的一話。"],
-    "看板娘やつもりんが、WEB予約のコツを漫画でご案内します。読みたい話を選んでください。": ["Our mascot Yatsumorin explains booking tips in comic form (in Japanese). Choose an episode.", "看板娘 Yatsumorin 用漫畫介紹預約訣竅（漫畫為日文）。請選擇想看的一話。"],
+    "看板娘やつもりんが、ご予約のコツを漫画でご案内します。読みたい話を選んでください。": ["Our mascot Yatsumorin explains booking tips in comic form. Choose an episode.", "看板娘 Yatsumorin 用漫畫介紹預約訣竅。請選擇想看的一話。"],
+    "看板娘やつもりんが、WEB予約のコツを漫画でご案内します。読みたい話を選んでください。": ["Our mascot Yatsumorin explains booking tips in comic form. Choose an episode.", "看板娘 Yatsumorin 用漫畫介紹預約訣竅。請選擇想看的一話。"],
     "読みたい話を選ぶ": ["Choose an episode", "選擇想看的一話"],
     "次の話へ ▸": ["Next episode ▸", "下一話 ▸"],
     "前の話へ": ["Previous episode", "上一話"],
+    "最終話までありがとう！": ["Thanks for reading to the end!", "謝謝你看到最後一話！"],
     "レンタル当日の流れ": ["Your rental day, step by step", "租借當天的流程"],
     "ご来店・受付": ["Arrive & check in", "到店・報到"],
     "ご予約の方は代表者のお名前をお伝えください。前日午後2時からのお渡しも可能です。": ["If you've booked, give us the name the booking is under. Pickup from 2 PM the day before is also possible.", "已預約的客人請告知代表人姓名。也可在前一天下午2點起領取。"],
@@ -534,7 +535,7 @@
     "わからないことは、お気軽にお電話（070-2472-3633）または": ["Questions? Call us (070-2472-3633) or see the ", "有不清楚的地方，歡迎來電（070-2472-3633）或參考"],
     "をご覧ください。": [".", "。"],
 
-    /* ── 初心者ガイド：マンガ各話（タイトルだけ訳す。マンガ画像の中身は日本語のまま） ── */
+    /* ── 初心者ガイド：マンガ各話（画像は言語別：manga-N-en/zh.jpg） ── */
     "第1話 予約でスムーズ": ["Ep. 1: Book ahead, go smoothly", "第1話 預約更順利"],
     "第1話：予約しておくと当日スムーズ！": ["Episode 1: Book ahead for a smooth day!", "第1話：事先預約，當天更順利！"],
     "やつもりんの予約案内マンガ 第1話 予約でスムーズ": ["Yatsumorin's booking comic, Ep. 1: Book ahead, go smoothly", "Yatsumorin 的預約導覽漫畫 第1話 預約更順利"],
@@ -817,11 +818,13 @@
       for (var j = 0; j < I18N_ATTRS.length; j++) {
         var a = I18N_ATTRS[j];
         if (!el.hasAttribute(a)) continue;
+        // ページ側のJSが属性を書き換えていたら（訳した値と違う）、控えを捨てて新しい日本語を元にする
+        if ((a in store) && el.getAttribute(a) !== store["\u0000" + a]) delete store[a];
         var raw = (a in store) ? store[a] : el.getAttribute(a);
         if (!JP.test(raw)) continue;
         if (cur === "ja") { if (a in store) el.setAttribute(a, raw); continue; }
         var t = tr(raw, cur);
-        if (t) { store[a] = raw; origAttr.set(el, store); el.setAttribute(a, t); }
+        if (t) { store[a] = raw; store["\u0000" + a] = t; origAttr.set(el, store); el.setAttribute(a, t); }
       }
     }
   }
@@ -936,6 +939,8 @@
     if (!LANGS[lang]) lang = "ja";
     cur = lang;
     if (save !== false) { try { localStorage.setItem(LS_KEY, lang); } catch (_) {} }
+    // 言語別の画像（初心者ガイドのマンガ等）を差し替えるページ向けの合図。訳の適用より先に出す
+    try { document.dispatchEvent(new CustomEvent("yr:langchange", { detail: { lang: cur } })); } catch (_) {}
     apply();
   }
 

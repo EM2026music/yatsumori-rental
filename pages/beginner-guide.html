@@ -174,15 +174,26 @@
     container.style.height = Math.round(curH + delta) + "px";
   }
 
+  // 英語・繁体字のときは言語別のマンガ（manga-N-en.jpg / ep{N}p{P}-zh.jpg）を出す。
+  // i18n.js はこのスクリプトより後に読まれるので、起動時はURL/保存値から自前で判定する
+  function langSuffix(){
+    var l = window.yrLang ? window.yrLang() : null;
+    if (!l) {
+      l = (location.search.match(/[?&]lang=(ja|en|zh)\b/) || [])[1];
+      if (!l) { try { l = localStorage.getItem("yatsumori:lang"); } catch (_) {} }
+    }
+    return (l === "en" || l === "zh") ? "-" + l : "";
+  }
+
   // スマホでは1枚絵ではなく「8コマを縦一列」で出す。PCでは何も読み込まない。
   var MQ_MOBILE = window.matchMedia("(max-width:759px)");
   function renderPanels(i){
     var host = document.getElementById("manga-panels");
     if (!host) return;
     if (!MQ_MOBILE.matches) { host.innerHTML = ""; return; }
-    var ep = i + 1, html = "";
+    var ep = i + 1, html = "", sfx = langSuffix();
     for (var p = 1; p <= 8; p++){
-      html += '<img class="manga-panel" src="../assets/img/manga/ep' + ep + 'p' + p + '.jpg?v=3"'
+      html += '<img class="manga-panel" src="../assets/img/manga/ep' + ep + 'p' + p + sfx + '.jpg?v=3"'
             + ' alt="第' + ep + '話 コマ' + p + '" loading="lazy" decoding="async">';
     }
     host.innerHTML = html;
@@ -203,7 +214,7 @@
     // 高さ0を基準にしてしまい、大きくズレるため。その場合は位置調整をスキップ）
     var oldH = (d.img.complete && d.img.naturalWidth) ? d.img.getBoundingClientRect().height : null;
     d.img.onload = function(){ d.img.onload = null; if (oldH !== null) reflowAfter(d.img, oldH); };
-    d.img.src = "../assets/img/" + ep.img + "?v=4";
+    d.img.src = "../assets/img/" + ep.img.replace(".jpg", langSuffix() + ".jpg") + "?v=4";
     renderPanels(i);
     d.img.alt = "やつもりんの予約案内マンガ " + ep.no + " " + ep.ttl;
     d.sel.value = i;
@@ -243,6 +254,12 @@
     show(i, true);
   });
 
+  // 言語を切り替えたら、表示中の話を言語別の画像で出し直す
+  document.addEventListener("yr:langchange", function(){
+    var d = els();
+    if (d.sel && d.img) show(parseInt(d.sel.value, 10) || 0, false);
+  });
+
   // 差し替え後にもプルダウンの中身を保証する（pageRendererが呼んでくれるフック）
   window.__yatsumoriRebind = function(){ populate(); };
 
@@ -252,6 +269,6 @@
 })();
 </script>
 <!-- このページは静的表示のみ（古い公開版の11話・旧画像を使わず、常にこの最新10話版を表示） -->
-<script src="../assets/js/i18n.js?v=4"></script>
+<script src="../assets/js/i18n.js?v=5"></script>
 </body>
 </html>

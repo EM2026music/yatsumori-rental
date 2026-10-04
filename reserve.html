@@ -422,7 +422,9 @@ function openManga(ep) {
   ensureMangaModal();
   document.getElementById("mm-title").textContent = d.t;
   const img = document.getElementById("mm-img");
-  const mSrc = d.img + "?v=3"; // 画像更新のキャッシュ回避
+  const lang = window.yrLang ? window.yrLang() : "ja";
+  const sfx = (lang === "en" || lang === "zh") ? "-" + lang : "";
+  const mSrc = d.img.replace(".jpg", sfx + ".jpg") + "?v=3"; // 英語・繁体字は言語別のマンガ／?vはキャッシュ回避
   if (img.getAttribute("src") !== mSrc) img.src = mSrc; // 開いたときだけ読み込む（フォーム表示を重くしない）
   document.getElementById("manga-modal").classList.add("open");
   document.body.style.overflow = "hidden";
@@ -919,7 +921,7 @@ function selectResultCode() {
 window.__yatsumoriRebind();
 </script>
 <script>window.YATSUMORI_PAGE_KEY="reserve";</script>
-<script src="assets/js/i18n.js?v=4"></script>
+<script src="assets/js/i18n.js?v=5"></script>
 <script src="assets/js/pageRenderer.js?v=5"></script>
 </body>
 </html>
