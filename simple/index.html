@@ -6,7 +6,8 @@
 <script>
 // スマホ端末だけ専用ページへ（?pc=1 でPC版を強制表示）
 if (window.self === window.top && /Android|iPhone|iPod|Mobile/i.test(navigator.userAgent) && location.search.indexOf("pc=1") === -1) {
-  location.replace("mobile.html");
+  var _yrLq = location.search.match(/[?&]lang=(ja|en|zh)\b/);
+  location.replace("mobile.html" + (_yrLq ? "?lang=" + _yrLq[1] : ""));
 }
 </script>
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
@@ -346,7 +347,7 @@ img{display:block}
 <div class="utility-bar">
   <span class="utility-ig">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="5"></circle><circle cx="17.5" cy="6.5" r="1" fill="white"></circle></svg>
-    最新情報はInstagramでチェック！&nbsp;&nbsp;@8mori_rental
+    最新情報はInstagramでチェック！&nbsp;&nbsp;@yatsumorirental
   </span>
   <div class="utility-links">
     <a href="pages/faq.html">❓ よくある質問</a>
@@ -432,6 +433,6 @@ window.__yatsumoriRebind = function () {
 };
 window.__yatsumoriRebind();
 </script>
-<script src="../assets/js/i18n.js?v=5"></script>
+<script src="../assets/js/i18n.js?v=6"></script>
 </body>
 </html>

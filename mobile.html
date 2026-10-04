@@ -8,7 +8,8 @@
 // ※編集画面（iframe内）では発動しない：これが無いとスマホ版編集時にPC版が
 //   読み込まれてしまい、レイアウトが崩れて見えた（長年のスマホ編集不調の原因）
 if (window.self === window.top && !/Android|iPhone|iPod|Mobile/i.test(navigator.userAgent)) {
-  location.replace("index.html?pc=1");
+  var _yrLq = location.search.match(/[?&]lang=(ja|en|zh)\b/);
+  location.replace("index.html?pc=1" + (_yrLq ? "&lang=" + _yrLq[1] : ""));
 }
 </script>
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
@@ -197,6 +198,7 @@ html,body{overflow-x:hidden}
     <a class="footer-action-btn" href="https://www.instagram.com/yatsumorirental/" target="_blank" rel="noopener">📷 Instagram</a>
     <a class="footer-action-btn" href="pages/access.html">📍 アクセス</a>
   </div>
+  <a href="pages/privacy.html" style="display:block;text-align:center;margin-top:12px;font-size:11px;color:#6b7785;text-decoration:underline">プライバシーポリシー</a>
 </footer>
 
 </div><!-- .page -->
@@ -234,7 +236,7 @@ window.__yatsumoriRebind();
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabaseClient.js?v=6"></script>
 <script>window.YATSUMORI_PAGE_KEY="home-m";</script>
-<script src="assets/js/i18n.js?v=5"></script>
+<script src="assets/js/i18n.js?v=6"></script>
 <script src="assets/js/pageRenderer.js?v=5"></script>
 </body>
 </html>
