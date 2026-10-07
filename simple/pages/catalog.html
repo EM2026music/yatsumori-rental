@@ -45,9 +45,9 @@ window.__yatsumoriRebind = function () {
   if (!root) return;
   var container = root.querySelector(".container") || root;
   if (!container.querySelector(".gallery-grid")) {   // 二重描画防止
-    var N = 15, cells = "";
+    var N = 15, GV = 1, cells = "";   // N=枚数, GV=写真の版（差し替えたら上げる）
     for (var i = 1; i <= N; i++) {
-      var src = "../../assets/img/gallery/gallery-" + i + ".jpg";
+      var src = "../../assets/img/gallery/gallery-" + i + ".jpg?v=" + GV;
       cells += '<a href="' + src + '"><img src="' + src + '" loading="lazy" alt="8つ森レンタル 店内・道具・ゲレンデの様子 ' + i + '"></a>';
     }
     container.innerHTML =

@@ -34,6 +34,9 @@ body{zoom:var(--yr-fit,1)}
 html[lang="en"] .hero-content{width:760px}
 /* 英語はバッジの文言が長く3行になり写真の下端に届くため、英語のときだけ少し小さく */
 html[lang="en"] .page .badges .badge .badge-label{font-size:12.5px !important;line-height:1.3}
+/* お知らせ欄（オーナー用エディタで表示/非表示と文言を切り替える） */
+.yr-notice{background:#fff4d6;color:#6b4300;border-bottom:1px solid #f0d48a;text-align:center;font-weight:800;font-size:16px;line-height:1.6;padding:10px 24px}
+.yr-notice[hidden]{display:none}
 </style>
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
 <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
@@ -225,12 +228,7 @@ img{display:block}
 .utility-links{display:flex;gap:24px;opacity:.85}
 .utility-links a{display:flex;align-items:center}
 
-/* 公開版(site_pages)への差し替えが終わるまで中身を隠し、古い静的版のチラ見えを防ぐ。
-   差し替え完了(__yatsumoriPageReady)でフェードイン表示する。 */
-#page-root{opacity:0;transition:opacity .28s ease}
-#page-root.yr-ready{opacity:1}
 </style>
-<noscript><style>#page-root{opacity:1 !important}</style></noscript>
 <meta name="description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。お電話でのご予約でスムーズ受取、ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,6 +237,7 @@ img{display:block}
 <body>
 <div class="page" id="page-root">
 <!-- ▼ HEADER -->
+<!--yr-notice--><div class="yr-notice" hidden><span class="yr-notice-text">お知らせ</span></div><!--/yr-notice-->
 <header class="site-header">
   <a class="brand" href="index.html">
     <img class="brand-logo" src="assets/img/logo.png" alt="8つ森レンタル" style="width: 82px; height: 82px;" loading="eager">
@@ -281,40 +280,36 @@ img{display:block}
   <!-- バッジ -->
   <div class="badges" style="height: 137px; left: 456px; top: 227px; right: auto; width: 0px;">
     <div class="badge" style="position: absolute; left: -165px; top: 0px; width: 84px; margin: 0px; right: auto;">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"></path></svg>
-      </div>
+      <div class="badge-icon" style="font-size: 38px; line-height: 1;">👐</div>
       <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">手ぶらでOK<div>小物も充実‼</div></div>
       <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
     </div>
-    <a href="index.html" style="text-decoration: none; color: inherit;"></a>
-    <div class="badge" style="position: absolute; left: 138px; top: 0px; width: 129px; margin: 0px; right: auto;">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><circle cx="12" cy="9" r="5"></circle><path d="M9 13.5L7.5 21L12 18.5L16.5 21L15 13.5"></path></svg>
-      </div>
-      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">板は<div>ワクシング済み‼</div></div>
-      <div class="badge-sub"><br></div>
-    </div>
-    <div class="badge" style="position: absolute; left: 487px; top: 2px; width: 90px; margin: 0px; right: auto;">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M6 21C4 19 4 17 6 15C8 13 8 11 6 9M12 21C10 19 10 17 12 15C14 13 14 11 12 9M18 21C16 19 16 17 18 15C20 13 20 11 18 9"></path></svg>
-      </div>
-      <div class="badge-label" style="font-size: 15px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">温泉街の中に立地‼</div>
-      <div class="badge-sub" style="font-size: 11px; font-weight: 800;"><br></div>
-    </div>
-  <div class="badge" style="position: absolute; left: 0px; top: 0px; width: 84px; margin: 0px; right: auto;">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"></path></svg>
-      </div>
+    <div class="badge" style="position: absolute; left: -30px; top: 0px; width: 84px; margin: 0px; right: auto;">
+      <div class="badge-icon"><img src="assets/img/badge-prep.png?v=1" alt=""></div>
       <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">前日貸し出しOK‼</div>
       <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
-    </div><div class="badge" style="position: absolute; left: 321px; top: 0px; width: 84px; margin: 0px; right: auto;">
-      <div class="badge-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15314f" stroke-width="1.6"><path d="M4 20L9 4M15 4L20 20M9 13H15"></path></svg>
-      </div>
+    </div>
+    <div class="badge" style="position: absolute; left: 105px; top: 0px; width: 129px; margin: 0px; right: auto;">
+      <div class="badge-icon" style="font-size: 38px; line-height: 1;">✨</div>
+      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">板は<div>ワクシング済み‼</div></div>
+      <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
+    </div>
+    <div class="badge" style="position: absolute; left: 285px; top: 0px; width: 84px; margin: 0px; right: auto;">
+      <div class="badge-icon" style="font-size: 38px; line-height: 1;">🚪</div>
       <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">男女別<div>更衣室完備</div><div>ロッカー有</div></div>
       <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
-    </div></div>
+    </div>
+    <div class="badge" style="position: absolute; left: 420px; top: 2px; width: 90px; margin: 0px; right: auto;">
+      <div class="badge-icon" style="font-size: 38px; line-height: 1;">♨️</div>
+      <div class="badge-label" style="font-size: 15px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">温泉街の中に立地‼</div>
+      <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
+    </div>
+    <div class="badge" style="position: absolute; left: 560px; top: 0px; width: 84px; margin: 0px; right: auto;">
+      <div class="badge-icon"><img src="assets/img/badge-prep.png?v=1" alt=""></div>
+      <div class="badge-label" style="font-size: 14px; text-shadow: rgb(255, 255, 255) -1.5px -1.5px 0px, rgb(255, 255, 255) 1.5px -1.5px 0px, rgb(255, 255, 255) -1.5px 1.5px 0px, rgb(255, 255, 255) 1.5px 1.5px 0px, rgba(255, 255, 255, 0.9) 0px 0px 10px;" data-legibility="outline-w">事前準備で<div>混雑回避</div></div>
+      <div class="badge-sub" style="color: rgb(80, 75, 104);"><br></div>
+    </div>
+  </div>
 </section>
 
 <!-- ▼ SERVICE CARDS -->
@@ -393,8 +388,6 @@ img{display:block}
 </div>
 </div><!-- .page -->
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="assets/js/supabaseClient.js?v=6"></script>
 <script>
 // 公開版のフッター「よくある質問/お問い合わせ/プライバシー」が古い#リンクのまま
 // でも、正しいページへ繋ぎ直す自己修復（pageRendererが差し替え後にこれを呼ぶ）。
@@ -444,33 +437,6 @@ window.__yatsumoriRebind = function () {
   });
   document.querySelectorAll(".badge-label").forEach(function (el) { if (/WEB予約/.test(el.textContent)) el.textContent = "電話でご予約"; });
   // バッジのアイコンをスマホ版と同じ絵文字に統一（公開版のSVGを置き換える）
-  var PREP_IMG = '<img src="assets/img/badge-prep.png?v=1" alt="">';
-  var BADGE_ICON = [
-    [/手ぶら/,        "👐"],
-    [/前日|貸し出し/,  PREP_IMG],
-    [/ワクシング|板/,  "✨"],
-    [/男女別|更衣室/,  "🚪"],
-    [/温泉/,          "♨️"],
-    [/混雑回避/,      PREP_IMG],
-    [/電話/,          "📞"]
-  ];
-  document.querySelectorAll(".badges .badge").forEach(function (b) {
-    var ico = b.querySelector(".badge-icon");
-    if (!ico) return;
-    var txt = b.textContent || "";
-    for (var i = 0; i < BADGE_ICON.length; i++) {
-      if (BADGE_ICON[i][0].test(txt)) {
-        var v = BADGE_ICON[i][1];
-        if (v.charAt(0) === "<") {
-          if (ico.innerHTML.indexOf("badge-prep") === -1) ico.innerHTML = v;
-        } else {
-          if (ico.textContent.trim() !== v) { ico.innerHTML = ""; ico.textContent = v; }
-          ico.style.fontSize = "38px"; ico.style.lineHeight = "1";
-        }
-        break;
-      }
-    }
-  });
   // 6つ目のバッジ「事前準備で混雑回避」を足し、6個が予約カードに被らないよう座標を配り直す
   // （公開版はバッジが1個ずつ絶対配置なので、位置はここで決め直すしかない）
   (function () {
@@ -479,7 +445,7 @@ window.__yatsumoriRebind = function () {
     var list = function () { return Array.prototype.slice.call(wrap.querySelectorAll(".badge")); };
     var badges = list();
     if (!badges.length) return;
-    if (!badges.some(function (b) { return /混雑回避/.test(b.textContent || ""); })) {
+    if (badges.length < 6) {
       var nb = badges[badges.length - 1].cloneNode(true);   // 装飾（白フチ等）を引き継ぐため複製
       var ico = nb.querySelector(".badge-icon");
       if (ico) { ico.innerHTML = '<img src="assets/img/badge-prep.png?v=1" alt="">'; }
@@ -500,8 +466,8 @@ window.__yatsumoriRebind = function () {
       [/温泉/,             420, 90],
       [/混雑回避/,         560, 84]
     ];
-    LAYOUT.forEach(function (row) {
-      var b = badges.filter(function (x) { return row[0].test(x.textContent || ""); })[0];
+    LAYOUT.forEach(function (row, i) {
+      var b = badges[i];
       if (!b) return;
       b.style.position = "absolute";
       b.style.left = row[1] + "px";
@@ -589,24 +555,6 @@ window.__yatsumoriRebind = function () {
 };
 window.__yatsumoriRebind();
 </script>
-<script>window.YATSUMORI_PAGE_KEY="home";</script>
-<script>
-// トップのちらつき対策：pageRendererが公開版に差し替え終わるまで #page-root を隠し、
-// 準備完了でフェードイン。Supabaseが遅い/失敗しても保険タイマーで必ず表示する。
-(function () {
-  var root = document.getElementById("page-root");
-  if (!root) return;
-  var shown = false;
-  function reveal() { if (shown) return; shown = true; root.classList.add("yr-ready"); }
-  var t0 = Date.now();
-  var iv = setInterval(function () {
-    if (window.__yatsumoriPageReady) { clearInterval(iv); reveal(); }
-    else if (Date.now() - t0 > 300) { clearInterval(iv); reveal(); } // 0.3秒で必ず表示（静的HTMLが公開版と同じ内容なので長く隠す必要がない。Supabase停止中に毎回2秒白くなっていた）
-  }, 30);
-  window.addEventListener("load", function () { setTimeout(reveal, 2500); }); // 最終保険
-})();
-</script>
 <script src="assets/js/i18n.js?v=7"></script>
-<script src="assets/js/pageRenderer.js?v=5"></script>
 </body>
 </html>

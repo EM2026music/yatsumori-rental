@@ -114,6 +114,9 @@ html,body{overflow-x:hidden}
 .tel-card{text-align:center;margin:2px 0 12px}
 .tel-num{display:block;font-size:25px;font-weight:800;color:var(--navy);line-height:1.2}
 .tel-sub{font-size:10.5px;color:var(--text-gray);margin-top:3px}
+/* お知らせ欄（オーナー用エディタで表示/非表示と文言を切り替える） */
+.yr-notice{background:#fff4d6;color:#6b4300;border-bottom:1px solid #f0d48a;text-align:center;font-weight:800;font-size:13px;line-height:1.6;padding:9px 14px}
+.yr-notice[hidden]{display:none}
 </style>
 <meta name="description" content="蔵王・遠刈田温泉のスキー・スノーボードレンタル専門店「8つ森レンタル」。お電話でのご予約でスムーズ受取、ウェアも揃って手ぶらでOK。温泉街すぐそばで帰りに温泉も。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,6 +126,7 @@ html,body{overflow-x:hidden}
 <body>
 <div class="page" id="page-root">
 
+<!--yr-notice--><div class="yr-notice" hidden><span class="yr-notice-text">お知らせ</span></div><!--/yr-notice-->
 <header class="site-header">
   <a class="brand" href="mobile.html">
     <img class="brand-logo" src="../assets/img/logo.png" alt="8つ森レンタル">

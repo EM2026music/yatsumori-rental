@@ -32,6 +32,9 @@ body{zoom:var(--yr-fit,1)}
 html[lang="en"] .hero-content{width:760px}
 /* 英語はバッジの文言が長く3行になり写真の下端に届くため、英語のときだけ少し小さく */
 html[lang="en"] .page .badges .badge .badge-label{font-size:12.5px !important;line-height:1.3}
+/* お知らせ欄（オーナー用エディタで表示/非表示と文言を切り替える） */
+.yr-notice{background:#fff4d6;color:#6b4300;border-bottom:1px solid #f0d48a;text-align:center;font-weight:800;font-size:16px;line-height:1.6;padding:10px 24px}
+.yr-notice[hidden]{display:none}
 </style>
 <title>8つ森レンタル | 蔵王・遠刈田温泉のスキー・スノーボードレンタル</title>
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
@@ -239,6 +242,7 @@ img{display:block}
 
 
 <!-- ▼ HEADER -->
+<!--yr-notice--><div class="yr-notice" hidden><span class="yr-notice-text">お知らせ</span></div><!--/yr-notice-->
 <header class="site-header">
   <a class="brand" href="index.html">
     <img class="brand-logo" src="../assets/img/logo.png" alt="8つ森レンタル" style="width: 82px; height: 82px;" loading="eager">
